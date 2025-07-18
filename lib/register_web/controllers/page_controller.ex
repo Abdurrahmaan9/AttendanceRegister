@@ -1,0 +1,14 @@
+defmodule RegisterWeb.PageController do
+  use RegisterWeb, :controller
+
+  def home(conn, _params) do
+    # The home page is often custom made,
+    # so skip the default app layout.
+    render(conn, :home, layout: false)
+  end
+
+  def about(conn, _params) do
+    # About page with navigation
+    render(conn, :about, layout: false)
+  end
+end
