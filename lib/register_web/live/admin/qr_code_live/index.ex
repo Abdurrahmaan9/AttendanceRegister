@@ -4,10 +4,12 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
   alias Register.QrCodes
   alias Register.QrCodes.QrCode
 
+  @url "/admin/qr_codes"
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:current_path, @url)
      |> assign(:qr_codes, list_qr_codes())
      |> assign(:form, to_form(QrCodes.change_qr_code(%QrCode{})))
      |> assign(:show_form, false)
@@ -57,7 +59,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
 
   def handle_event("validate", %{"qr_code" => qr_code_params}, socket) do
     qr_code = socket.assigns.qr_code || %QrCode{}
-    
+
     changeset =
       qr_code
       |> QrCodes.change_qr_code(qr_code_params)
@@ -75,34 +77,51 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
     form_params = socket.assigns.form.params
     class_name = form_params["class_name"] || ""
     program_name = form_params["program_name"] || ""
-    
+
     # Generate QR data
     qr_data = QrCodes.generate_qr_data(class_name, program_name)
-    
+
     # Generate QR code SVG
-    qr_svg = 
-      qr_data
-      |> QRCode.create()
-      |> case do
-        {:ok, qr_code} -> 
-          qr_code
-          |> QRCode.render()
-          |> case do
-            {:ok, svg_string} -> svg_string
-            {:error, _} -> nil
+    qr_svg =
+      case QRCode.create(qr_data) do
+        {:ok, qr_code} ->
+          case QRCode.render(qr_code) do
+            {:ok, svg_string} ->
+              IO.inspect(svg_string, label: "Generated SVG")
+              svg_string
+            {:error, reason} ->
+              IO.inspect(reason, label: "SVG Render Error")
+              nil
           end
-        {:error, _} -> nil
+        {:error, reason} ->
+          IO.inspect(reason, label: "QR Create Error")
+          nil
+        qr_code when is_struct(qr_code) ->
+          # Handle case where QRCode.create returns struct directly
+          case QRCode.render(qr_code) do
+            {:ok, svg_string} ->
+              IO.inspect(svg_string, label: "Generated SVG (direct)")
+              svg_string
+            {:error, reason} ->
+              IO.inspect(reason, label: "SVG Render Error (direct)")
+              nil
+            svg_string when is_binary(svg_string) ->
+              IO.inspect(svg_string, label: "Generated SVG (binary)")
+              svg_string
+          end
       end
+
+    IO.inspect(qr_svg, label: "Final QR SVG")
 
     updated_params = Map.put(form_params, "qr_data", qr_data)
     qr_code = socket.assigns.qr_code || %QrCode{}
-    
+
     changeset =
       qr_code
       |> QrCodes.change_qr_code(updated_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, 
+    {:noreply,
      socket
      |> assign(:form, to_form(changeset))
      |> assign(:qr_svg, qr_svg)
@@ -114,7 +133,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
   end
 
   def handle_event("hide_form", _params, socket) do
-    {:noreply, 
+    {:noreply,
      socket
      |> assign(:show_form, false)
      |> assign(:form, to_form(QrCodes.change_qr_code(%QrCode{})))
@@ -138,7 +157,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
 
   defp save_qr_code(socket, :new, qr_code_params) do
     qr_code_params = Map.put(qr_code_params, "created_by_id", socket.assigns.current_user.id)
-    
+
     case QrCodes.create_qr_code(qr_code_params) do
       {:ok, qr_code} ->
         {:noreply,

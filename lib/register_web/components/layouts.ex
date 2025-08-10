@@ -9,6 +9,16 @@ defmodule RegisterWeb.Layouts do
   `use RegisterWeb, :live_view`.
   """
   use RegisterWeb, :html
+  
+  # Import the sidebar component
+  import RegisterWeb.Layouts.SidebarComponent, only: [sidebar: 1]
+  
+  # Register the component
+  def components do
+    %{
+      sidebar: &sidebar/1
+    }
+  end
 
   embed_templates "layouts/*"
 end

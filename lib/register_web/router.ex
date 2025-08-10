@@ -67,14 +67,24 @@ defmodule RegisterWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
-      live "/dashboard", Dashboard.DashboardLive, :index
+      live "/dashboard", Dashboard.Index, :index
       live "/users/settings", Auth.UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", Auth.UserSettingsLive, :confirm_email
-      
-      # Admin QR Code Management
-      live "/admin/qr-codes", Admin.QrCodeLive.Index, :index
-      live "/admin/qr-codes/new", Admin.QrCodeLive.Index, :new
-      live "/admin/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
+
+      # ==================== COURSE MANAGEMENT =========================
+      live "/courses", Admin.CoursesLive.Index, :index
+      live "/courses/new", Admin.CoursesLive.Index, :new
+      live "/courses/:id/edit", Admin.CoursesLive.Index, :edit
+
+      # ==================== STUDENT MANAGEMENT =========================
+      live "/students", Admin.StudentsLive.Index, :index
+      live "/students/new", Admin.StudentsLive.Index, :new
+      live "/students/:id/edit", Admin.StudentsLive.Index, :edit
+
+      # ==================== QR CODE MANAGEMENT =========================
+      live "/qr-codes", Admin.QrCodeLive.Index, :index
+      live "/qr-codes/new", Admin.QrCodeLive.Index, :new
+      live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
     end
   end
 

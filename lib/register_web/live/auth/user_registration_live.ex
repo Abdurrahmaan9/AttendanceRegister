@@ -23,7 +23,7 @@ defmodule RegisterWeb.Auth.UserRegistrationLive do
       </div>
     </nav>
 
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style="min-height: 100vh; padding-top: 80px;">
+    <div class="pt-24;">
       <div class="max-w-md w-full space-y-8">
         <div class="text-center">
           <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
@@ -34,7 +34,7 @@ defmodule RegisterWeb.Auth.UserRegistrationLive do
           <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
           <p class="mt-2 text-sm text-gray-600">Join E-Register today</p>
         </div>
-        
+
         <div class="bg-white py-8 px-6 shadow-xl rounded-xl">
           <.simple_form
             for={@form}
@@ -52,28 +52,28 @@ defmodule RegisterWeb.Auth.UserRegistrationLive do
 
             <div class="space-y-5">
               <div>
-                <.input 
-                  field={@form[:email]} 
-                  type="email" 
-                  label="Email address" 
-                  required 
+                <.input
+                  field={@form[:email]}
+                  type="email"
+                  label="Email address"
+                  required
                   class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all duration-200"
                   placeholder="Enter your email"
                 />
               </div>
-              
+
               <div class="relative">
-                <.input 
-                  field={@form[:password]} 
-                  type={if @show_password, do: "text", else: "password"} 
-                  label="Password" 
-                  required 
+                <.input
+                  field={@form[:password]}
+                  type={if @show_password, do: "text", else: "password"}
+                  label="Password"
+                  required
                   class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all duration-200"
                   placeholder="Create a password"
                 />
-                <button 
-                  type="button" 
-                  phx-click="toggle_password" 
+                <button
+                  type="button"
+                  phx-click="toggle_password"
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                   style="top: 24px;"
                 >
@@ -90,8 +90,8 @@ defmodule RegisterWeb.Auth.UserRegistrationLive do
             </div>
 
             <:actions>
-              <.button 
-                phx-disable-with="Creating account..." 
+              <.button
+                phx-disable-with="Creating account..."
                 class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span class="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -103,7 +103,7 @@ defmodule RegisterWeb.Auth.UserRegistrationLive do
               </.button>
             </:actions>
           </.simple_form>
-          
+
           <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
               Already have an account?

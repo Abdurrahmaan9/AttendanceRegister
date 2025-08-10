@@ -1,20 +1,7 @@
-defmodule RegisterWeb.Dashboard.DashboardLive do
-  use RegisterWeb, :live_view
-
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, sidebar_open: true)}
-  end
-
-  def handle_event("toggle_sidebar", _params, socket) do
-    {:noreply, assign(socket, sidebar_open: !socket.assigns.sidebar_open)}
-  end
-
-  def render(assigns) do
-    ~H"""
     <div class="min-h-screen bg-gray-50">
       <!-- Navigation -->
       <nav class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-full sm:px-6 lg:px-8">
           <div class="flex justify-between h-16">
             <div class="flex items-center">
               <button
@@ -114,6 +101,12 @@ defmodule RegisterWeb.Dashboard.DashboardLive do
                     </svg>
                     QR Code
                   </a>
+                <a href="/admin/qr-codes" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                    <svg class="text-gray-400 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                    OTP Code
+                  </a>
                   <a href="/calendar" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
                     <svg class="text-gray-400 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -125,12 +118,6 @@ defmodule RegisterWeb.Dashboard.DashboardLive do
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Audit Logs
-                  </a>
-                  <a href="/biometric" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                    <svg class="text-gray-400 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
-                    Biometric Authentication
                   </a>
                   <a href="/analytics" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
                     <svg class="text-gray-400 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,6 +132,3 @@ defmodule RegisterWeb.Dashboard.DashboardLive do
         </div>
       </div>
     </div>
-    """
-  end
-end
