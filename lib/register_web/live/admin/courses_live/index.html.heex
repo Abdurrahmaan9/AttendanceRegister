@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-2xl font-bold text-gray-900">Courses</h1>
     <.link
-      patch={~p"/courses/new"}
+      patch={~p"/Admin/courses/new"}
       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
     >
       Add Course
@@ -64,7 +64,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end space-x-4">
                   <.link
-                    patch={~p"/courses/#{course}/edit"}
+                    patch={~p"/Admin/courses/#{course}/edit"}
                     class="text-blue-600 hover:text-blue-900"
                   >
                     Edit
@@ -90,7 +90,7 @@
   :if={@live_action in [:new, :edit]}
   id="course-modal"
   show
-  on_cancel={JS.patch(~p"/courses")}
+  on_cancel={JS.patch(~p"/Admin/courses")}
 >
   <.live_component
     module={RegisterWeb.Admin.CoursesLive.FormComponent}
@@ -98,6 +98,6 @@
     title={@page_title}
     action={@live_action}
     course={@course}
-    return_to={~p"/courses"}
+    return_to={~p"/Admin/courses"}
   />
 </.modal>

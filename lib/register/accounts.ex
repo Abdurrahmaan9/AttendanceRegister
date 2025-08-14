@@ -60,6 +60,21 @@ defmodule Register.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  def list_users do
+    Repo.all(User)
+  end
+
+  def list_users_by_role(role) do
+    from(u in User, where: u.role == ^role)
+    |> Repo.all()
+  end
+
+  def assign_role(user, role) do
+    user
+    |> User.changeset(%{role: role})
+    |> Repo.update()
+  end
+
   ## User registration
 
   @doc """

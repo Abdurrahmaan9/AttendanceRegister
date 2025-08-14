@@ -15,7 +15,7 @@ defmodule RegisterWeb.Admin.StudentsLive.FormComponent do
      |> assign(assigns)
      |> assign(:title, title)
      |> assign(:changeset, changeset)
-     |> assign_new(:return_to, fn -> ~p"/students" end)}
+     |> assign_new(:return_to, fn -> ~p"/Admin/students" end)}
   end
 
   @impl true

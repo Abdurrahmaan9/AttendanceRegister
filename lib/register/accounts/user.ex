@@ -8,9 +8,29 @@ defmodule Register.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    field :role, :string, default: "student"
 
     timestamps(type: :utc_datetime)
   end
+
+
+  @roles ~w(admin lecturer student)
+
+  def changeset(user, attrs) do
+    user
+    |> cast(attrs, [:role, :email, :password])
+    |> validate_inclusion(:role, @roles)
+    |> validate_required([:role])
+  end
+
+  def is_admin?(%__MODULE__{role: "admin"}), do: true
+  def is_admin?(_), do: false
+
+  def is_lecturer?(%__MODULE__{role: "lecturer"}), do: true
+  def is_lecturer?(_), do: false
+
+  def is_student?(%__MODULE__{role: "student"}), do: true
+  def is_student?(_), do: false
 
   @doc """
   A user changeset for registration.
