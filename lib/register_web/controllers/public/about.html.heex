@@ -25,7 +25,7 @@
             <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</a>
             <a href="/about" class="text-blue-600 px-3 py-2 text-sm font-medium border-b-2 border-blue-600">About</a>
             <%= if assigns[:current_user] do %>
-              <a href="/dashboard" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Dashboard</a>
+              <a href="/Admin/dashboard" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Dashboard</a>
               <a href="/users/log_out" data-method="delete" class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700">Log out</a>
             <% else %>
               <a href="/users/login" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Login</a>
@@ -129,7 +129,7 @@
                     Back to Home
                   </a>
                   <%= if assigns[:current_user] do %>
-                    <a href="/dashboard" class="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
+                    <a href="/Admin/dashboard" class="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
                       Go to Dashboard
                     </a>
                   <% else %>

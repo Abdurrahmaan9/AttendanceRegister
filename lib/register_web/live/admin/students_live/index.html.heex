@@ -76,7 +76,7 @@
     id={@editing_id || "new-student"}
     action={if @editing_id, do: :edit, else: :new}
     student={@editing_student || %Student{}}
-    return_to={~p"/students"}
+    return_to={~p"/Admin/students"}
     current_user={@current_user}
   />
 <% end %>

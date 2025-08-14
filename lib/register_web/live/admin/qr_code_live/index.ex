@@ -4,7 +4,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
   alias Register.QrCodes
   alias Register.QrCodes.QrCode
 
-  @url "/admin/qr_codes"
+  @url "/Admin/qr_codes"
   @impl true
   def mount(_params, _session, socket) do
     {:ok,

@@ -17,6 +17,10 @@ defmodule RegisterWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :admin_only do
+    plug RegisterWeb.Plugs.RequireRole, ["admin"]
+  end
+
   scope "/", RegisterWeb do
     pipe_through :browser
 
@@ -62,12 +66,12 @@ defmodule RegisterWeb.Router do
     post "/users/login", UserSessionController, :create
   end
 
-  scope "/", RegisterWeb do
-    pipe_through [:browser, :require_authenticated_user]
+  scope "/Admin", RegisterWeb do
+    pipe_through [:browser, :admin_only, :require_authenticated_user]
 
     live_session :require_authenticated_user,
       on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
-      live "/dashboard", Dashboard.Index, :index
+      live "/dashboard", Admin.Dashboard.Index, :index
       live "/users/settings", Auth.UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", Auth.UserSettingsLive, :confirm_email
 
@@ -81,10 +85,18 @@ defmodule RegisterWeb.Router do
       live "/students/new", Admin.StudentsLive.Index, :new
       live "/students/:id/edit", Admin.StudentsLive.Index, :edit
 
+      # ==================== USERS MGT =================================
+      live "/users", Admin.UsersLive.Index, :index
+
       # ==================== QR CODE MANAGEMENT =========================
       live "/qr-codes", Admin.QrCodeLive.Index, :index
       live "/qr-codes/new", Admin.QrCodeLive.Index, :new
       live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
+
+      # ==================== OTP MANAGEMENT =========================
+      live "/otp", Admin.OtpLive.Index, :index
+      live "/otp/new", Admin.OtpLive.Index, :new
+      live "/otp/:id", Admin.OtpLive.Index, :show
     end
   end
 
