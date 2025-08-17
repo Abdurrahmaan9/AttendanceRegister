@@ -59,7 +59,9 @@ defmodule Register.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:qr_code, "~> 3.1"}
+      {:qr_code, "~> 3.0"},
+      {:eqrcode, "~> 0.1.10"},
+      {:timex, "~> 3.7"}
     ]
   end
 

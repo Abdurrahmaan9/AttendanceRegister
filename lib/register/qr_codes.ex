@@ -18,6 +18,10 @@ defmodule Register.QrCodes do
 
   """
   def list_qr_codes do
+    # First deactivate any expired QR codes
+    deactivate_expired_qr_codes()
+    
+    # Then return all QR codes
     Repo.all(QrCode)
   end
 

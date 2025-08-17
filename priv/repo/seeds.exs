@@ -15,6 +15,6 @@ alias Bcrypt
 
 Accounts.register_user(%{
   email: "admin@gmail.com",
-  password: "password06foradmin",
+  password: "registrypassword",
   role: "super_user"
 })

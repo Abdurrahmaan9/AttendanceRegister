@@ -92,11 +92,12 @@ defmodule RegisterWeb.Router do
       live "/qr-codes", Admin.QrCodeLive.Index, :index
       live "/qr-codes/new", Admin.QrCodeLive.Index, :new
       live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
+      live "/qr-codes/:id/show", Admin.QrCodeLive.ShowComponent, :show
 
       # ==================== OTP MANAGEMENT =========================
-      live "/otp", Admin.OtpLive.Index, :index
-      live "/otp/new", Admin.OtpLive.Index, :new
-      live "/otp/:id", Admin.OtpLive.Index, :show
+      live "/otp-management", Admin.OTPManagementLive.Index, :index
+      live "/otp-management/new", Admin.OTPManagementLive.Index, :new
+      live "/otp-management/:id/edit", Admin.OTPManagementLive.Index, :edit
     end
   end
 

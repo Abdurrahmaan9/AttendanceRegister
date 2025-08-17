@@ -5,13 +5,14 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
   alias Register.QrCodes.QrCode
 
   @url "/Admin/qr_codes"
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
      |> assign(:current_path, @url)
      |> assign(:qr_codes, list_qr_codes())
-     |> assign(:form, to_form(QrCodes.change_qr_code(%QrCode{})))
+     |> assign(:form, to_form(Register.QrCodes.QrCode.changeset(%QrCode{}, %{})))
      |> assign(:show_form, false)
      |> assign(:generated_qr_code, nil)
      |> assign(:qr_svg, nil)}
