@@ -176,7 +176,7 @@ defmodule RegisterWeb.Admin.StudentsLive.Index do
       |> assign(:editing_id, nil)
       |> assign(:editing_student, nil)
       |> assign(:show_form, false)
-      |> push_patch(to: Routes.students_index_path(socket, :index))
+      |> push_patch(to: ~p"/Admin/students")
     }
   end
 

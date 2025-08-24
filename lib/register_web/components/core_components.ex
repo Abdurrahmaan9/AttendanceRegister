@@ -50,7 +50,7 @@ defmodule RegisterWeb.CoreComponents do
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       class="relative z-50 hidden"
     >
-      <div id={"#{@id}-bg"} class="bg-zinc-50/90 fixed inset-0 transition-opacity" aria-hidden="true" />
+      <div id={"#{@id}-bg"} class="backdrop-filter backdrop-blur-sm bg-opacity-50 fixed inset-0 transition-opacity" aria-hidden="true" />
       <div
         class="fixed inset-0 overflow-y-auto"
         aria-labelledby={"#{@id}-title"}
@@ -60,7 +60,7 @@ defmodule RegisterWeb.CoreComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
+          <div class="w-full max-w-5xl p-4 sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -79,7 +79,7 @@ defmodule RegisterWeb.CoreComponents do
                 </button>
               </div>
               <div id={"#{@id}-content"}>
-                {render_slot(@inner_block)}
+                <%= render_slot(@inner_block) %>
               </div>
             </.focus_wrap>
           </div>
@@ -88,7 +88,6 @@ defmodule RegisterWeb.CoreComponents do
     </div>
     """
   end
-
   def tab_link(assigns) do
     ~H"""
     <.link

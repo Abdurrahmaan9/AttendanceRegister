@@ -2,9 +2,17 @@ defmodule RegisterWeb.PageController do
   use RegisterWeb, :controller
 
   def home(conn, _params) do
-    # The home page is often custom made,
-    # so skip the default app layout.
-    render(conn, :home, layout: false)
+    case conn.assigns[:current_user] do
+      %{role: "admin"} ->
+        redirect(conn, to: "/Admin/dashboard")
+      %{role: "lecturer"} ->
+        redirect(conn, to: "/Lecturer/dashboard")
+      %{role: "student"} ->
+        redirect(conn, to: "/Students/dashboard")
+      _ ->
+        # For unauthenticated users, show the home page
+        render(conn, :home, layout: false)
+    end
   end
 
   def about(conn, _params) do

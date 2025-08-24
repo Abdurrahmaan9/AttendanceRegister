@@ -21,6 +21,11 @@ defmodule RegisterWeb.Router do
     plug RegisterWeb.Plugs.RequireRole, ["admin"]
   end
 
+  pipeline :lecturer_only do
+    plug RegisterWeb.Plugs.RequireRole, ["lecturer"]
+  end
+
+
   scope "/", RegisterWeb do
     pipe_through :browser
 
@@ -66,6 +71,7 @@ defmodule RegisterWeb.Router do
     post "/users/login", UserSessionController, :create
   end
 
+  # ======================= ADMIN ROUTES =============================
   scope "/Admin", RegisterWeb do
     pipe_through [:browser, :admin_only, :require_authenticated_user]
 
@@ -92,17 +98,40 @@ defmodule RegisterWeb.Router do
       live "/qr-codes", Admin.QrCodeLive.Index, :index
       live "/qr-codes/new", Admin.QrCodeLive.Index, :new
       live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
+      live "/qr-codes/:id/show", Admin.QrCodeLive.ShowComponent, :show
 
       # ==================== OTP MANAGEMENT =========================
-      live "/otp", Admin.OtpLive.Index, :index
-      live "/otp/new", Admin.OtpLive.Index, :new
-      live "/otp/:id", Admin.OtpLive.Index, :show
+      live "/otp-management", Admin.OTPManagementLive.Index, :index
+      live "/otp-management/new", Admin.OTPManagementLive.Index, :new
+      live "/otp-management/:id/edit", Admin.OTPManagementLive.Index, :edit
+    end
+  end
+
+    # ========================= LECTURER ROUTES =========================
+  scope "/Lecturer", RegisterWeb do
+    pipe_through [:browser, :lecturer_only, :require_authenticated_user]
+
+    live_session :lecturer_authenticated,
+      on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
+      live "/dashboard", Lecturer.Dashboard.Index, :index
+    end
+  end
+
+  # =========================== STUDENT ROUTES =========================
+  scope "/Students", RegisterWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :student_authenticated,
+      on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
+      live "/dashboard", Students.Dashboard.Index, :index
+      live "/enter-register-otp", Students.EnterRegisterOtpLive, :new
     end
   end
 
   scope "/", RegisterWeb do
     pipe_through [:browser]
 
+    get "/users/log_out", UserSessionController, :delete
     delete "/users/log_out", UserSessionController, :delete
 
     live_session :current_user,

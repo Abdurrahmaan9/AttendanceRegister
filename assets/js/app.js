@@ -17,6 +17,13 @@
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
+
+// Import Alpine.js
+import Alpine from 'alpinejs'
+
+// Initialize Alpine.js
+window.Alpine = Alpine
+Alpine.start()
 // Import student actions
 import "./student_actions"
 // Import modal functionality

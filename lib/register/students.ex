@@ -22,12 +22,12 @@ defmodule Register.Students do
 
   @doc """
   Returns the total count of students.
-  
+
   ## Examples
-  
+
       iex> count_students()
       42
-  
+
   """
   def count_students do
     Repo.aggregate(Student, :count, :id)
@@ -50,21 +50,45 @@ defmodule Register.Students do
   def get_student!(id), do: Repo.get!(Student, id)
 
   @doc """
-  Creates a student.
+  Creates a student and registers a user account with a random password.
 
   ## Examples
 
-      iex> create_student(%{field: value})
+      iex> create_student(%{field: value, email: "user@example.com"})
       {:ok, %Student{}}
 
       iex> create_student(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
   def create_student(attrs \\ %{}) do
-    %Student{}
-    |> Student.changeset(attrs)
-    |> Repo.insert()
+    # Create student
+    case %Student{} |> Student.changeset(attrs) |> Repo.insert() do
+      {:ok, student} ->
+        # Generate random password
+        password = :crypto.strong_rand_bytes(8) |> Base.encode64() |> binary_part(0, 12)
+
+        email = Map.get(attrs, :email) || Map.get(attrs, "email")
+        name = Map.get(attrs, :name) || Map.get(attrs, "name") || "Student"
+
+        # Register user account linked to student
+        user_attrs = %{email: email, password: password, role: "student"}
+
+        case Register.Accounts.register_user(user_attrs) do
+          {:ok, _user} ->
+            # Send welcome email with credentials
+            Task.start(fn ->
+              Register.Emails.send_welcome_email(email, name, password)
+            end)
+            {:ok, student}
+
+          {:error, changeset} ->
+            # Rollback student creation if user registration fails
+            Repo.delete(student)
+            {:error, changeset}
+        end
+
+      error -> error
+    end
   end
 
   @doc """
