@@ -71,6 +71,7 @@ defmodule RegisterWeb.Router do
     post "/users/login", UserSessionController, :create
   end
 
+  # ======================= ADMIN ROUTES =============================
   scope "/Admin", RegisterWeb do
     pipe_through [:browser, :admin_only, :require_authenticated_user]
 
@@ -106,7 +107,7 @@ defmodule RegisterWeb.Router do
     end
   end
 
-  # Lecturer routes
+    # ========================= LECTURER ROUTES =========================
   scope "/Lecturer", RegisterWeb do
     pipe_through [:browser, :lecturer_only, :require_authenticated_user]
 
@@ -116,7 +117,7 @@ defmodule RegisterWeb.Router do
     end
   end
 
-  # Student routes
+  # =========================== STUDENT ROUTES =========================
   scope "/Students", RegisterWeb do
     pipe_through [:browser, :require_authenticated_user]
 
