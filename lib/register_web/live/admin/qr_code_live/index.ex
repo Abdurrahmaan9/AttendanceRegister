@@ -144,7 +144,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
 
   defp save_qr_code(socket, :edit, qr_code_params) do
     case QrCodes.update_qr_code(socket.assigns.qr_code, qr_code_params) do
-      {:ok, qr_code} ->
+      {:ok, _qr_code} ->
         {:noreply,
          socket
          |> put_flash(:info, "QR code updated successfully")
@@ -160,7 +160,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
     qr_code_params = Map.put(qr_code_params, "created_by_id", socket.assigns.current_user.id)
 
     case QrCodes.create_qr_code(qr_code_params) do
-      {:ok, qr_code} ->
+      {:ok, _qr_code} ->
         {:noreply,
          socket
          |> put_flash(:info, "QR code created successfully")

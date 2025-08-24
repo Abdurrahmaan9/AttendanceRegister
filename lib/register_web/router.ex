@@ -21,6 +21,11 @@ defmodule RegisterWeb.Router do
     plug RegisterWeb.Plugs.RequireRole, ["admin"]
   end
 
+  pipeline :lecturer_only do
+    plug RegisterWeb.Plugs.RequireRole, ["lecturer"]
+  end
+
+
   scope "/", RegisterWeb do
     pipe_through :browser
 
@@ -101,9 +106,31 @@ defmodule RegisterWeb.Router do
     end
   end
 
+  # Lecturer routes
+  scope "/Lecturer", RegisterWeb do
+    pipe_through [:browser, :lecturer_only, :require_authenticated_user]
+
+    live_session :lecturer_authenticated,
+      on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
+      live "/dashboard", Lecturer.Dashboard.Index, :index
+    end
+  end
+
+  # Student routes
+  scope "/Students", RegisterWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :student_authenticated,
+      on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
+      live "/dashboard", Students.Dashboard.Index, :index
+      live "/enter-register-otp", Students.EnterRegisterOtpLive, :new
+    end
+  end
+
   scope "/", RegisterWeb do
     pipe_through [:browser]
 
+    get "/users/log_out", UserSessionController, :delete
     delete "/users/log_out", UserSessionController, :delete
 
     live_session :current_user,

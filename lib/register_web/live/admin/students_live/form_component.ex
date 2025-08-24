@@ -2,7 +2,6 @@ defmodule RegisterWeb.Admin.StudentsLive.FormComponent do
   use RegisterWeb, :live_component
 
   alias Register.Students
-  alias Register.Students.Student
 
   @impl true
   def update(%{student: student} = assigns, socket) do
@@ -14,7 +13,7 @@ defmodule RegisterWeb.Admin.StudentsLive.FormComponent do
      |> assign(assigns)
      |> assign(:title, title)
      |> assign(:changeset, changeset)
-     |> assign_new(:return_to, fn -> ~p"/admin/students" end)}
+     |> assign_new(:return_to, fn -> ~p"/Admin/students" end)}
   end
 
   @impl true
@@ -118,7 +117,7 @@ defmodule RegisterWeb.Admin.StudentsLive.FormComponent do
             {:noreply,
              socket
              |> put_flash(:info, "Student updated successfully")
-             |> push_redirect(to: socket.assigns.return_to)}
+             |> push_navigate(to: socket.assigns.return_to)}
 
           {:error, %Ecto.Changeset{} = changeset} ->
             {:noreply, assign(socket, changeset: changeset)}
@@ -130,7 +129,7 @@ defmodule RegisterWeb.Admin.StudentsLive.FormComponent do
             {:noreply,
              socket
              |> put_flash(:info, "Student created successfully")
-             |> push_redirect(to: socket.assigns.return_to)}
+             |> push_navigate(to: socket.assigns.return_to)}
 
           {:error, %Ecto.Changeset{} = changeset} ->
             {:noreply, assign(socket, changeset: changeset)}

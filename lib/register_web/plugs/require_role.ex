@@ -7,7 +7,7 @@ defmodule RegisterWeb.Plugs.RequireRole do
   def call(conn, roles) do
     user = conn.assigns.current_user
 
-    if user && user.role in roles do
+    if user && (user.role in roles || to_string(user.role) in roles) do
       conn
     else
       conn

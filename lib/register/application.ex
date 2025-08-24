@@ -4,20 +4,29 @@ defmodule Register.Application do
   @moduledoc false
 
   use Application
+  alias Register.Permissions.Permission
+  alias Register.Repo
 
   @impl true
   def start(_type, _args) do
     children = [
-      RegisterWeb.Telemetry,
+      # Start the Ecto repository
       Register.Repo,
-      {DNSCluster, query: Application.get_env(:register, :dns_cluster_query) || :ignore},
+
+      # Start the Telemetry supervisor
+      RegisterWeb.Telemetry,
+
+      # Start the PubSub system
       {Phoenix.PubSub, name: Register.PubSub},
+
+      # Start the Endpoint (http/https)
+      RegisterWeb.Endpoint,
+
       # Start the Finch HTTP client for sending emails
       {Finch, name: Register.Finch},
-      # Start a worker by calling: Register.Worker.start_link(arg)
-      # {Register.Worker, arg},
-      # Start to serve requests, typically the last entry
-      RegisterWeb.Endpoint
+
+      # Start the permission initialization worker
+      {Task, &initialize_default_permissions/0}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -32,5 +41,49 @@ defmodule Register.Application do
   def config_change(changed, _new, removed) do
     RegisterWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  # Initialize default permissions in the database
+  def initialize_default_permissions do
+    default_permissions = [
+      %{
+        name: "view_dashboard",
+        description: "Access to admin dashboard and overview",
+        category: "Core Management"
+      },
+      %{
+        name: "manage_users",
+        description: "Manage user accounts and permissions",
+        category: "User Management"
+      },
+      %{
+        name: "manage_roles",
+        description: "Manage roles and their permissions",
+        category: "Role Management"
+      },
+      %{
+        name: "manage_permissions",
+        description: "Manage system permissions",
+        category: "Permission Management"
+      }
+      # Add other default permissions here
+    ]
+
+    permissions = Enum.map(default_permissions, fn perm_attrs ->
+      case Repo.get_by(Permission, name: perm_attrs.name) do
+        nil ->
+          {:ok, permission} =
+            %Permission{}
+            |> Permission.changeset(perm_attrs)
+            |> Repo.insert()
+          permission
+        permission ->
+          permission
+      end
+    end)
+
+    # Then ensure admin has all permissions
+    admin_permissions = Enum.map(permissions, & &1.name)
+    Register.Permissions.update_role_permissions("admin", admin_permissions)
   end
 end

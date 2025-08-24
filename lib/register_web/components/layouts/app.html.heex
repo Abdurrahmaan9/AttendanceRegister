@@ -18,16 +18,16 @@
         <div class="flex items-center space-x-8">
           <%= if Map.get(assigns, :current_user) do %>
             <.link
-              href={~p"/users/settings"}
+              href={~p"/Admin/users/settings"}
               class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Settings
             </.link>
             <.link
               href={~p"/users/log_out"}
-              method={:delete}
+              method="delete"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
+            >``
               Log out
             </.link>
           <% end %>
@@ -46,7 +46,7 @@
         <.sidebar 
           sidebar_open={assigns[:sidebar_open] || false} 
           current_path={assigns[:current_path] || ""}
-          myself={@current_user}
+          user_type={@current_user.role |> String.to_atom()}
         />
       </div>
 

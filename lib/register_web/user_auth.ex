@@ -225,5 +225,12 @@ defmodule RegisterWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/Admin/dashboard"
+  defp signed_in_path(conn) do
+    case conn.assigns[:current_user] do
+      %{role: "admin"} -> ~p"/Admin/dashboard"
+      %{role: "lecturer"} -> ~p"/Lecturer/dashboard"
+      %{role: "student"} -> ~p"/Students/dashboard"
+      _ -> ~p"/"
+    end
+  end
 end
