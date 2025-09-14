@@ -28,6 +28,9 @@ Alpine.start()
 // Import QR Scanner
 import { QRScanner } from "./qr_scanner"
 
+// Import background carousels
+import bgCarousel from "./bg_carousel"
+
 // Import student actions
 import "./student_actions"
 
@@ -45,7 +48,11 @@ let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute(
 // Initialize LiveSocket with hooks
 let hooks = {
   // Register QRScanner hook
-  QRScanner: QRScanner
+  QRScanner: QRScanner,
+  
+  // Register background carousel hooks
+  BgCarousel: bgCarousel,
+  LocalBgCarousel: localBgCarousel
 };
 
 // Create LiveSocket instance with hooks

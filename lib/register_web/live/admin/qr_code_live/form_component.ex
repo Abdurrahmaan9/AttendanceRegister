@@ -2,18 +2,17 @@ defmodule RegisterWeb.Admin.QRCodeLive.FormComponent do
   use RegisterWeb, :live_component
   alias Phoenix.LiveView.JS
   alias Register.QrCodes
-  alias Register.QrCodes.QrCode
 
   @impl true
   def update(assigns, socket) do
-    socket = 
+    socket =
       socket
       |> assign(assigns)
       |> assign_new(:return_to, fn -> ~p"/Admin/qr_codes" end)
       |> assign_new(:current_user, fn -> assigns.current_user end)
       |> assign_new(:live_action, fn -> :new end)  # Default to :new if not provided
 
-    form = 
+    form =
       case socket.assigns do
         %{live_action: :edit, qr_code: %QrCodes.QrCode{} = qr_code} ->
           qr_code
@@ -136,7 +135,7 @@ defmodule RegisterWeb.Admin.QRCodeLive.FormComponent do
 
   def handle_event("validate", %{"qr_code" => params}, socket) do
     # Prepare params with user and required fields
-    params_with_user = 
+    params_with_user =
       params
       |> Map.put("created_by_id", socket.assigns.current_user.id)
       |> Map.put_new_lazy("is_active", fn -> "true" end)
@@ -152,7 +151,7 @@ defmodule RegisterWeb.Admin.QRCodeLive.FormComponent do
         params_with_user
       end
 
-    changeset = 
+    changeset =
       case socket.assigns.live_action do
         :edit ->
           socket.assigns.qr_code
@@ -168,7 +167,7 @@ defmodule RegisterWeb.Admin.QRCodeLive.FormComponent do
 
   def handle_event("save", %{"qr_code" => qr_code_params}, socket) do
     # Prepare params with user and required fields
-    params_with_user = 
+    params_with_user =
       qr_code_params
       |> Map.put("created_by_id", socket.assigns.current_user.id)
       |> Map.put_new_lazy("is_active", fn -> "true" end)
