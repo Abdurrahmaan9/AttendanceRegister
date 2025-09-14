@@ -83,7 +83,7 @@ defmodule Register.Application do
     end)
 
     # Then ensure admin has all permissions
-    admin_permissions = Enum.map(permissions, & &1.name)
-    Register.Permissions.update_role_permissions("admin", admin_permissions)
+    admin_permission_ids = Enum.map(permissions, & &1.id)
+    Register.Permissions.update_role_permissions("admin", admin_permission_ids)
   end
 end

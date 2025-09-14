@@ -1,4 +1,4 @@
-defmodule RegisterWeb.Auth.UserRegistrationLive do
+defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
   use RegisterWeb, :live_view
 
   alias Register.Accounts
@@ -16,8 +16,6 @@ defmodule RegisterWeb.Auth.UserRegistrationLive do
           <div class="flex items-center space-x-8">
             <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</a>
             <a href="/about" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">About</a>
-            <a href="/users/login" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Login</a>
-            <a href="/users/register" class="text-blue-600 px-3 py-2 text-sm font-medium border-b-2 border-blue-600">Register</a>
           </div>
         </div>
       </div>

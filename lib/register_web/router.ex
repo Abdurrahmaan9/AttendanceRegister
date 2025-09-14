@@ -62,10 +62,10 @@ defmodule RegisterWeb.Router do
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{RegisterWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", Auth.UserRegistrationLive, :new
-      live "/users/login", Auth.LoginLive, :new
+      live "/users/register", Auth.LoginLive.UserRegistrationLive, :new
+      live "/users/login", Auth.LoginLive.Index, :new
       live "/users/reset_password", Auth.UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", Auth.UserResetPasswordLive, :edit
+      live "/users/reset_password/:token", Auth.LoginLive.UserResetPasswordLive, :edit
     end
 
     post "/users/login", UserSessionController, :create
@@ -78,8 +78,8 @@ defmodule RegisterWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
       live "/dashboard", Admin.Dashboard.Index, :index
-      live "/users/settings", Auth.UserSettingsLive, :edit
-      live "/users/settings/confirm_email/:token", Auth.UserSettingsLive, :confirm_email
+      live "/users/settings", Auth.SettingsLive.Index, :edit
+      live "/users/settings/confirm_email/:token", Auth.SettingsLive.Index, :confirm_email
 
       # ==================== COURSE MANAGEMENT =========================
       live "/courses", Admin.CoursesLive.Index, :index
@@ -107,13 +107,15 @@ defmodule RegisterWeb.Router do
     end
   end
 
-    # ========================= LECTURER ROUTES =========================
+  # ========================= LECTURER ROUTES =========================
   scope "/Lecturer", RegisterWeb do
     pipe_through [:browser, :lecturer_only, :require_authenticated_user]
 
     live_session :lecturer_authenticated,
       on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
       live "/dashboard", Lecturer.Dashboard.Index, :index
+      live "/users/settings", Auth.SettingsLive.Index, :edit
+
     end
   end
 
@@ -124,7 +126,19 @@ defmodule RegisterWeb.Router do
     live_session :student_authenticated,
       on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
       live "/dashboard", Students.Dashboard.Index, :index
+      live "/users/settings", Auth.SettingsLive.Index, :edit
       live "/enter-register-otp", Students.EnterRegisterOtpLive, :new
+
+
+      live "/otp", Students.OtpLive.Index, :index
+      live "/otp/:id", Students.OtpLive.Index, :show
+      live "/otp/:id/verify", Students.OtpLive.Index, :verify
+
+
+      live "/qr-codes", Students.QrCodesLive.Index, :index
+      live "/qr-codes/:id", Students.QrCodesLive.Index, :show
+      live "/qr-codes/:id/verify", Students.QrCodesLive.Index, :verify
+
     end
   end
 

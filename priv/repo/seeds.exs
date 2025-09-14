@@ -17,4 +17,14 @@ Accounts.register_user(%{
   email: "admin@gmail.com",
   password: "registrypassword",
   role: "super_user"
+# },
+# %{
+#   email: "lecturer@gmail.com",
+#   password: "FQOKX7Jf0gs=",
+#   role: "lecturer"
+# },
+# %{
+#   email: "student@gmail.com",
+#   password: "WPK8Lop2fc8=",
+#   role: "student"
 })

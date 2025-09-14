@@ -1,4 +1,4 @@
-defmodule RegisterWeb.Auth.UserResetPasswordLive do
+defmodule RegisterWeb.Auth.LoginLive.UserResetPasswordLive do
   use RegisterWeb, :live_view
 
   alias Register.Accounts

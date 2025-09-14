@@ -1,4 +1,4 @@
-defmodule RegisterWeb.Auth.LoginLive do
+defmodule RegisterWeb.Auth.LoginLive.Index do
   use RegisterWeb, :live_view
 
   def mount(_params, _session, socket) do

@@ -130,6 +130,9 @@ defmodule RegisterWeb.Layouts.SidebarBk do
   attr :icon, :string, required: true
   attr :active, :boolean, default: false
 
+  slot :inner_block, required: true
+
+
   defp nav_link(assigns) do
     base_classes = "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
     active_classes = if assigns.active, do: "bg-blue-50 text-blue-700", else: "text-gray-700 hover:bg-gray-50"
