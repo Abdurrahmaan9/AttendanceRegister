@@ -24,19 +24,50 @@ import Alpine from 'alpinejs'
 // Initialize Alpine.js
 window.Alpine = Alpine
 Alpine.start()
+
+// Import QR Scanner
+import { QRScanner } from "./qr_scanner"
+
+// Import background carousels
+import bgCarousel from "./bg_carousel"
+
 // Import student actions
 import "./student_actions"
+
 // Import modal functionality
 import "./modal"
+
 // Establish Phoenix Socket and LiveView configuration.
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+// Get CSRF token for secure requests
+let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
+
+// Initialize LiveSocket with hooks
+let hooks = {
+  // Register QRScanner hook
+  QRScanner: QRScanner,
+  
+  // Register background carousel hooks
+  BgCarousel: bgCarousel,
+  LocalBgCarousel: localBgCarousel
+};
+
+// Create LiveSocket instance with hooks
 let liveSocket = new LiveSocket("/live", Socket, {
-  longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: { _csrf_token: csrfToken },
+  hooks: hooks,
+  dom: {
+    // Add any custom DOM handling here
+  },
+  // Enable debug mode in development
+  // debug: process.env.NODE_ENV === 'development',
+  // Enable latency simulation for testing
+  // latencySim: process.env.NODE_ENV === 'development' ? 1000 : 0,
+  // Long polling fallback in case of WebSocket issues
+  longPollFallbackMs: 2500
 })
 
 // Show progress bar on live navigation and form submits

@@ -1,10 +1,9 @@
 defmodule RegisterWeb.Admin.QrCodeLive.ShowComponent do
   use RegisterWeb, :live_view
   alias Register.QrCodes
-  alias QRCode.Render.SvgSettings
   alias EQRCode
 
-  
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok, socket}

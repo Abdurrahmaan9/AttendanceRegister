@@ -1,10 +1,10 @@
 defmodule RegisterWeb.Admin.Dashboard.Index do
   use RegisterWeb, :live_view
   alias Register.Students
-  alias RegisterWeb.Helpers.RoleHelper
+  # alias RegisterWeb.Helpers.RoleHelper
 
   # Import the role helper functions
-  import RegisterWeb.Helpers.RoleHelper, only: [role_class: 1]
+  # import RegisterWeb.Helpers.RoleHelper, only: [role_class: 1]
 
   @url "/Admin/dashboard"
 

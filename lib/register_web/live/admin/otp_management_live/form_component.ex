@@ -5,8 +5,6 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
   alias Register.Otps
   alias Register.Otps.Otp
 
-  import Calendar, only: [strftime: 2]
-
   @impl true
   def update(assigns, socket) do
     socket =
@@ -48,27 +46,27 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
   defp process_params(params) do
     # Ensure we have a map with string keys
     params = Map.new(params, fn {k, v} -> {to_string(k), v} end)
-    
+
     # Set default values for required fields
-    params = 
+    params =
       params
       |> Map.put_new("is_active", "false")
       |> Map.put_new("purpose", "authentication")
       |> Map.put_new("metadata", "{}")
-    
+
     # Process is_active checkbox
-    params = 
+    params =
       if Map.has_key?(params, "is_active") do
         Map.put(params, "is_active", params["is_active"] == "on")
       else
         Map.put(params, "is_active", false)
       end
-    
+
     # Process metadata
-    params = 
+    params =
       case params["metadata"] do
         "" -> Map.put(params, "metadata", %{})
-        json when is_binary(json) -> 
+        json when is_binary(json) ->
           case Jason.decode(json) do
             {:ok, decoded} when is_map(decoded) -> Map.put(params, "metadata", decoded)
             _ -> Map.put(params, "metadata", %{})
@@ -76,13 +74,13 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
         map when is_map(map) -> Map.put(params, "metadata", map)
         _ -> Map.put(params, "metadata", %{})
       end
-    
+
     # Process expires_at
     params =
       case params["expires_at"] do
-        %NaiveDateTime{} = dt -> 
+        %NaiveDateTime{} = dt ->
           Map.put(params, "expires_at", dt)
-        "" -> 
+        "" ->
           # Set default expiration to 30 minutes from now if not provided
           Map.put(params, "expires_at", NaiveDateTime.add(NaiveDateTime.utc_now(), 30 * 60))
         datetime_str when is_binary(datetime_str) ->
@@ -90,22 +88,22 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
             {:ok, datetime} -> Map.put(params, "expires_at", datetime)
             _ -> Map.put(params, "expires_at", NaiveDateTime.add(NaiveDateTime.utc_now(), 30 * 60))
           end
-        _ -> 
+        _ ->
           Map.put(params, "expires_at", NaiveDateTime.add(NaiveDateTime.utc_now(), 30 * 60))
       end
-    
+
     params
   end
 
   @impl true
   def handle_event("validate", %{"otp" => params}, socket) do
     # Prepare params with user and default values
-    params_with_user = 
+    params_with_user =
       params
       |> process_params()
       |> Map.put("created_by_id", socket.assigns.current_user.id)
 
-    changeset = 
+    changeset =
       case socket.assigns.live_action do
         :edit ->
           socket.assigns.otp
@@ -122,13 +120,13 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
   @impl true
   def handle_event("save", %{"otp" => params}, socket) do
     # Prepare params with user and default values
-    params_with_user = 
+    params_with_user =
       params
       |> process_params()
       |> Map.put("created_by_id", socket.assigns.current_user.id)
 
     # Generate a code if not provided
-    params_with_code = 
+    params_with_code =
       if Map.get(params_with_user, "code", "") == "" do
         Map.put(params_with_user, "code", Register.Otps.Otp.generate_code())
       else
@@ -140,7 +138,7 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
     # Log the params for debugging
     IO.inspect(params_with_code, label: "Saving OTP with params")
 
-    result = 
+    result =
       case socket.assigns.live_action do
         :new ->
           Otps.create_otp(params_with_code)
@@ -238,8 +236,8 @@ defmodule RegisterWeb.Admin.OTPManagementLive.FormComponent do
                       id={@form[:expires_at].id}
                       name={@form[:expires_at].name}
                       value={case @form[:expires_at].value do
-                        %DateTime{} = dt -> 
-                          dt 
+                        %DateTime{} = dt ->
+                          dt
                           |> DateTime.truncate(:second)
                           |> DateTime.to_naive()
                           |> format_datetime_for_input()

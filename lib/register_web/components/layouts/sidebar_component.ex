@@ -99,6 +99,19 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                     Audit Logs
                   </.nav_link>
                 </div>
+                <div>
+                <.nav_link to="/Admin/users/settings" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Lecturer/users/settings"}>
+                  Settings
+                </.nav_link>
+                <.nav_link
+                  to="/users/log_out"
+                  method="delete"
+                  icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  active={@current_path == "/users/log_out"}
+                >
+                  Log out
+                </.nav_link>
+                </div>
               </div>
 
                 <% :student -> %>
@@ -109,11 +122,22 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   <.nav_link to="/Students/courses" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/courses"}>
                     Course View
                   </.nav_link>
-                  <.nav_link to="/Students/scan-register" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/Students/scan-register"}>
+                  <.nav_link to="/Students/qr-codes" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/Students/scan-register"}>
                     Scan Register
                   </.nav_link>
-                  <.nav_link to="/Students/enter-register-otp" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/enter-register-otp"}>
+                  <.nav_link to="/Students/otp" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/enter-register-otp"}>
                     Enter Register OTP
+                  </.nav_link>
+                  <.nav_link to="/Students/users/settings" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/users/settings"}>
+                    Settings
+                  </.nav_link>
+                  <.nav_link
+                    to="/users/log_out"
+                    method="delete"
+                    icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    active={@current_path == "/users/log_out"}
+                  >
+                    Log out
                   </.nav_link>
 
                 <% :lecturer -> %>
@@ -127,6 +151,17 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   <.nav_link to="/Lecturer/qr-codes" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2" active={@current_path == "/Lecturer/qr-codes"}>
                     Manage QR Codes
                   </.nav_link>
+                  <.nav_link to="/Lecturer/users/settings" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/users/settings"}>
+                    Settings
+                  </.nav_link>
+                  <.nav_link
+                    to="/users/log_out"
+                    method="delete"
+                    icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    active={@current_path == "/users/log_out"}
+                  >
+                    Log out
+                  </.nav_link>
               <% end %>
             </nav>
           </div>
@@ -139,6 +174,8 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
   attr :to, :string, required: true
   attr :icon, :string, required: true
   attr :active, :boolean, default: false
+
+  slot :inner_block, required: true
 
   defp nav_link(assigns) do
     base_classes = "group flex items-center px-2 py-2 text-sm font-medium rounded-md"

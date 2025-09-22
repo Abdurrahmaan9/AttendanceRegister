@@ -1,0 +1,8 @@
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
+
+/**
+ * @license MIT
+ * topbar 2.0.0, 2023-02-04
+ * https://buunguyen.github.io/topbar
+ * Copyright (c) 2021 Buu Nguyen
+ */
