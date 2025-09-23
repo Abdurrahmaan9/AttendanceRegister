@@ -100,6 +100,12 @@ defmodule RegisterWeb.Router do
       live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
       live "/qr-codes/:id/show", Admin.QrCodeLive.ShowComponent, :show
 
+      # ==================== PROGRAM MANAGEMENT =========================
+      live "/programs", Admin.ProgramLive.Index, :index
+      live "/programs/new", Admin.ProgramLive.Index, :new
+      live "/programs/:id/edit", Admin.ProgramLive.Index, :edit
+      live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
+
       # ==================== OTP MANAGEMENT =========================
       live "/otp-management", Admin.OTPManagementLive.Index, :index
       live "/otp-management/new", Admin.OTPManagementLive.Index, :new
@@ -116,6 +122,10 @@ defmodule RegisterWeb.Router do
       live "/dashboard", Lecturer.Dashboard.Index, :index
       live "/users/settings", Auth.SettingsLive.Index, :edit
 
+      live "/otp-management", Lecturer.OTPLive.Index, :index
+      live "/otp-management/new", Lecturer.OTPLive.Index, :new
+      live "/otp-management/:id", Lecturer.OTPLive.Index, :show
+
     end
   end
 
@@ -130,9 +140,9 @@ defmodule RegisterWeb.Router do
       live "/enter-register-otp", Students.EnterRegisterOtpLive, :new
 
 
-      live "/otp", Students.OtpLive.Index, :index
-      live "/otp/:id", Students.OtpLive.Index, :show
-      live "/otp/:id/verify", Students.OtpLive.Index, :verify
+      live "/otp-management", Students.OtpLive.Index, :index
+      live "/otp-management/:id", Students.OtpLive.Index, :show
+      live "/otp-management/:id/verify", Students.OtpLive.Index, :verify
 
 
       live "/qr-codes", Students.QrCodesLive.Index, :index

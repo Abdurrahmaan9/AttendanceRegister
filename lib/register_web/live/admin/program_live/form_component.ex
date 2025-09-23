@@ -1,11 +1,21 @@
-defmodule RegisterWeb.Admin.CoursesLive.FormComponent do
+defmodule RegisterWeb.Admin.ProgramLive.FormComponent do
   use RegisterWeb, :live_component
 
+  alias Register.Academic
+  alias Register.Academic.Program
   import RegisterWeb.CoreComponents
 
-  alias Register.Courses
 
+  @impl true
+  def update(%{program: program} = assigns, socket) do
+    changeset = Program.changeset(program, %{})
 
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(:changeset, changeset)
+     |> assign(:title, if(program.id, do: "Edit Program", else: "New Program"))}
+  end
 
   @impl true
   def render(assigns) do
@@ -27,9 +37,10 @@ defmodule RegisterWeb.Admin.CoursesLive.FormComponent do
             <div class="grid grid-cols-6 gap-6">
               <div class="col-span-6 sm:col-span-3">
                 <.input
-                  field={f[:title]}
+                  field={f[:name]}
                   type="text"
-                  label="Title"
+                  label="Program Name"
+                  placeholder="e.g. Computer Science"
                   class="mt-1 block w-full"
                 />
               </div>
@@ -38,7 +49,8 @@ defmodule RegisterWeb.Admin.CoursesLive.FormComponent do
                 <.input
                   field={f[:code]}
                   type="text"
-                  label="Code"
+                  label="Program Code"
+                  placeholder="e.g. CS"
                   class="mt-1 block w-full"
                 />
               </div>
@@ -48,81 +60,71 @@ defmodule RegisterWeb.Admin.CoursesLive.FormComponent do
                   field={f[:description]}
                   type="textarea"
                   label="Description"
+                  rows={3}
+                  placeholder="Program description..."
                   class="mt-1 block w-full"
-                  rows="3"
                 />
               </div>
 
               <div class="col-span-6 sm:col-span-3">
                 <.input
-                  field={f[:credits]}
+                  field={f[:duration_years]}
                   type="number"
-                  label="Credits"
+                  label="Duration (Years)"
+                  min={1}
+                  max={6}
                   class="mt-1 block w-full"
                 />
               </div>
 
-              <div class="col-span-6 sm:col-span-3 flex items-center">
+              <div class="col-span-6 sm:col-span-3">
                 <.input
                   field={f[:is_active]}
                   type="checkbox"
                   label="Active"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  class="mt-1"
                 />
               </div>
             </div>
 
-            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-              <button
-                type="submit"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm"
-              >
+            <div class="mt-6 flex items-center justify-end space-x-3">
+              <.button type="submit" class="bg-indigo-600 hover:bg-indigo-700">
                 Save
-              </button>
-              <.link
-                patch={@return_to}
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm"
-              >
-                Cancel
-              </.link>
+              </.button>
             </div>
           </.form>
         </div>
       </div>
     </div>
+
     """
   end
 
   @impl true
-  def update(%{course: course} = assigns, socket) do
-    changeset = Courses.change_course(course)
-
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(:changeset, changeset)}
-  end
-
-  @impl true
-  def handle_event("validate", %{"course" => course_params}, socket) do
+  def handle_event("validate", %{"program" => program_params}, socket) do
     changeset =
-      socket.assigns.course
-      |> Courses.change_course(course_params)
+      socket.assigns.program
+      |> Program.changeset(program_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
   end
 
-  def handle_event("save", %{"course" => course_params}, socket) do
-    save_course(socket, socket.assigns.action, course_params)
+  def handle_event("save", %{"program" => program_params}, socket) do
+    save_program(socket, socket.assigns.action, program_params)
   end
 
-  defp save_course(socket, :edit, course_params) do
-    case Courses.update_course(socket.assigns.course, course_params) do
-      {:ok, _course} ->
+  def handle_event("cancel", _, socket) do
+    {:noreply, push_navigate(socket, to: socket.assigns.return_to)}
+
+  end
+
+  defp save_program(socket, :edit, program_params) do
+    case Academic.update_program(socket.assigns.program, program_params) do
+      {:ok, _program} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Course updated successfully")
+         |> put_flash(:info, "Program updated successfully")
          |> push_navigate(to: socket.assigns.return_to)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -130,12 +132,12 @@ defmodule RegisterWeb.Admin.CoursesLive.FormComponent do
     end
   end
 
-  defp save_course(socket, :new, course_params) do
-    case Courses.create_course(course_params) do
-      {:ok, _course} ->
+  defp save_program(socket, :new, program_params) do
+    case Academic.create_program(program_params) do
+      {:ok, _program} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Course created successfully")
+         |> put_flash(:info, "Program created successfully")
          |> push_navigate(to: socket.assigns.return_to)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

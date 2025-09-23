@@ -77,10 +77,78 @@ defmodule Register.Otps do
       code: Otp.generate_code(),
       is_active: true,
       expires_at: expires_at,
-      purpose: "authentication",
+      purpose: attrs[:purpose] || "authentication",
       metadata: %{},
-      created_by_id: attrs[:created_by_id]
+      created_by_id: attrs[:created_by_id],
+      course_id: attrs[:course_id],
+      course_name: attrs[:course_name],
+      module_code: attrs[:module_code],
+      lecturer_name: attrs[:lecturer_name],
+      location: attrs[:location],
+      session_date: attrs[:session_date] || Date.utc_today()
     }
+  end
+
+  @doc """
+  Generates a new OTP specifically for attendance.
+  
+  ## Parameters
+    * `lecturer` - The lecturer generating the OTP
+    * `course` - The course for which the OTP is being generated
+    * `opts` - Additional options like :location, :expires_in_minutes
+  """
+  def generate_attendance_otp(lecturer, course, opts \\ []) do
+    expires_in = Keyword.get(opts, :expires_in_minutes, 30)
+    
+    # Get lecturer name, fallback to email if name fields are not available
+    lecturer_name = cond do
+      function_exported?(lecturer, :first_name, 0) && function_exported?(lecturer, :last_name, 0) ->
+        "#{lecturer.first_name} #{lecturer.last_name}"
+      function_exported?(lecturer, :name, 0) ->
+        lecturer.name
+      true ->
+        lecturer.email
+    end
+    
+    otp_attrs = %{
+      purpose: "attendance",
+      created_by_id: lecturer.id,
+      course_id: course.id,
+      course_name: course.title,
+      module_code: course.code,
+      lecturer_name: lecturer_name,
+      location: Keyword.get(opts, :location, "TBA"),
+      session_date: Date.utc_today(),
+      expires_in_minutes: expires_in
+    }
+    
+    otp_attrs = Map.merge(otp_attrs, Map.new(opts))
+    
+    case create_otp(otp_attrs) do
+      {:ok, otp} -> 
+        {:ok, otp}
+      {:error, changeset} -> 
+        {:error, changeset}
+    end
+  end
+  
+  @doc """
+  Verifies an attendance OTP and returns the associated course details if valid.
+  """
+  def verify_attendance_otp(code) do
+    case verify_otp(code, "attendance") do
+      {:ok, otp} ->
+        {:ok, %{
+          course_id: otp.course_id,
+          course_name: otp.course_name,
+          module_code: otp.module_code,
+          lecturer_name: otp.lecturer_name,
+          location: otp.location,
+          session_date: otp.session_date
+        }}
+      error ->
+        error
+    end
   end
 
   @doc """

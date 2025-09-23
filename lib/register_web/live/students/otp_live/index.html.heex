@@ -1,32 +1,91 @@
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-  <h1 class="text-2xl font-bold text-center mb-6">Verify OTP</h1>
-  
-  <.form for={%{}} as={:otp} phx-submit="verify_otp" class="space-y-4">
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
-        Enter OTP
-      </label>
-      <input
-        type="text"
-        name="otp"
-        placeholder="Enter the OTP sent to your email"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        required
-      />
+<div class="max-w-md mx-auto px-4 py-8">
+  <div class="text-center mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Mark Your Attendance</h1>
+    <p class="mt-2 text-sm text-gray-600">Enter the OTP provided by your lecturer</p>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <%= if @attendance_recorded do %>
+        <div class="rounded-md bg-green-50 p-4 mb-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <!-- Heroicon name: check-circle -->
+              <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-green-800">
+                Attendance Recorded Successfully!
+              </h3>
+              <div class="mt-2 text-sm text-green-700">
+                <p>
+                  You have been marked as present for <strong><%= @course_info.course_name %></strong>
+                  <br>
+                  <span class="text-gray-600"><%= @course_info.module_code %></span>
+                  <br>
+                  <span class="text-gray-600"><%= @course_info.lecturer_name %></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <%= if @error do %>
+          <div class="rounded-md bg-red-50 p-4 mb-6">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <!-- Heroicon name: x-circle -->
+                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  <%= @error %>
+                </h3>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <.form for={@form} phx-submit="verify_otp" class="space-y-6">
+          <div>
+            <label for="otp" class="block text-sm font-medium text-gray-700">
+              Enter OTP
+            </label>
+            <div class="mt-1">
+              <input 
+                type="text"
+                name="otp"
+                id="otp"
+                required
+                autofocus
+                autocomplete="off"
+                value={@form[:otp].value}
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+            <p class="mt-2 text-sm text-gray-500">
+              Enter the 6-digit code provided by your lecturer
+            </p>
+          </div>
+
+          <div>
+            <button 
+              type="submit" 
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Submit
+            </button>
+          </div>
+        </.form>
+      <% end %>
     </div>
-    
-    <div class="text-center">
-      <button
-        type="submit"
-        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      >
-        Verify OTP
-      </button>
-    </div>
-  </.form>
-  
-  <div class="mt-4 text-center text-sm text-gray-600">
-    Didn't receive an OTP? 
-    <a href="#" class="text-blue-600 hover:underline">Resend OTP</a>
+  </div>
+
+  <div class="mt-6 text-center text-sm text-gray-600">
+    <p>Don't have an OTP? Ask your lecturer to generate one for your class.</p>
   </div>
 </div>

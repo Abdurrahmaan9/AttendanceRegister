@@ -28,6 +28,9 @@ Alpine.start()
 // Import QR Scanner
 import { QRScanner } from "./qr_scanner"
 
+// Import Sidebar Dropdowns
+import "./sidebar_dropdowns"
+
 // Import background carousels
 import bgCarousel from "./bg_carousel"
 

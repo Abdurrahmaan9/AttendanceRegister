@@ -6,6 +6,7 @@ defmodule Register.Courses do
   import Ecto.Query, warn: false
   alias Register.Repo
   alias Register.Courses.Course
+  alias Register.Academic.ProgramCourse
 
   @doc """
   Returns the list of courses.
@@ -17,7 +18,16 @@ defmodule Register.Courses do
 
   """
   def list_courses do
-    Repo.all(Course)
+    from(c in Course, where: c.is_active == true, order_by: [asc: :code])
+    |> Repo.all()
+  end
+
+  @doc """
+  Lists all courses including inactive ones.
+  """
+  def list_all_courses do
+    from(c in Course, order_by: [asc: :code])
+    |> Repo.all()
   end
 
   @doc """
@@ -34,7 +44,11 @@ defmodule Register.Courses do
       ** (Ecto.NoResultsError)
 
   """
-  def get_course!(id), do: Repo.get!(Course, id)
+  def get_course!(id) do
+    Course
+    |> Repo.get!(id)
+    |> Repo.preload([:programs, program_courses: :program])
+  end
 
   @doc """
   Creates a course.
@@ -102,13 +116,46 @@ defmodule Register.Courses do
   end
 
   @doc """
+  Lists courses not assigned to a specific program.
+  """
+  def list_available_courses(program_id) do
+    assigned_course_ids =
+      from(pc in ProgramCourse,
+        where: pc.program_id == ^program_id,
+        select: pc.course_id
+      )
+      |> Repo.all()
+
+    from(c in Course,
+      where: c.id not in ^assigned_course_ids,
+      where: c.is_active == true,
+      order_by: [asc: :code]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets courses by program, year, and semester.
+  """
+  def get_courses_by_program_and_semester(program_id, year, semester) do
+    from(pc in ProgramCourse,
+      where: pc.program_id == ^program_id and pc.year == ^year and pc.semester == ^semester,
+      where: pc.is_active == true,
+      preload: [:course],
+      order_by: [asc: :is_core, asc: :id]
+    )
+    |> Repo.all()
+    |> Enum.map(fn pc -> %{pc.course | program_course_id: pc.id, is_core: pc.is_core} end)
+  end
+
+  @doc """
   Returns the total count of courses.
-  
+
   ## Examples
-  
+
       iex> count_courses()
       5
-  
+
   """
   def count_courses do
     Repo.aggregate(Course, :count, :id)
