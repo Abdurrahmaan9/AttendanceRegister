@@ -89,7 +89,15 @@ defmodule RegisterWeb.Router do
       # ==================== STUDENT MANAGEMENT =========================
       live "/students", Admin.StudentsLive.Index, :index
       live "/students/new", Admin.StudentsLive.Index, :new
+      live "/students/:id", Admin.StudentLive.Show, :show
       live "/students/:id/edit", Admin.StudentsLive.Index, :edit
+      
+      # ==================== PROGRAM MANAGEMENT =========================
+      live "/programs", Admin.ProgramLive.Index, :index
+      live "/programs/new", Admin.ProgramLive.Index, :new
+      live "/programs/:id", Admin.ProgramLive.Index, :show
+      live "/programs/:id/edit", Admin.ProgramLive.Index, :edit
+      live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
 
       # ==================== USERS MGT =================================
       live "/users", Admin.UsersLive.Index, :index

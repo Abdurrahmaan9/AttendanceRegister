@@ -3,10 +3,8 @@ defmodule RegisterWeb.Admin.ProgramLive.Index do
   use Phoenix.Component
   import Ecto.Query, warn: false
 
-  alias Register.Repo
   alias Register.Academic
   alias Register.Academic.Program
-  alias Register.Academic.ProgramCourse
 
   @impl true
   def mount(_params, _session, socket) do

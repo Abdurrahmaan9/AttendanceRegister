@@ -1,10 +1,10 @@
 defmodule RegisterWeb.Layouts.SidebarComponent do
   use Phoenix.Component
-  import Phoenix.LiveView.Helpers
 
   attr :sidebar_open, :boolean, default: false
   attr :current_path, :string, required: true
   attr :user_type, :atom, required: true
+  attr :current_user, :any, default: nil
 
   def sidebar(assigns) do
     ~H"""
@@ -99,6 +99,11 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   System
                 </h3>
                 <div class="mt-2 space-y-1">
+                  <%= if @current_user do %>
+                    <.nav_link to={"/Admin/students/#{@current_user.id}"} icon="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" active={@current_path == "/Admin/students/#{@current_user.id}"}>
+                      My Profile
+                    </.nav_link>
+                  <% end %>
                   <.nav_link to="/Admin/qr-codes" icon="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" active={String.starts_with?(@current_path, "/admin")}>
                     QR Code Management
                   </.nav_link>
@@ -135,7 +140,7 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   <.nav_link to="/Students/qr-codes" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/Students/scan-register"}>
                     Scan Register
                   </.nav_link>
-                  <.nav_link to="/Students/otp" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/enter-register-otp"}>
+                  <.nav_link to="/Students/otp-management" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/enter-register-otp"}>
                     Enter Register OTP
                   </.nav_link>
                   <.nav_link to="/Students/users/settings" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/users/settings"}>
