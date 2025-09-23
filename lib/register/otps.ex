@@ -97,33 +97,30 @@ defmodule Register.Otps do
     * `course` - The course for which the OTP is being generated
     * `opts` - Additional options like :location, :expires_in_minutes
   """
-  def generate_attendance_otp(lecturer, course, opts \\ []) do
+  def generate_attendance_otp(lecturer = %Register.Accounts.User{}, course = %Register.Courses.Course{}, opts \\ []) do
     expires_in = Keyword.get(opts, :expires_in_minutes, 30)
+    location = Keyword.get(opts, :location, "TBA")
     
-    # Get lecturer name, fallback to email if name fields are not available
-    lecturer_name = cond do
-      function_exported?(lecturer, :first_name, 0) && function_exported?(lecturer, :last_name, 0) ->
-        "#{lecturer.first_name} #{lecturer.last_name}"
-      function_exported?(lecturer, :name, 0) ->
-        lecturer.name
-      true ->
-        lecturer.email
-    end
+    # Generate OTP code
+    code = Register.Otps.Otp.generate_code()
     
+    # Calculate expiration time
+    expires_at = DateTime.utc_now() |> DateTime.add(expires_in * 60, :second)
+    
+    # Prepare OTP attributes
     otp_attrs = %{
-      purpose: "attendance",
-      created_by_id: lecturer.id,
-      course_id: course.id,
-      course_name: course.title,
-      module_code: course.code,
-      lecturer_name: lecturer_name,
-      location: Keyword.get(opts, :location, "TBA"),
+      code: code,
+      is_active: true,
+      expires_at: expires_at,
+      course_name: course.title || "",
+      module_code: course.code || "",
+      lecturer_name: lecturer.email || "Unknown Lecturer",
+      location: location,
       session_date: Date.utc_today(),
-      expires_in_minutes: expires_in
+      created_by_id: lecturer.id
     }
     
-    otp_attrs = Map.merge(otp_attrs, Map.new(opts))
-    
+    # Create the OTP record
     case create_otp(otp_attrs) do
       {:ok, otp} -> 
         {:ok, otp}
