@@ -44,6 +44,12 @@
                                         <%= student.program %>
                                     </td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                        <.link
+                                            navigate={"/Admin/students/#{student.id}"}
+                                            class="text-blue-600 hover:text-blue-900 mr-4"
+                                        >
+                                            View
+                                        </.link>
                                         <button
                                             phx-click="edit_student"
                                             phx-value-id={student.id}
@@ -73,7 +79,7 @@
 <%= if @editing_id || @show_form do %>
   <.live_component
     module={RegisterWeb.Admin.StudentsLive.FormComponent}
-    id={@editing_id || "new-student"}
+    id={"student-#{@editing_id}" || "new-student"}
     action={if @editing_id, do: :edit, else: :new}
     student={@editing_student || %Student{}}
     return_to={~p"/Admin/students"}

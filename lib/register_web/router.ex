@@ -89,7 +89,15 @@ defmodule RegisterWeb.Router do
       # ==================== STUDENT MANAGEMENT =========================
       live "/students", Admin.StudentsLive.Index, :index
       live "/students/new", Admin.StudentsLive.Index, :new
+      live "/students/:id", Admin.StudentLive.Show, :show
       live "/students/:id/edit", Admin.StudentsLive.Index, :edit
+      
+      # ==================== PROGRAM MANAGEMENT =========================
+      live "/programs", Admin.ProgramLive.Index, :index
+      live "/programs/new", Admin.ProgramLive.Index, :new
+      live "/programs/:id", Admin.ProgramLive.Index, :show
+      live "/programs/:id/edit", Admin.ProgramLive.Index, :edit
+      live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
 
       # ==================== USERS MGT =================================
       live "/users", Admin.UsersLive.Index, :index
@@ -99,6 +107,12 @@ defmodule RegisterWeb.Router do
       live "/qr-codes/new", Admin.QrCodeLive.Index, :new
       live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
       live "/qr-codes/:id/show", Admin.QrCodeLive.ShowComponent, :show
+
+      # ==================== PROGRAM MANAGEMENT =========================
+      live "/programs", Admin.ProgramLive.Index, :index
+      live "/programs/new", Admin.ProgramLive.Index, :new
+      live "/programs/:id/edit", Admin.ProgramLive.Index, :edit
+      live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
 
       # ==================== OTP MANAGEMENT =========================
       live "/otp-management", Admin.OTPManagementLive.Index, :index
@@ -116,6 +130,10 @@ defmodule RegisterWeb.Router do
       live "/dashboard", Lecturer.Dashboard.Index, :index
       live "/users/settings", Auth.SettingsLive.Index, :edit
 
+      live "/otp-management", Lecturer.OTPLive.Index, :index
+      live "/otp-management/new", Lecturer.OTPLive.Index, :new
+      live "/otp-management/:id", Lecturer.OTPLive.Index, :show
+
     end
   end
 
@@ -130,9 +148,9 @@ defmodule RegisterWeb.Router do
       live "/enter-register-otp", Students.EnterRegisterOtpLive, :new
 
 
-      live "/otp", Students.OtpLive.Index, :index
-      live "/otp/:id", Students.OtpLive.Index, :show
-      live "/otp/:id/verify", Students.OtpLive.Index, :verify
+      live "/otp-management", Students.OtpLive.Index, :index
+      live "/otp-management/:id", Students.OtpLive.Index, :show
+      live "/otp-management/:id/verify", Students.OtpLive.Index, :verify
 
 
       live "/qr-codes", Students.QrCodesLive.Index, :index

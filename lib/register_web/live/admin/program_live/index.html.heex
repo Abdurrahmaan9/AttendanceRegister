@@ -1,0 +1,213 @@
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Programs</h1>
+  <.link
+    patch={~p"/Admin/programs/new"}
+    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+  >
+    New Program
+  </.link>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        <th scope="col" class="relative px-6 py-3">
+          <span class="sr-only">Actions</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      <%= for program <- @programs do %>
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <%= program.code %>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <%= program.name %>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <%= program.duration_years %> years
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <.status_pill active={program.is_active} />
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex space-x-2 justify-end">
+              <.link
+                patch={~p"/Admin/programs/#{program.id}/manage_courses"}
+                class="text-indigo-600 hover:text-indigo-900"
+              >
+                Manage Courses
+              </.link>
+              <.link
+                patch={~p"/Admin/programs/#{program}/edit"}
+                class="text-indigo-600 hover:text-indigo-900"
+              >
+                Edit
+              </.link>
+              <button
+                phx-click={show_modal("delete-program-#{program.id}")}
+                class="text-red-600 hover:text-red-900"
+              >
+                Delete
+              </button>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <.modal id={"delete-program-#{program.id}"}>
+              <:title>Confirm Deletion</:title>
+              <p class="text-gray-600 mb-4">Are you sure you want to delete the program "<%= program.name %>"?</p>
+              <:confirm phx-click="delete" phx-value-id={program.id}>Delete</:confirm>
+            </.modal>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<.modal :if={@live_action in [:new, :edit]} id="program-modal" show>
+  <.live_component
+    module={RegisterWeb.Admin.ProgramLive.FormComponent}
+    id={@program.id || :new}
+    title={@page_title}
+    action={@live_action}
+    program={@program}
+    return_to={~p"/Admin/programs"}
+  />
+</.modal>
+
+<.modal :if={@live_action == :manage_courses} id="manage-courses-modal" show>
+  <div class="space-y-6">
+    <div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Manage Courses - <%= @program.name %>
+      </h3>
+      <p class="mt-1 text-sm text-gray-500">
+        Add or remove courses from this program.
+      </p>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h4 class="text-md font-medium text-gray-900 mb-4">Add Course</h4>
+        
+        <.form :let={f} for={%{}} as={:course} phx-submit="add_course" class="space-y-4">
+          <input type="hidden" name="program_id" value={@program.id} />
+          
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="col-span-2">
+              <label for="course_id" class="block text-sm font-medium text-gray-700">Course</label>
+              <select
+                id="course_id"
+                name="course_id"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                required
+              >
+                <option value="">Select a course</option>
+                <%= for course <- @available_courses do %>
+                  <option value={course.id}><%= course.code %> - <%= course.title %></option>
+                <% end %>
+              </select>
+            </div>
+            
+            <div>
+              <label for="year" class="block text-sm font-medium text-gray-700">Year</label>
+              <select
+                id="year"
+                name="year"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                required
+              >
+                <%= for year <- @years do %>
+                  <option value={year}><%= year %></option>
+                <% end %>
+              </select>
+            </div>
+            
+            <div>
+              <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+              <select
+                id="semester"
+                name="semester"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                required
+              >
+                <%= for semester <- @semesters do %>
+                  <option value={semester}><%= semester %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Add Course
+            </button>
+          </div>
+        </.form>
+      </div>
+      
+      <div class="border-t border-gray-200">
+        <div class="px-4 py-5 sm:p-6">
+          <h4 class="text-md font-medium text-gray-900 mb-4">Program Courses</h4>
+          
+          <div class="space-y-4">
+            <%= for year <- @years do %>
+              <div>
+                <h5 class="text-sm font-medium text-gray-700 mb-2">Year <%= year %></h5>
+                <%= for semester <- @semesters do %>
+                  <div class="mb-4">
+                    <h6 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Semester <%= semester %></h6>
+                    <ul class="space-y-2">
+                      <%= for pc <- get_courses_by_year_and_semester(@program.id, year, semester) do %>
+                        <li class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded-md">
+                          <div>
+                            <span class="font-medium"><%= pc.course.code %></span>
+                            <span class="text-gray-500 ml-2"><%= pc.course.title %></span>
+                            <%= if pc.is_core do %>
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
+                                Core
+                              </span>
+                            <% end %>
+                          </div>
+                          <button
+                            phx-click="remove_course"
+                            phx-value-id={pc.id}
+                            class="text-red-600 hover:text-red-900 text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      <% end %>
+                      <%= if Enum.empty?(get_courses_by_year_and_semester(@program.id, year, semester)) do %>
+                        <li class="text-sm text-gray-500 italic">No courses added yet</li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-5 sm:mt-6">
+      <.link
+        patch={~p"/Admin/programs"}
+        class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+      >
+        Done
+      </.link>
+    </div>
+  </div>
+</.modal>

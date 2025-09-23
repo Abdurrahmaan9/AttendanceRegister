@@ -1,6 +1,7 @@
 defmodule Register.Courses.Course do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Register.Academic.ProgramCourse
 
   schema "courses" do
     field :title, :string
@@ -8,6 +9,9 @@ defmodule Register.Courses.Course do
     field :code, :string
     field :credits, :integer, default: 3
     field :is_active, :boolean, default: true
+
+    has_many :program_courses, ProgramCourse
+    has_many :programs, through: [:program_courses, :program]
 
     timestamps()
   end
