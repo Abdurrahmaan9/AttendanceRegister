@@ -1,0 +1,96 @@
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-4">Generate QR Code</h1>
+
+  <%= if @current_user do %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="bg-white border rounded p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">QR Codes</h2>
+          <.button phx-click={JS.push("new_qr") |> show_modal("qr-code-modal")}>New QR Code</.button>
+        </div>
+      </div>
+
+      <div class="bg-white border rounded p-4">
+        <h2 class="text-lg font-semibold mb-4">Preview</h2>
+        <%= if @created_qr && @qr_svg do %>
+          <div class="mb-4">
+            <div class="text-sm text-gray-500">Scan this code</div>
+            <div class="flex justify-center" style="min-height: 300px; min-width: 300px;">
+              <%= Phoenix.HTML.raw(@qr_svg) %>
+            </div>
+          </div>
+          <div class="text-sm text-gray-700 space-y-1">
+            <div><span class="font-medium">Name:</span> <%= @created_qr.name %></div>
+            <div><span class="font-medium">Class:</span> <%= @created_qr.class_name %></div>
+            <div><span class="font-medium">Program:</span> <%= @created_qr.program_name %></div>
+            <div><span class="font-medium">Active:</span> <%= if @created_qr.is_active, do: "Yes", else: "No" %></div>
+            <%= if @created_qr.expires_at do %>
+              <div><span class="font-medium">Expires:</span> <%= Calendar.strftime(@created_qr.expires_at, "%Y-%m-%d %H:%M") %></div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-gray-600">Generate a QR code to preview it here.</div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold mb-4">Your QR Codes</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="border-b font-medium">
+            <tr>
+              <th class="px-3 py-2">Name</th>
+              <th class="px-3 py-2">Class</th>
+              <th class="px-3 py-2">Program</th>
+              <th class="px-3 py-2">Active</th>
+              <th class="px-3 py-2">Expires</th>
+              <th class="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <%= for qr <- @qr_codes do %>
+              <tr>
+                <td class="px-3 py-2"><%= qr.name %></td>
+                <td class="px-3 py-2"><%= qr.class_name %></td>
+                <td class="px-3 py-2"><%= qr.program_name %></td>
+                <td class="px-3 py-2"><%= if qr.is_active, do: "Yes", else: "No" %></td>
+                <td class="px-3 py-2"><%= qr.expires_at && Calendar.strftime(qr.expires_at, "%Y-%m-%d %H:%M") %></td>
+                <td class="px-3 py-2">
+                  <div class="flex justify-end gap-2">
+                    <.button class="bg-white border text-gray-900" phx-click="view_qr" phx-value-id={qr.id}>View</.button>
+                    <.button class="bg-white border text-gray-900" phx-click={JS.push("edit_qr", value: %{id: qr.id}) |> show_modal("qr-code-modal")}>Edit</.button>
+                    <.button class="bg-red-600" phx-click="delete_qr" phx-value-id={qr.id} data-confirm="Are you sure you want to delete this QR code?">Delete</.button>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% else %>
+    <div class="text-red-600">You must be logged in to view this page.</div>
+  <% end %>
+
+  <.modal id="qr-code-modal">
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold">New QR Code</h2>
+      <p class="text-sm text-gray-500">Enter details about the course/module to generate a code for students to scan.</p>
+    </div>
+    <.simple_form for={@changeset} :let={f} as={:qr_code} phx-submit="save" phx-change="validate">
+      <.input field={f[:name]} label="Name" />
+      <.input field={f[:description]} label="Description" />
+      <.input field={f[:class_name]} label="Class / Module" />
+      <.input field={f[:program_name]} label="Program" />
+      <.input field={f[:expires_at]} type="datetime-local" label="Expires At" />
+      <.input field={f[:is_active]} type="checkbox" label="Active" />
+      <:actions>
+        <div class="flex items-center gap-2">
+          <.button type="submit">Generate</.button>
+          <.button class="bg-gray-200 text-gray-900" phx-click={hide_modal("qr-code-modal")}>Cancel</.button>
+        </div>
+      </:actions>
+    </.simple_form>
+  </.modal>
+</div>

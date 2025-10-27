@@ -112,6 +112,8 @@ defmodule Register.Otps do
       code: code,
       is_active: true,
       expires_at: expires_at,
+      purpose: "attendance",
+      course_id: course.id,
       course_name: course.title || "",
       module_code: course.code || "",
       lecturer_name: lecturer.email || "Unknown Lecturer",

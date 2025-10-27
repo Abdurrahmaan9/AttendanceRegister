@@ -19,11 +19,7 @@
 import "phoenix_html"
 
 // Import Alpine.js
-import Alpine from 'alpinejs'
-
-// Initialize Alpine.js
-window.Alpine = Alpine
-Alpine.start()
+// Alpine.js removed (package not installed). Re-add if needed.
 
 // Import QR Scanner
 import { QRScanner } from "./qr_scanner"
@@ -54,8 +50,7 @@ let hooks = {
   QRScanner: QRScanner,
   
   // Register background carousel hooks
-  BgCarousel: bgCarousel,
-  LocalBgCarousel: localBgCarousel
+  BgCarousel: bgCarousel
 };
 
 // Create LiveSocket instance with hooks

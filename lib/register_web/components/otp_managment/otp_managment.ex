@@ -1,0 +1,96 @@
+defmodule RegisterWeb.Components.OtpManagement.OtpMangement do
+
+  use Phoenix.Component
+
+  def render(assigns) do
+    ~H"""
+      <div class="max-w-4xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-8">Generate OTP for Class Attendance</h1>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <form phx-submit="generate" class="space-y-6">
+              <div>
+                <label for="course_id" class="block text-sm font-medium text-gray-700">
+                  Select Course
+                </label>
+                <div class="mt-1">
+                  <select
+                    id="course_id"
+                    name="form[course_id]"
+                    required
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  >
+                    <option value="">-- Select a course --</option>
+                    <%= for course <- @courses do %>
+                      <option value={course.id}><%= course.title %> (<%= course.code %>)</option>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label for="location" class="block text-sm font-medium text-gray-700">
+                  Location (Optional)
+                </label>
+                <div class="mt-1">
+                  <input
+                    type="text"
+                    name="form[location]"
+                    id="location"
+                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    placeholder="e.g., Room 101"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="expires_in" class="block text-sm font-medium text-gray-700">
+                  Expires After (minutes)
+                </label>
+                <div class="mt-1">
+                  <input
+                    type="number"
+                    name="form[expires_in]"
+                    id="expires_in"
+                    value="30"
+                    min="5"
+                    max="1440"
+                    class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-24 sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+
+              <div class="flex justify-end">
+                <button
+                  type="submit"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Generate OTP
+                </button>
+              </div>
+            </form>
+
+            <%= if @otp do %>
+              <div class="mt-8 p-4 bg-green-50 rounded-md">
+                <h3 class="text-lg font-medium text-green-800">OTP Generated Successfully</h3>
+                <div class="mt-2">
+                  <p class="text-3xl font-mono font-bold text-center my-4">
+                    <%= @otp.code %>
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    This OTP will expire at <%= Timex.format!(@otp.expires_at, "{h12}:{m} {AM}") %>
+                    (<%= Timex.from_now(@otp.expires_at) %>)
+                  </p>
+                  <p class="text-sm text-gray-600 mt-2">
+                    Share this code with your students to allow them to mark their attendance.
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    """
+  end
+end

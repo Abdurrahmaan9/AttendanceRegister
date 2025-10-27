@@ -143,7 +143,6 @@ export const QRScanner = {
       // Try to use the native BarcodeDetector API if available
       useBarCodeDetectorIfSupported: false,
       // Disable flash by default
-      showTorchButtonIfSupported: false
     };
     
     // First, check if we can enumerate devices to see available cameras
