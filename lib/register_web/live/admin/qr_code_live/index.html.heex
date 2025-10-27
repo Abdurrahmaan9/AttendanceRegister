@@ -1,169 +1,96 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="mb-6">
-    <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">QR Code Management</h1>
-        <p class="mt-2 text-sm text-gray-700">A list of all generated QR codes.</p>
-      </div>
-      <button
-        :if={!@show_form}
-        phx-click="show_form"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
-        Generate New QR Code
-      </button>
-    </div>
-  </div>
-    <div :if={@show_form} class="bg-white shadow rounded-lg p-6">
-    <!-- Debug Section -->
-    <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-      <h4 class="text-sm font-medium text-yellow-800 mb-2">Debug Info:</h4>
-      <div class="text-xs text-yellow-700 space-y-1">
-        <div>QR SVG present: <%= if assigns[:qr_svg], do: "Yes (#{String.length(@qr_svg)} chars)", else: "No" %></div>
-        <div>Generated QR Code: <%= if assigns[:generated_qr_code], do: @generated_qr_code, else: "None" %></div>
-        <div>Show Form: <%= @show_form %></div>
-      </div>
-    </div>
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-4">Generate QR Code</h1>
 
-    <!-- QR Code Form -->
-    <div :if={@show_form} class="mb-6">
-      <.live_component module={RegisterWeb.Admin.QRCodeLive.FormComponent}
-        id="qr-code-form"
-        return_to={~p"/Admin/qr-codes"}
-        form={@form}
-        current_user={@current_user}
-      />
-    </div>
-
-    <!-- QR Code Preview -->
-    <div :if={@qr_svg} class="mt-8 p-6 bg-gray-50 rounded-lg">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">QR Code Preview</h3>
-      <div class="flex flex-col md:flex-row gap-6">
-        <div class="flex-shrink-0">
-          <div class="bg-white p-4 rounded-lg shadow-sm border">
-            <%= Phoenix.HTML.raw(@qr_svg) %>
-          </div>
-          <!-- Debug info -->
-          <div class="mt-2 text-xs text-gray-500">
-            QR SVG length: <%= if @qr_svg, do: String.length(@qr_svg), else: "nil" %>
-          </div>
+  <%= if @current_user do %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="bg-white border rounded p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">QR Codes</h2>
+          <.button phx-click={JS.push("new_qr") |> show_modal("qr-code-modal")}>New QR Code</.button>
         </div>
-        <div class="flex-1">
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">QR Code Data:</label>
-              <p class="mt-1 text-sm text-gray-600 bg-white p-2 rounded border font-mono"><%= @generated_qr_code %></p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Usage Instructions:</label>
-              <p class="mt-1 text-sm text-gray-600">Students can scan this QR code to mark their attendance for the specified class and program.</p>
+      </div>
+
+      <div class="bg-white border rounded p-4">
+        <h2 class="text-lg font-semibold mb-4">Preview</h2>
+        <%= if @created_qr && @qr_svg do %>
+          <div class="mb-4">
+            <div class="text-sm text-gray-500">Scan this code</div>
+            <div class="flex justify-center" style="min-height: 300px; min-width: 300px;">
+              <%= Phoenix.HTML.raw(@qr_svg) %>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- QR Codes List -->
-  <div class="mt-8">
-    <div class="mt-8 flex flex-col">
-      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-          <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-300">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Class</th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Program</th>
-                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                    <span class="sr-only">View</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                <%= for qr_code <- @qr_codes do %>
-                  <tr>
-                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                      <%= qr_code.name %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <%= qr_code.class_name %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <%= qr_code.program_name %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm">
-                      <span class={[
-                        "inline-flex rounded-full px-2 text-xs font-semibold leading-5",
-                        if(qr_code.is_active, do: "bg-green-100 text-green-800", else: "bg-gray-100 text-gray-800")
-                      ]}>
-                        <%= if qr_code.is_active, do: "Active", else: "Inactive" %>
-                      </span>
-                    </td>
-                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <div class="relative inline-block text-left">
-                        <details class="relative">
-                          <summary 
-                            class="inline-flex items-center rounded-md bg-white text-gray-400 hover:text-gray-500 cursor-pointer focus:outline-none list-none"
-                            aria-haspopup="true">
-                            <span class="sr-only">Open options</span>
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                              <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
-                            </svg>
-                          </summary>
-                          
-                          <div class="absolute right-0 z-10 mt-1 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div class="py-1">
-                              <!-- View -->
-                              <.link 
-                                patch={~p"/Admin/qr-codes/#{qr_code.id}/show"}
-                                class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" 
-                                role="menuitem">
-                                View QR Code
-                              </.link>
-                              
-                              <!-- Edit -->
-                              <.link 
-                                patch={~p"/Admin/qr-codes/#{qr_code.id}/edit"}
-                                class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" 
-                                role="menuitem">
-                                Edit
-                              </.link>
-                              
-                              <!-- Toggle Active/Inactive -->
-                              <button 
-                                phx-click={JS.push("toggle_active", value: %{id: qr_code.id})}
-                                class={"w-full text-left px-4 py-2 text-sm " <> if(qr_code.is_active, do: "text-red-600 hover:bg-red-50", else: "text-green-600 hover:bg-green-50")}
-                                role="menuitem">
-                                <%= if qr_code.is_active, do: "Deactivate", else: "Activate" %>
-                              </button>
-                              
-                              <!-- Delete with Confirmation -->
-                              <button 
-                                phx-click={JS.push("delete", value: %{id: qr_code.id})}
-                                onclick="return confirm('Are you sure you want to delete this QR code?');"
-                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" 
-                                role="menuitem">
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </details>
-                      </div>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+          <div class="text-sm text-gray-700 space-y-1">
+            <div><span class="font-medium">Name:</span> <%= @created_qr.name %></div>
+            <div><span class="font-medium">Class:</span> <%= @created_qr.class_name %></div>
+            <div><span class="font-medium">Program:</span> <%= @created_qr.program_name %></div>
+            <div><span class="font-medium">Active:</span> <%= if @created_qr.is_active, do: "Yes", else: "No" %></div>
+            <%= if @created_qr.expires_at do %>
+              <div><span class="font-medium">Expires:</span> <%= Calendar.strftime(@created_qr.expires_at, "%Y-%m-%d %H:%M") %></div>
+            <% end %>
           </div>
-        </div>
+        <% else %>
+          <div class="text-gray-600">Generate a QR code to preview it here.</div>
+        <% end %>
       </div>
     </div>
-  </div>
+
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold mb-4">Your QR Codes</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="border-b font-medium">
+            <tr>
+              <th class="px-3 py-2">Name</th>
+              <th class="px-3 py-2">Class</th>
+              <th class="px-3 py-2">Program</th>
+              <th class="px-3 py-2">Active</th>
+              <th class="px-3 py-2">Expires</th>
+              <th class="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <%= for qr <- @qr_codes do %>
+              <tr>
+                <td class="px-3 py-2"><%= qr.name %></td>
+                <td class="px-3 py-2"><%= qr.class_name %></td>
+                <td class="px-3 py-2"><%= qr.program_name %></td>
+                <td class="px-3 py-2"><%= if qr.is_active, do: "Yes", else: "No" %></td>
+                <td class="px-3 py-2"><%= qr.expires_at && Calendar.strftime(qr.expires_at, "%Y-%m-%d %H:%M") %></td>
+                <td class="px-3 py-2">
+                  <div class="flex justify-end gap-2">
+                    <.button class="bg-white border text-gray-900" phx-click="view_qr" phx-value-id={qr.id}>View</.button>
+                    <.button class="bg-white border text-gray-900" phx-click={JS.push("edit_qr", value: %{id: qr.id}) |> show_modal("qr-code-modal")}>Edit</.button>
+                    <.button class="bg-red-600" phx-click="delete_qr" phx-value-id={qr.id} data-confirm="Are you sure you want to delete this QR code?">Delete</.button>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% else %>
+    <div class="text-red-600">You must be logged in to view this page.</div>
+  <% end %>
+
+  <.modal id="qr-code-modal">
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold">New QR Code</h2>
+      <p class="text-sm text-gray-500">Enter details about the course/module to generate a code for students to scan.</p>
+    </div>
+    <.simple_form for={@changeset} :let={f} as={:qr_code} phx-submit="save" phx-change="validate">
+      <.input field={f[:name]} label="Name" />
+      <.input field={f[:description]} label="Description" />
+      <.input field={f[:class_name]} label="Class / Module" />
+      <.input field={f[:program_name]} label="Program" />
+      <.input field={f[:expires_at]} type="datetime-local" label="Expires At" />
+      <.input field={f[:is_active]} type="checkbox" label="Active" />
+      <:actions>
+        <div class="flex items-center gap-2">
+          <.button type="submit">Generate</.button>
+          <.button class="bg-gray-200 text-gray-900" phx-click={hide_modal("qr-code-modal")}>Cancel</.button>
+        </div>
+      </:actions>
+    </.simple_form>
+  </.modal>
 </div>
