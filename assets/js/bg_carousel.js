@@ -126,8 +126,7 @@ const bgCarousel = {
     this.carousel.style.backgroundPosition = 'center';
     this.carousel.style.backgroundRepeat = 'no-repeat';
     this.carousel.style.opacity = 1;
-    }, 500);
   }
 };
 
-export default localBgCarousel;
+export default bgCarousel;

@@ -10,13 +10,13 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Register.Accounts
-alias Bcrypt
+# alias Register.Accounts
+# alias Bcrypt
 
-Accounts.register_user(%{
-  email: "admin@gmail.com",
-  password: "registrypassword",
-  role: "super_user"
+# Accounts.register_user(%{
+#   email: "admin@gmail.com",
+#   password: "registrypassword",
+#   role: "super_user"
 # },
 # %{
 #   email: "lecturer@gmail.com",
@@ -27,4 +27,4 @@ Accounts.register_user(%{
 #   email: "student@gmail.com",
 #   password: "WPK8Lop2fc8=",
 #   role: "student"
-})
+# })

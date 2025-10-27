@@ -1,43 +1,24 @@
 defmodule RegisterWeb.Admin.OTPManagementLive.Index do
-  use RegisterWeb, :live_view
-
-  alias Phoenix.LiveView.JS
+use RegisterWeb, :live_view
   alias Register.Otps
-  alias Register.Otps.Otp
-
-  import RegisterWeb.Admin.OTPManagementLive.Helpers
-  import RegisterWeb.CoreComponents
+  alias Register.Courses
+  alias RegisterWeb.Plugs.MfaAuth
 
   @impl true
   def mount(_params, _session, socket) do
-    require Logger
-    Logger.debug("Mounting OTP Management LiveView")
+    courses = list_lecturer_courses(socket.assigns.current_user.id)
 
-    if connected?(socket) do
-      Logger.debug("Socket is connected, loading OTPs...")
-
-      try do
-        # Try to list OTPs directly
-        otps = Otps.list_otps()
-        Logger.debug("Loaded #{length(otps)} OTPs")
-
-        # Verify the first OTP's structure if it exists
-        if Enum.any?(otps) do
-          otp = List.first(otps)
-          Logger.debug("First OTP: #{inspect(otp, limit: :infinity, pretty: true)}")
-          Logger.debug("OTP created_by: #{inspect(otp.created_by, limit: :infinity, pretty: true)}")
-        end
-
-        {:ok, assign(socket, otps: otps, id: "otp-management")}
-      rescue
-        e ->
-          Logger.error("Error loading OTPs: #{inspect(e)}")
-          {:ok, assign(socket, otps: [], id: "otp-management", error: "Error loading OTPs")}
-      end
-    else
-      Logger.debug("Socket not connected, using empty OTP list")
-      {:ok, assign(socket, otps: [], id: "otp-management")}
-    end
+    {:ok,
+      socket
+      |> assign(:courses, courses)
+      |> assign(:otp, nil)
+      |> assign(:sidebar_open, false)
+      |> assign(:form, to_form(%{
+        "course_id" => "",
+        "location" => "",
+        "expires_in" => "30"
+      }))
+    }
   end
 
   @impl true
@@ -47,67 +28,45 @@ defmodule RegisterWeb.Admin.OTPManagementLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Manage OTPs")
-    |> assign(:otp, nil)
-  end
-
-  defp apply_action(socket, :new, _params) do
-    socket
-    |> assign(:page_title, "New OTP")
-    |> assign(:otp, %Otp{})
-  end
-
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    otp = Otps.get_otp!(id)
-
-    socket
-    |> assign(:page_title, "Edit OTP")
-    |> assign(:otp, otp)
+    |> assign(:page_title, "Generate OTP for Attendance")
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    otp = Otps.get_otp!(id)
-    {:ok, _} = Otps.delete_otp(otp)
+  def handle_event("generate", %{"form" => params}, socket) do
+    course_id = String.to_integer(params["course_id"])
+    expires_in = String.to_integer(params["expires_in"] || "30")
 
-    otps = Otps.list_otps()
+    case Enum.find(socket.assigns.courses, &(&1.id == course_id)) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Invalid course selected")}
 
-    {:noreply,
-      socket
-      |> put_flash(:info, "OTP deleted successfully")
-      |> assign(:otps, otps)
-    }
+      course ->
+        case MfaAuth.generate_attendance_pass(
+          socket.assigns.current_user,
+          course,
+          location: params["location"],
+          expires_in_minutes: expires_in
+        ) do
+          {:ok, otp} ->
+            {:noreply,
+              socket
+              |> assign(:otp, otp)
+              |> put_flash(:info, "OTP generated successfully!")
+            }
+
+          {:error, _changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to generate OTP")}
+        end
+    end
+  end
+
+  defp list_lecturer_courses(lecturer_id) do
+    # TODO: Update this to filter courses by the current lecturer
+    Courses.list_courses()
   end
 
   @impl true
-  def handle_info({:otp_created, _otp}, socket) do
-    otps = Otps.list_otps()
-    {:noreply, assign(socket, :otps, otps)}
-  end
-
-  @impl true
-  def handle_event("toggle_active", %{"id" => id}, socket) do
-    otp = Otps.get_otp!(id)
-    {:ok, updated_otp} = Otps.update_otp(otp, %{is_active: !otp.is_active})
-
-    otps = Otps.list_otps()
-
-    status = if updated_otp.is_active, do: "activated", else: "deactivated"
-
-    {:noreply,
-      socket
-      |> put_flash(:info, "OTP #{status} successfully")
-      |> assign(:otps, otps)
-    }
-  end
-
-  @impl true
-  def handle_event("close-dropdown", _params, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("toggle-dropdown", %{"id" => id}, socket) do
-    {:noreply, socket}
+  def handle_event("toggle_sidebar", _, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
   end
 end

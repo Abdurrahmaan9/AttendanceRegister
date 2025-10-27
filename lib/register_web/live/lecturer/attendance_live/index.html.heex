@@ -1,0 +1,63 @@
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-4">Attendance View</h1>
+
+  <%= if @current_user do %>
+    <%= if is_nil(@summary) do %>
+      <div class="text-gray-600">Loading scans...</div>
+    <% else %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="p-4 bg-white rounded border">
+          <div class="text-sm text-gray-500">Total Scans</div>
+          <div class="text-xl font-semibold"><%= @summary.total_scans %></div>
+        </div>
+      </div>
+
+      <%= if Enum.empty?(@summary.sessions) do %>
+        <div class="text-gray-600">No scans recorded yet.</div>
+      <% else %>
+        <div class="space-y-6">
+          <%= for session <- @summary.sessions do %>
+            <div class="bg-white border rounded">
+              <div class="p-4 border-b flex items-center justify-between">
+                <div>
+                  <div class="text-sm text-gray-500">Session</div>
+                  <div class="text-lg font-semibold"><%= session.name || session.session_name || "Unnamed Session" %></div>
+                </div>
+                <div>
+                  <div class="text-sm text-gray-500">Code</div>
+                  <div class="text-lg font-semibold"><%= session.code || session.qr_code || session.otp || "—" %></div>
+                </div>
+                <div>
+                  <div class="text-sm text-gray-500">Scans</div>
+                  <div class="text-lg font-semibold"><%= length(session.scans || []) %></div>
+                </div>
+              </div>
+              <div class="p-4 overflow-x-auto">
+                <table class="min-w-full text-left text-sm">
+                  <thead class="border-b font-medium">
+                    <tr>
+                      <th class="px-3 py-2">Name</th>
+                      <th class="px-3 py-2">Email</th>
+                      <th class="px-3 py-2">Scanned At</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <%= for scan <- session.scans || [] do %>
+                      <tr>
+                        <td class="px-3 py-2"><%= scan.name || "—" %></td>
+                        <td class="px-3 py-2"><%= scan.email || "—" %></td>
+                        <td class="px-3 py-2"><%= scan.scanned_at && Calendar.strftime(scan.scanned_at, "%Y-%m-%d %H:%M") || "—" %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  <% else %>
+    <div class="text-red-600">You must be logged in to view this page.</div>
+  <% end %>
+</div>

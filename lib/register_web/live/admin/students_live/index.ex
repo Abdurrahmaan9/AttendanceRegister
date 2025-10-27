@@ -17,6 +17,7 @@ defmodule RegisterWeb.Admin.StudentsLive.Index do
       |> assign(:editing_id, nil)
       |> assign(:editing_student, nil)
       |> assign(:show_form, false)
+      |> assign(:sidebar_open, false)
       |> assign(:students, [])
       |> assign(:changeset, Students.change_student(%Student{}))
 
@@ -196,5 +197,9 @@ defmodule RegisterWeb.Admin.StudentsLive.Index do
     Students.list_students()
   end
 
+  @impl true
+  def handle_event("toggle_sidebar", _, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
+  end
 
 end

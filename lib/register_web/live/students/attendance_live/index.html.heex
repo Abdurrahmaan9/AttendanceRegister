@@ -1,0 +1,60 @@
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-4">Attendance Overview</h1>
+
+  <%= if @current_user do %>
+    <%= if is_nil(@summary) do %>
+      <div class="text-gray-600">Loading attendance summary...</div>
+    <% else %>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="p-4 bg-white rounded border">
+          <div class="text-sm text-gray-500">Total Courses</div>
+          <div class="text-xl font-semibold"><%= @summary.total_courses %></div>
+        </div>
+        <div class="p-4 bg-white rounded border">
+          <div class="text-sm text-gray-500">Total Sessions</div>
+          <div class="text-xl font-semibold"><%= @summary.total_sessions %></div>
+        </div>
+        <div class="p-4 bg-white rounded border">
+          <div class="text-sm text-gray-500">Attended</div>
+          <div class="text-xl font-semibold text-green-700"><%= @summary.attended_sessions %></div>
+        </div>
+        <div class="p-4 bg-white rounded border">
+          <div class="text-sm text-gray-500">Missed</div>
+          <div class="text-xl font-semibold text-red-700"><%= @summary.missed_sessions %></div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <div class="text-sm text-gray-500">Attendance Rate</div>
+        <div class="text-2xl font-bold"><%= :io_lib.format("~.1f", [@summary.attendance_rate * 100]) |> to_string() %>%</div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="border-b font-medium">
+            <tr>
+              <th class="px-3 py-2">Code</th>
+              <th class="px-3 py-2">Title</th>
+              <th class="px-3 py-2">Attended</th>
+              <th class="px-3 py-2">Missed</th>
+              <th class="px-3 py-2">Rate</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <%= for %{course: course, attended: attended, missed: missed, rate: rate} <- @summary.per_course do %>
+              <tr>
+                <td class="px-3 py-2"><%= course.code %></td>
+                <td class="px-3 py-2"><%= course.title %></td>
+                <td class="px-3 py-2"><%= attended %></td>
+                <td class="px-3 py-2"><%= missed %></td>
+                <td class="px-3 py-2"><%= :io_lib.format("~.1f", [rate * 100]) |> to_string() %>%</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="text-red-600">You must be logged in to view this page.</div>
+  <% end %>
+</div>

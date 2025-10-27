@@ -3,6 +3,7 @@ defmodule RegisterWeb.Students.OtpLive.Index do
   import Phoenix.HTML.Form
   alias Register.Otps
   alias Register.Attendance
+  alias RegisterWeb.Plugs.MfaAuth
   
   @impl true
   def mount(_params, _session, socket) do
@@ -25,7 +26,7 @@ defmodule RegisterWeb.Students.OtpLive.Index do
 
   @impl true
   def handle_event("verify_otp", %{"otp" => otp}, socket) do
-    case Otps.verify_attendance_otp(otp) do
+    case MfaAuth.valid_attendance_code?(otp) do
       {:ok, course_info} ->
         # Record attendance
         case Attendance.record_attendance(

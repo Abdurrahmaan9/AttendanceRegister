@@ -5,7 +5,14 @@ defmodule RegisterWeb.Admin.CoursesLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :courses, list_courses())}
+    socket =
+      socket
+      |> assign(:courses, list_courses())
+      |> assign(:sidebar_open, false)
+
+    if connected?(socket), do: send(self(), {:courses, list_courses()})
+
+    {:ok, socket}
   end
 
   @impl true
@@ -44,5 +51,10 @@ defmodule RegisterWeb.Admin.CoursesLive.Index do
 
   defp list_courses do
     Courses.list_courses()
+  end
+
+  @impl true
+  def handle_event("toggle_sidebar", _, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
   end
 end

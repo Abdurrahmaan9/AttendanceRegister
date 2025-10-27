@@ -136,4 +136,16 @@ defmodule Register.Academic do
   def change_student_program(%StudentProgram{} = student_program, attrs \\ %{}) do
     StudentProgram.changeset(student_program, attrs)
   end
+
+  # Returns all active courses assigned to a student through their active program enrollments
+  def list_student_courses(student_id) do
+    from(sp in StudentProgram,
+      join: pc in ProgramCourse, on: pc.program_id == sp.program_id,
+      join: c in Course, on: c.id == pc.course_id,
+      where: sp.student_id == ^student_id and sp.is_active == true and pc.is_active == true and c.is_active == true,
+      order_by: [asc: pc.year, asc: pc.semester, asc: c.code],
+      select: %{course: c, year: pc.year, semester: pc.semester, program_id: sp.program_id}
+    )
+    |> Repo.all()
+  end
 end

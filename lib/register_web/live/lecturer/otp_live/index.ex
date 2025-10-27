@@ -2,6 +2,7 @@ defmodule RegisterWeb.Lecturer.OTPLive.Index do
   use RegisterWeb, :live_view
   alias Register.Otps
   alias Register.Courses
+  alias RegisterWeb.Plugs.MfaAuth
 
   @impl true
   def mount(_params, _session, socket) do
@@ -39,7 +40,7 @@ defmodule RegisterWeb.Lecturer.OTPLive.Index do
         {:noreply, put_flash(socket, :error, "Invalid course selected")}
 
       course ->
-        case Otps.generate_attendance_otp(
+        case MfaAuth.generate_attendance_pass(
           socket.assigns.current_user,
           course,
           location: params["location"],

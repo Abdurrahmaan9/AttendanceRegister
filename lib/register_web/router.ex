@@ -91,7 +91,7 @@ defmodule RegisterWeb.Router do
       live "/students/new", Admin.StudentsLive.Index, :new
       live "/students/:id", Admin.StudentLive.Show, :show
       live "/students/:id/edit", Admin.StudentsLive.Index, :edit
-      
+
       # ==================== PROGRAM MANAGEMENT =========================
       live "/programs", Admin.ProgramLive.Index, :index
       live "/programs/new", Admin.ProgramLive.Index, :new
@@ -107,6 +107,9 @@ defmodule RegisterWeb.Router do
       live "/qr-codes/new", Admin.QrCodeLive.Index, :new
       live "/qr-codes/:id/edit", Admin.QrCodeLive.Index, :edit
       live "/qr-codes/:id/show", Admin.QrCodeLive.ShowComponent, :show
+
+      # ==================== ADMIN ATTENDANCE =========================
+      live "/attendance/view", Admin.AttendanceLive.Index, :index
 
       # ==================== PROGRAM MANAGEMENT =========================
       live "/programs", Admin.ProgramLive.Index, :index
@@ -129,6 +132,12 @@ defmodule RegisterWeb.Router do
       on_mount: [{RegisterWeb.UserAuth, :ensure_authenticated}] do
       live "/dashboard", Lecturer.Dashboard.Index, :index
       live "/users/settings", Auth.SettingsLive.Index, :edit
+
+      # ===================== LECTURER ATTENDANCE =====================
+      live "/attendance/view", Lecturer.AttendanceLive.Index, :index
+
+      # ===================== LECTURER QR CODES =======================
+      live "/qr-codes", Lecturer.QrCodesLive.Index, :index
 
       live "/otp-management", Lecturer.OTPLive.Index, :index
       live "/otp-management/new", Lecturer.OTPLive.Index, :new
@@ -156,6 +165,12 @@ defmodule RegisterWeb.Router do
       live "/qr-codes", Students.QrCodesLive.Index, :index
       live "/qr-codes/:id", Students.QrCodesLive.Index, :show
       live "/qr-codes/:id/verify", Students.QrCodesLive.Index, :verify
+
+      # ===================== STUDENT COURSES =========================
+      live "/courses", Students.CoursesLive.Index, :index
+
+      # ===================== STUDENT ATTENDANCE ======================
+      live "/attendance", Students.AttendanceLive.Index, :index
 
     end
   end

@@ -5,7 +5,11 @@ defmodule RegisterWeb.Admin.UsersLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = assign(socket, users: [])
+    socket =
+      socket
+    |> assign(users: [])
+    |> assign(:sidebar_open, false)
+
     if connected?(socket), do: send(self(), {:load_users, "all"})
     {:ok, assign(socket, active_tab: "all")}
   end
@@ -37,5 +41,10 @@ defmodule RegisterWeb.Admin.UsersLive.Index do
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Failed to update user role")}
     end
+  end
+
+  @impl true
+  def handle_event("toggle_sidebar", _, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
   end
 end
