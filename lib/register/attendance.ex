@@ -36,4 +36,18 @@ defmodule Register.Attendance do
       sessions: []
     }
   end
+
+  # Admin overview filtered by program and/or course/module.
+  # Placeholder implementation until scan logging is implemented.
+  def admin_attendance_summary(%{program_id: program_id, course_id: course_id}) do
+    %{
+      filter: %{program_id: program_id, course_id: course_id},
+      total_sessions: 0,
+      total_students: 0,
+      attended: 0,
+      missed: 0,
+      attendance_rate: 0.0,
+      sessions: []
+    }
+  end
 end

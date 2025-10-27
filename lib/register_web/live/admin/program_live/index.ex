@@ -6,10 +6,17 @@ defmodule RegisterWeb.Admin.ProgramLive.Index do
   alias Register.Academic
   alias Register.Academic.Program
 
-  @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :programs, list_programs())}
-  end
+@impl true
+def mount(_params, _session, socket) do
+  socket =
+    socket
+    |> assign(:programs, list_programs())
+    |> assign(:sidebar_open, false)
+
+  if connected?(socket), do: send(self(), {:programs, list_programs()})
+
+  {:ok, socket}
+end
 
   @impl true
   def handle_params(params, _url, socket) do
@@ -110,5 +117,10 @@ defmodule RegisterWeb.Admin.ProgramLive.Index do
       order_by: [asc: :is_core, asc: :id]
     )
     |> Register.Repo.all()
+  end
+
+  @impl true
+  def handle_event("toggle_sidebar", _, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
   end
 end
