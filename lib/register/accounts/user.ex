@@ -14,7 +14,7 @@ defmodule Register.Accounts.User do
   end
 
 
-  @roles ~w(admin lecturer student)
+  @roles ~w(admin lecturer student staff)
 
   def changeset(user, attrs) do
     user

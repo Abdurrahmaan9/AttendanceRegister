@@ -69,6 +69,33 @@
             </div>
         </div>
 
+        <!-- System Performance Summary -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">System Performance</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">Uptime</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @uptime_min %> min</h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">Memory</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @memory_mb %> MB</h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">Run Queue</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @run_queue %></h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">IO In</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @io_in_kbs %> KB/s</h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">IO Out</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @io_out_kbs %> KB/s</h3>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Daily Sign-ins Chart -->
@@ -91,6 +118,69 @@
             </div>
         </div>
 
+        <!-- System Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Memory Usage (MB)</h2>
+                <canvas id="systemMemChart" height="220"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Run Queue</h2>
+                <canvas id="systemRunqChart" height="220"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">IO Throughput (KB/s)</h2>
+                <canvas id="systemIOChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Hidden data element for LiveView Hook to read -->
+        <div id="system-metrics-data"
+            phx-hook="SystemCharts"
+            data-labels={Jason.encode!(@labels)}
+            data-mem-series={Jason.encode!(@mem_series)}
+            data-runq-series={Jason.encode!(@runq_series)}
+            data-ioin-series={Jason.encode!(@ioin_series)}
+            data-ioout-series={Jason.encode!(@ioout_series)}
+            class="hidden">
+        </div>
+
+        <!-- Statistical Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Students by Program</h2>
+                <canvas id="progBarChart" height="260"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">New Users (7 days)</h2>
+                <canvas id="usersLineChart" height="260"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">OTP Status</h2>
+                <canvas id="otpDonutChart" height="240"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">QR Codes Status</h2>
+                <canvas id="qrDonutChart" height="240"></canvas>
+            </div>
+        </div>
+
+        <!-- Hidden data for statistical charts -->
+        <div id="stats-data"
+             phx-hook="StatsCharts"
+             data-prog-labels={Jason.encode!(@prog_labels || [])}
+             data-prog-counts={Jason.encode!(@prog_counts || [])}
+             data-users-labels={Jason.encode!(@users_labels || [])}
+             data-users-counts={Jason.encode!(@users_counts || [])}
+             data-otps-active={@otps_active || 0}
+             data-otps-inactive={@otps_inactive || 0}
+             data-qr-active={@qr_active || 0}
+             data-qr-expired={@qr_expired || 0}
+             class="hidden">
+        </div>
 
         <!-- Bottom Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -173,12 +263,14 @@
                             <h4 class="font-medium">Jessica Lee</h4>
                             <p class="text-sm text-gray-500">Student | 7:45 AM</p>
                         </div>
+                        <button class="ml-auto p-2 text-gray-500 hover:text-gray-700"><i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 <script>
 // Set current date

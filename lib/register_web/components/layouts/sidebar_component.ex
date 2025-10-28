@@ -48,12 +48,30 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   <.nav_link to="/Admin/dashboard" icon="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" active={@current_path == "/dashboard"}>
                     Dashboard
                   </.nav_link>
-                  <.nav_link to="/Admin/students" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" active={String.starts_with?(@current_path, "/students")}>
-                    Students
-                  </.nav_link>
-                  <.nav_link to="/Admin/users" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" active={@current_path == "/Admin/users"}>
-                    User Management
-                  </.nav_link>
+                  <div class="space-y-1">
+                    <button
+                      type="button"
+                      data-dropdown-target="user-mgmt"
+                      aria-expanded="false"
+                      class="group w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      <span class="flex items-center">
+                        <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                        User Management
+                      </span>
+                      <svg class="h-4 w-4 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <div id="user-mgmt-dropdown" class="dropdown-content hidden ml-8 space-y-1">
+                      <a href="/Admin/users" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">All Users</a>
+                      <a href="/Admin/students" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">Students</a>
+                      <a href="/Admin/lecturers" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">Lecturers</a>
+                      <a href="/Admin/admins-staff" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">Admins & Staff</a>
+                    </div>
+                  </div>
                   <.nav_link to="/Admin/attendance/record" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/attendance/record"}>
                     Attendance Recording
                   </.nav_link>

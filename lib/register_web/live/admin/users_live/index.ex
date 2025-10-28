@@ -1,4 +1,4 @@
-defmodule RegisterWeb.Admin.UsersLive.Index do
+defmodule RegisterWeb.Admin.UserMgtLive.Index do
   use RegisterWeb, :live_view
   alias Register.Accounts
   alias RegisterWeb.Helpers.RoleHelper

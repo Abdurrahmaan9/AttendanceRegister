@@ -92,6 +92,10 @@ defmodule RegisterWeb.Router do
       live "/students/:id", Admin.StudentLive.Show, :show
       live "/students/:id/edit", Admin.StudentsLive.Index, :edit
 
+      # ==================== LECTURER & ADMIN/STAFF MANAGEMENT =========
+      live "/lecturers", Admin.LecturersLive.Index, :index
+      live "/admins-staff", Admin.AdminsStaffLive.Index, :index
+
       # ==================== PROGRAM MANAGEMENT =========================
       live "/programs", Admin.ProgramLive.Index, :index
       live "/programs/new", Admin.ProgramLive.Index, :new
@@ -100,7 +104,7 @@ defmodule RegisterWeb.Router do
       live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
 
       # ==================== USERS MGT =================================
-      live "/users", Admin.UsersLive.Index, :index
+      live "/users", Admin.UserMgtLive.Index, :index
 
       # ==================== QR CODE MANAGEMENT =========================
       live "/qr-codes", Admin.QrCodeLive.Index, :index
