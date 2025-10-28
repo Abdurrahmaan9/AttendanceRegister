@@ -89,7 +89,7 @@ defmodule RegisterWeb.Router do
       # ==================== STUDENT MANAGEMENT =========================
       live "/students", Admin.StudentsLive.Index, :index
       live "/students/new", Admin.StudentsLive.Index, :new
-      live "/students/:id", Admin.StudentLive.Show, :show
+      live "/students/:id", Admin.StudentsLive.Show, :show
       live "/students/:id/edit", Admin.StudentsLive.Index, :edit
 
       # ==================== LECTURER & ADMIN/STAFF MANAGEMENT =========
