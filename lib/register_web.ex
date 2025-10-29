@@ -17,7 +17,7 @@ defmodule RegisterWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+  def static_paths, do: ~w(assets fonts images logo favicon.ico robots.txt)
 
   def router do
     quote do
