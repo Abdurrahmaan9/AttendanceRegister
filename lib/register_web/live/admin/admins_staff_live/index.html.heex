@@ -38,7 +38,7 @@
             <form phx-submit="create_member" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input name="email" type="email" placeholder="Email" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
               <input name="phone" type="tel" placeholder="Phone number" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-              <button type="submit" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">Add <%= String.capitalize(@active_tab) %></button>
+              <button type="submit" class="btn btn-primary">Add <%= String.capitalize(@active_tab) %></button>
             </form>
           </div>
 
@@ -67,7 +67,7 @@
                       </span>
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <button phx-click="remove_user" phx-value-id={user.id} class="text-red-600 hover:text-red-800">Remove</button>
+                      <button phx-click="remove_user" phx-value-id={user.id} class="btn btn-danger">Remove</button>
                     </td>
                   </tr>
                 <% end %>

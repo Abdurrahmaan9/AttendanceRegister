@@ -21,7 +21,9 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 
 
 
-Class Register Sys
+Class Register
+
+SyncIn seamless systems, smart future
 
 Accademics Office:
            Responsibilities:

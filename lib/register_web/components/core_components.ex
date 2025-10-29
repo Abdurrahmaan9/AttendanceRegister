@@ -237,17 +237,25 @@ defmodule RegisterWeb.CoreComponents do
   """
   attr :type, :string, default: nil
   attr :class, :string, default: nil
+  attr :variant, :atom, default: :primary, values: ~w(primary secondary danger ghost)a
+  attr :size, :atom, default: :md, values: ~w(md sm icon)a
   attr :rest, :global, include: ~w(disabled form name value)
 
   slot :inner_block, required: true
 
   def button(assigns) do
+    assigns =
+      assigns
+      |> assign(:variant_class, button_variant_class(assigns.variant))
+      |> assign(:size_class, button_size_class(assigns.size))
+
     ~H"""
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 btn",
+        @variant_class,
+        @size_class,
         @class
       ]}
       {@rest}
@@ -256,6 +264,17 @@ defmodule RegisterWeb.CoreComponents do
     </button>
     """
   end
+
+  defp button_variant_class(:primary), do: "btn-primary"
+  defp button_variant_class(:secondary), do: "btn-secondary"
+  defp button_variant_class(:danger), do: "btn-danger"
+  defp button_variant_class(:ghost), do: "btn-ghost"
+  defp button_variant_class(_), do: "btn-primary"
+
+  defp button_size_class(:md), do: nil
+  defp button_size_class(:sm), do: "btn-sm"
+  defp button_size_class(:icon), do: "btn-icon"
+  defp button_size_class(_), do: nil
 
   @doc """
   Renders an input with label and error messages.

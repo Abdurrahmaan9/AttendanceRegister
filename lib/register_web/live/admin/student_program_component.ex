@@ -107,12 +107,9 @@ defmodule RegisterWeb.Admin.StudentProgramComponent do
               </div>
 
               <div class="sm:col-span-2 flex items-end">
-                <button
-                  type="submit"
-                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
+                <.button type="submit" variant={:primary}>
                   Assign Program
-                </button>
+                </.button>
               </div>
             </div>
           </.form>
@@ -160,15 +157,16 @@ defmodule RegisterWeb.Admin.StudentProgramComponent do
                         if(enrollment.is_active, do: "bg-green-100 text-green-800", else: "bg-gray-100 text-gray-800")]}>
                         <%= if enrollment.is_active, do: "Active", else: "Inactive" %>
                       </span>
-                      <button
+                      <.button
                         phx-click="delete"
                         phx-value-id={enrollment.id}
                         phx-target={@myself}
-                        class="text-red-600 hover:text-red-900 text-sm font-medium"
+                        variant={:danger}
+                        size={:sm}
                         data-confirm="Are you sure you want to remove this program assignment?"
                       >
                         Remove
-                      </button>
+                      </.button>
                     </div>
                   </div>
                 </li>

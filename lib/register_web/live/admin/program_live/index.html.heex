@@ -2,7 +2,7 @@
   <h1 class="text-2xl font-bold text-gray-900">Programs</h1>
   <.link
     patch={~p"/Admin/programs/new"}
-    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    class="btn btn-primary"
   >
     New Program
   </.link>
@@ -40,22 +40,22 @@
             <div class="flex space-x-2 justify-end">
               <.link
                 patch={~p"/Admin/programs/#{program.id}/manage_courses"}
-                class="text-indigo-600 hover:text-indigo-900"
+                class="btn btn-secondary"
               >
                 Manage Courses
               </.link>
               <.link
                 patch={~p"/Admin/programs/#{program}/edit"}
-                class="text-indigo-600 hover:text-indigo-900"
+                class="btn btn-secondary"
               >
                 Edit
               </.link>
-              <button
+              <.button
+                variant={:danger}
                 phx-click={show_modal("delete-program-#{program.id}")}
-                class="text-red-600 hover:text-red-900"
               >
                 Delete
-              </button>
+              </.button>
             </div>
 
             <!-- Delete Confirmation Modal -->
@@ -146,12 +146,9 @@
           </div>
           
           <div class="flex justify-end">
-            <button
-              type="submit"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
+            <.button type="submit" variant={:primary}>
               Add Course
-            </button>
+            </.button>
           </div>
         </.form>
       </div>
@@ -179,13 +176,14 @@
                               </span>
                             <% end %>
                           </div>
-                          <button
+                          <.button
                             phx-click="remove_course"
                             phx-value-id={pc.id}
-                            class="text-red-600 hover:text-red-900 text-sm font-medium"
+                            variant={:danger}
+                            size={:sm}
                           >
                             Remove
-                          </button>
+                          </.button>
                         </li>
                       <% end %>
                       <%= if Enum.empty?(get_courses_by_year_and_semester(@program.id, year, semester)) do %>
@@ -204,7 +202,7 @@
     <div class="mt-5 sm:mt-6">
       <.link
         patch={~p"/Admin/programs"}
-        class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+        class="btn btn-primary w-full"
       >
         Done
       </.link>

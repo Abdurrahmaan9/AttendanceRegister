@@ -7,12 +7,13 @@
             </p>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <button
+            <.button
                 phx-click="new_student"
-                class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+                variant={:primary}
+                class="sm:w-auto"
             >
                 Add student
-            </button>
+            </.button>
         </div>
     </div>
 
@@ -46,25 +47,26 @@
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                         <.link
                                             navigate={"/Admin/students/#{student.id}"}
-                                            class="text-blue-600 hover:text-blue-900 mr-4"
+                                            class="btn btn-secondary"
                                         >
                                             View
                                         </.link>
-                                        <button
+                                        <.button
                                             phx-click="edit_student"
                                             phx-value-id={student.id}
-                                            class="text-indigo-600 hover:text-indigo-900 mr-4"
+                                            variant={:secondary}
+                                            class="mr-4"
                                         >
                                             Edit
-                                        </button>
-                                        <button
+                                        </.button>
+                                        <.button
                                             phx-click="delete_student"
                                             phx-value-id={student.id}
                                             data-confirm="Are you sure you want to delete this student?"
-                                            class="text-red-600 hover:text-red-900"
+                                            variant={:danger}
                                         >
                                             Delete
-                                        </button>
+                                        </.button>
                                     </td>
                                 </tr>
                             <% end %>

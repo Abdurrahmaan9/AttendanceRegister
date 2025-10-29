@@ -1,4 +1,4 @@
-defmodule RegisterWeb.Admin.OTPManagementLive.Index do
+defmodule RegisterWeb.Lecturer.OTPLive.Index do
   use RegisterWeb, :live_view
   alias Register.Otps
   alias Register.Courses

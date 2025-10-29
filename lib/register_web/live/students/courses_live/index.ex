@@ -11,14 +11,18 @@ defmodule RegisterWeb.Students.CoursesLive.Index do
       socket
       |> assign(:current_user, current_user)
       |> assign(:courses, [])
+      |> assign(:student_programs, [])
       |> assign(:sidebar_open, false)
       |> assign(:page_title, "My Courses")
 
-    if connected?(socket) and current_user do
-      {:ok, load_courses(socket)}
-    else
-      {:ok, socket}
-    end
+    socket =
+      if current_user do
+        load_courses(socket)
+      else
+        socket
+      end
+
+    {:ok, socket}
   end
 
   defp get_session_user(session) do
@@ -29,8 +33,19 @@ defmodule RegisterWeb.Students.CoursesLive.Index do
   end
 
   defp load_courses(%{assigns: %{current_user: %{id: user_id}}} = socket) do
-    courses = Academic.list_student_courses(user_id)
-    assign(socket, :courses, courses)
+    student_programs =
+      Academic.list_student_programs(user_id)
+      |> Enum.filter(& &1.is_active)
+
+    courses =
+      case student_programs do
+        [] -> []
+        _ -> Academic.list_student_courses(user_id)
+      end
+
+    socket
+    |> assign(:student_programs, student_programs)
+    |> assign(:courses, courses)
   end
 
   defp load_courses(socket), do: socket
@@ -43,6 +58,7 @@ defmodule RegisterWeb.Students.CoursesLive.Index do
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "My Courses")
+    |> load_courses()
   end
 
   @impl true
