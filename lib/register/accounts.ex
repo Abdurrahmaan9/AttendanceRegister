@@ -75,6 +75,38 @@ defmodule Register.Accounts do
     |> Repo.update()
   end
 
+  @doc """
+  Creates a user with the given role in a single convenience call.
+  """
+  def create_user_with_role(%{email: email} = attrs, role) do
+    # Ensure there is a password; generate a temporary one if missing
+    temp_password = Map.get(attrs, :password) || Map.get(attrs, "password") || generate_temp_password()
+    attrs = Map.put(attrs, :password, temp_password)
+
+    with {:ok, %User{} = user} <- register_user(attrs),
+         {:ok, %User{} = user} <- assign_role(user, role) do
+      # Notify user of their temporary password
+      _ = UserNotifier.deliver_temporary_password(user, temp_password)
+      {:ok, user}
+    else
+      {:error, changeset} -> {:error, changeset}
+      error -> error
+    end
+  end
+
+  defp generate_temp_password() do
+    :crypto.strong_rand_bytes(16)
+    |> Base.url_encode64(padding: false)
+    |> binary_part(0, 16)
+  end
+
+  @doc """
+  Deletes a user.
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
+  end
+
   ## User registration
 
   @doc """

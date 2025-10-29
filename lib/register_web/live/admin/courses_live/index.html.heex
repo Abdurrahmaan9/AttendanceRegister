@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold text-gray-900">Courses</h1>
     <.link
       patch={~p"/Admin/courses/new"}
-      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      class="btn btn-primary"
     >
       Add Course
     </.link>
@@ -65,17 +65,17 @@
                 <div class="flex justify-end space-x-4">
                   <.link
                     patch={~p"/Admin/courses/#{course}/edit"}
-                    class="text-blue-600 hover:text-blue-900"
+                    class="btn btn-secondary"
                   >
                     Edit
                   </.link>
-                  <button
+                  <.button
+                    variant={:danger}
                     phx-click={JS.push("delete", value: %{id: course.id})}
                     data-confirm="Are you sure?"
-                    class="text-red-600 hover:text-red-900"
                   >
                     Delete
-                  </button>
+                  </.button>
                 </div>
               </td>
             </tr>

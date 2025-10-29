@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
     <.live_title suffix=" · Phoenix Framework">
-      About - E-Register
+      About - SyncIn
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
@@ -19,8 +19,15 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <a href="/" class="text-2xl font-bold text-blue-600">E-Register</a>
-          </div>
+          <a href="/" class="flex items-center space-x-2">
+            <img
+              src={~p"/logo/syncin-high-resolution-logo-grayscale-transparent.png"}
+              alt="SyncIn logo"
+              class="h-6 w-auto"
+            />
+            <!--<span class="text-2xl font-bold text-blue-600 whitespace-nowrap">SyncIn</span>-->
+          </a>          
+        </div>
           <div class="flex items-center space-x-8">
             <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</a>
             <a href="/about" class="text-blue-600 px-3 py-2 text-sm font-medium border-b-2 border-blue-600">About</a>
@@ -34,11 +41,11 @@
       <div class="sm:mx-auto sm:w-full sm:max-w-4xl">
         <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div class="max-w-3xl mx-auto">
-            <h1 class="text-3xl font-bold text-gray-900 mb-8">About E-Register</h1>
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">About SyncIn</h1>
             
             <div class="prose prose-lg text-gray-700 space-y-6">
               <p>
-                E-Register is a modern, secure digital registration and management system built with Phoenix LiveView and Elixir. 
+                SyncIn is a modern, secure digital registration and management system built with Phoenix LiveView and Elixir. 
                 Our platform provides a comprehensive solution for managing user registrations, authentication, and administrative tasks.
               </p>
 

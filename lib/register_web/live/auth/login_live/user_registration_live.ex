@@ -11,7 +11,14 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <a href="/" class="text-2xl font-bold text-blue-600">E-Register</a>
+          <a href="/" class="flex items-center space-x-2">
+            <img
+              src={~p"/logo/syncin-high-resolution-logo-grayscale-transparent.png"}
+              alt="SyncIn logo"
+              class="h-6 w-auto"
+            />
+            <!--<span class="text-2xl font-bold text-blue-600 whitespace-nowrap">SyncIn</span>-->
+          </a>
           </div>
           <div class="flex items-center space-x-8">
             <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</a>
@@ -30,7 +37,7 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
             </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
-          <p class="mt-2 text-sm text-gray-600">Join E-Register today</p>
+          <p class="mt-2 text-sm text-gray-600">Join SyncIn today</p>
         </div>
 
         <div class="bg-white py-8 px-6 shadow-xl rounded-xl">

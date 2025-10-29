@@ -13,27 +13,58 @@ defmodule Register.Otps do
   def list_otps do
     require Logger
     Logger.debug("Starting to list OTPs")
-    
+
     deactivate_expired_otps()
-    
+
     query = from o in Otp,
       preload: :created_by,
       order_by: [desc: o.inserted_at]
-      
+
     otps = Repo.all(query)
     Logger.debug("Found #{length(otps)} OTPs in database")
-    
+
     if Enum.any?(otps) do
       Logger.debug("First OTP: #{inspect(List.first(otps), limit: :infinity, pretty: true)}")
     end
-    
+
     otps
+  end
+
+  @doc """
+  Returns OTPs created by a specific user.
+  """
+  def list_otps_for_user(user_id) when is_integer(user_id) do
+    deactivate_expired_otps()
+
+    query =
+      from(o in Otp,
+        where: o.created_by_id == ^user_id,
+        preload: :created_by,
+        order_by: [desc: o.inserted_at]
+      )
+
+    with_owner_column_fallback(fn -> Repo.all(query) end, fn -> list_otps() end)
   end
 
   @doc """
   Gets a single OTP.
   """
   def get_otp!(id), do: Repo.get!(Otp, id) |> Repo.preload(:created_by)
+
+  @doc """
+  Fetches an OTP belonging to a user. Returns nil when not found.
+  """
+  def get_otp_for_user(id, user_id) when is_integer(id) and is_integer(user_id) do
+    query_fun = fn -> Repo.get_by(Otp, id: id, created_by_id: user_id) end
+    fallback_fun = fn -> Repo.get(Otp, id) end
+
+    query_fun
+    |> with_owner_column_fallback(fallback_fun)
+    |> case do
+      nil -> nil
+      otp -> Repo.preload(otp, :created_by)
+    end
+  end
 
   @doc """
   Creates an OTP.
@@ -61,6 +92,16 @@ defmodule Register.Otps do
   end
 
   @doc """
+  Deletes an OTP if it belongs to the given user.
+  """
+  def delete_otp_for_user(id, user_id) when is_integer(id) and is_integer(user_id) do
+    case get_otp_for_user(id, user_id) do
+      nil -> {:error, :not_found}
+      otp -> delete_otp(otp)
+    end
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking OTP changes.
   """
   def change_otp(%Otp{} = otp, attrs \\ %{}) do
@@ -72,7 +113,7 @@ defmodule Register.Otps do
   """
   def generate_otp(attrs \\ %{}) do
     expires_at = DateTime.utc_now() |> DateTime.add(30 * 60, :second)
-    
+
     %{
       code: Otp.generate_code(),
       is_active: true,
@@ -91,7 +132,7 @@ defmodule Register.Otps do
 
   @doc """
   Generates a new OTP specifically for attendance.
-  
+
   ## Parameters
     * `lecturer` - The lecturer generating the OTP
     * `course` - The course for which the OTP is being generated
@@ -100,13 +141,13 @@ defmodule Register.Otps do
   def generate_attendance_otp(lecturer = %Register.Accounts.User{}, course = %Register.Courses.Course{}, opts \\ []) do
     expires_in = Keyword.get(opts, :expires_in_minutes, 30)
     location = Keyword.get(opts, :location, "TBA")
-    
+
     # Generate OTP code
     code = Register.Otps.Otp.generate_code()
-    
+
     # Calculate expiration time
     expires_at = DateTime.utc_now() |> DateTime.add(expires_in * 60, :second)
-    
+
     # Prepare OTP attributes
     otp_attrs = %{
       code: code,
@@ -121,16 +162,16 @@ defmodule Register.Otps do
       session_date: Date.utc_today(),
       created_by_id: lecturer.id
     }
-    
+
     # Create the OTP record
     case create_otp(otp_attrs) do
-      {:ok, otp} -> 
+      {:ok, otp} ->
         {:ok, otp}
-      {:error, changeset} -> 
+      {:error, changeset} ->
         {:error, changeset}
     end
   end
-  
+
   @doc """
   Verifies an attendance OTP and returns the associated course details if valid.
   """
@@ -155,7 +196,7 @@ defmodule Register.Otps do
   """
   def verify_otp(code, purpose) when is_binary(code) do
     now = DateTime.utc_now()
-    
+
     case Repo.get_by(Otp, code: code, purpose: purpose, is_active: true) do
       %Otp{expires_at: expires_at} = otp ->
         if DateTime.compare(now, expires_at) == :lt do
@@ -174,10 +215,21 @@ defmodule Register.Otps do
   """
   def deactivate_expired_otps do
     now = DateTime.utc_now()
-    
-    from(o in Otp, 
+
+    from(o in Otp,
       where: o.is_active == true and o.expires_at < ^now
     )
     |> Repo.update_all(set: [is_active: false])
+  end
+
+  defp with_owner_column_fallback(fun, fallback) when is_function(fun, 0) do
+    fun.()
+  rescue
+    e in Postgrex.Error ->
+      if e.postgres[:code] == :undefined_column do
+        fallback.()
+      else
+        reraise e, __STACKTRACE__
+      end
   end
 end

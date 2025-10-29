@@ -76,4 +76,27 @@ defmodule Register.Accounts.UserNotifier do
     ==============================
     """)
   end
+
+  @doc """
+  Deliver a temporary password to a newly created user.
+  """
+  def deliver_temporary_password(user, temp_password) do
+    deliver(user.email, "Your temporary password", """
+
+    ==============================
+
+    Hi #{user.email},
+
+    An account has been created for you.
+
+    Temporary password: #{temp_password}
+
+    Please log in and change your password here:
+    /users/login
+
+    If you didn't expect this account, please ignore this.
+
+    ==============================
+    """)
+  end
 end

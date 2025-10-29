@@ -2,10 +2,12 @@ defmodule Register.Otps.Otp do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "otps" do
+  schema "otp" do
     field :code, :string
     field :is_active, :boolean, default: true
     field :expires_at, :utc_datetime
+    field :purpose, :string, default: "authentication"
+    field :course_id, :integer
     field :course_name, :string
     field :module_code, :string
     field :lecturer_name, :string
@@ -21,15 +23,15 @@ defmodule Register.Otps.Otp do
   def changeset(otp, attrs) do
     otp
     |> cast(attrs, [
-      :code, :is_active, :expires_at,
-      :course_name, :module_code, :lecturer_name, :location, :session_date
+      :code, :is_active, :expires_at, :purpose,
+      :course_id, :course_name, :module_code, :lecturer_name, :location, :session_date,
+      :created_by_id
     ])
     |> validate_required([
-      :code, :is_active,
-      :course_name, :module_code, :session_date
+      :code, :is_active, :expires_at, :purpose,
+      :course_id, :course_name, :module_code, :lecturer_name, :location, :session_date,
+      :created_by_id
     ])
-    |> validate_length(:code, min: 6, max: 6)
-    |> validate_length(:purpose, max: 100)
     |> foreign_key_constraint(:created_by_id)
   end
 
