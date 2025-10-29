@@ -2,7 +2,7 @@
 <h1 class="text-2xl font-semibold mb-4">Program Overview</h1>
 
 <%= if @current_user do %>
-   <%= if Enum.empty?(@student_programs) do %>
+   <%= if Enum.empty?(@courses) do %>
       <div class="text-gray-600">You are not enrolled in any program yet.</div>
    <% else %>
       <%= if Enum.empty?(@courses) do %>

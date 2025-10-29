@@ -72,7 +72,7 @@ defmodule Register.Academic do
   # Helper functions
   def list_courses_not_in_program(program_id) do
     # First, get all course IDs that are already in the program
-    assigned_course_ids = 
+    assigned_course_ids =
       from(pc in ProgramCourse,
         where: pc.program_id == ^program_id,
         select: pc.course_id
@@ -137,13 +137,15 @@ defmodule Register.Academic do
     StudentProgram.changeset(student_program, attrs)
   end
 
-  # Returns all active courses assigned to a student through their active program enrollments
+  @doc """
+  Returns all active courses assigned to a student through their active program enrollments
+  """
   def list_student_courses(student_id) do
     from(sp in StudentProgram,
       join: pc in ProgramCourse,
       on:
         pc.program_id == sp.program_id and
-          pc.semester == type(sp.semester, :integer),
+          pc.semester == sp.semester,
       join: p in Program, on: p.id == sp.program_id,
       join: c in Course, on: c.id == pc.course_id,
       where:
@@ -151,6 +153,32 @@ defmodule Register.Academic do
           sp.is_active == true and
           pc.is_active == true and
           c.is_active == true,
+      order_by: [asc: pc.year, asc: pc.semester, asc: c.code],
+      select: %{
+        course: c,
+        year: pc.year,
+        semester: pc.semester,
+        program: p,
+        academic_year: sp.academic_year
+      }
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+    Returns all active courses assigned to a student through their active program enrollments
+    including courses from other semesters
+  """
+  def list_all_student_courses(student_id) do
+    from(sp in StudentProgram,
+      join: pc in ProgramCourse,
+      on: pc.program_id == sp.program_id,
+      join: p in Program, on: p.id == sp.program_id,
+      join: c in Course, on: c.id == pc.course_id,
+      where:
+        sp.student_id == ^student_id and
+        pc.is_active == true and
+        c.is_active == true,
       order_by: [asc: pc.year, asc: pc.semester, asc: c.code],
       select: %{
         course: c,

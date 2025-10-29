@@ -8,6 +8,7 @@ defmodule Register.Repo.Migrations.CreateUsersAuthTables do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :utc_datetime
+      add :is_active, :boolean, default: true, null: false
 
       timestamps(type: :utc_datetime)
     end

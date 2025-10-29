@@ -227,18 +227,18 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
   slot :inner_block, required: true
 
   defp nav_link(assigns) do
-    base_classes = "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-    active_classes = if assigns.active, do: "bg-blue-50 text-blue-700", else: "text-gray-700 hover:bg-gray-50"
-    icon_base_classes = "mr-3 h-5 w-5"
-    icon_active_classes = if assigns.active, do: "text-blue-500", else: "text-gray-400"
+    assigns = assign(assigns, :base_classes, "group flex items-center px-2 py-2 text-sm font-medium rounded-md")
+    assigns = assign(assigns, :active_classes, if(assigns.active, do: "bg-blue-50 text-blue-700", else: "text-gray-700 hover:bg-gray-50"))
+    assigns = assign(assigns, :icon_base_classes, "mr-3 h-5 w-5")
+    assigns = assign(assigns, :icon_active_classes, if(assigns.active, do: "text-blue-500", else: "text-gray-400"))
 
     ~H"""
     <a
       href={@to}
-      class={"#{base_classes} #{active_classes}"}
+      class={"#{@base_classes} #{@active_classes}"}
     >
       <svg
-        class={"#{icon_base_classes} #{icon_active_classes}"}
+        class={"#{@icon_base_classes} #{@icon_active_classes}"}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

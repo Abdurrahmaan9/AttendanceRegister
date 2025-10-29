@@ -50,6 +50,24 @@ defmodule Register.Students do
   def get_student!(id), do: Repo.get!(Student, id)
 
   @doc """
+  Gets a single student by email.
+
+  Returns nil if the Student does not exist.
+
+  ## Examples
+
+      iex> get_student_by_email("user@example.com")
+      %Student{}
+
+      iex> get_student_by_email("nonexistent@example.com")
+      nil
+
+  """
+  def get_student_by_email(email) do
+    Repo.get_by(Student, email: email)
+  end
+
+  @doc """
   Creates a student and registers a user account with a random password.
 
   ## Examples
