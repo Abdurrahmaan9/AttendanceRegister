@@ -25,6 +25,9 @@ defmodule Register.Application do
       # Start the Finch HTTP client for sending emails
       {Finch, name: Register.Finch},
 
+      # Start attendance summary cache refresher (runs every 2 hours)
+      Register.Attendance.SummaryCache,
+
       # Start the permission initialization worker
       {Task, &initialize_default_permissions/0}
     ]
