@@ -35,9 +35,11 @@
         <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
           <div class="bg-white p-4">
             <h2 class="text-sm font-medium text-gray-700 mb-3">Add <%= String.capitalize(@active_tab) %></h2>
-            <form phx-submit="create_member" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <form phx-submit="create_member" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              <input name="first_name" type="text" placeholder="First name" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+              <input name="last_name" type="text" placeholder="Last name" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
               <input name="email" type="email" placeholder="Email" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-              <input name="phone" type="tel" placeholder="Phone number" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+              <input name="phone" type="tel" placeholder="Phone (optional)" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
               <button type="submit" class="btn btn-primary">Add <%= String.capitalize(@active_tab) %></button>
             </form>
           </div>

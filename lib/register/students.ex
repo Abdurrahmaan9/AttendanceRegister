@@ -98,20 +98,22 @@ defmodule Register.Students do
     case %Student{} |> Student.changeset(attrs) |> Repo.insert() do
       {:ok, student} ->
         # Generate random password
-        password = :crypto.strong_rand_bytes(8) |> Base.encode64() |> binary_part(0, 12)
+        password = Map.get(attrs, :password) || Map.get(attrs, "password") || generate_temp_password()
 
         email = Map.get(attrs, :email) || Map.get(attrs, "email")
         name = Map.get(attrs, :name) || Map.get(attrs, "name") || "Student"
 
         # Register user account linked to student
-        user_attrs = %{email: email, password: password, role: "student"}
+        user_attrs = %{
+          email: email,
+          password: password,
+          role: "student",
+          first_name: student.first_name,
+          last_name: student.last_name
+        }
 
-        case Register.Accounts.register_user(user_attrs) do
+        case Register.Accounts.create_user_with_role(user_attrs, "student") do
           {:ok, _user} ->
-            # Send welcome email with credentials
-            Task.start(fn ->
-              Register.Emails.send_welcome_email(email, name, password)
-            end)
             {:ok, student}
 
           {:error, changeset} ->
@@ -122,6 +124,12 @@ defmodule Register.Students do
 
       error -> error
     end
+  end
+
+  defp generate_temp_password() do
+    :crypto.strong_rand_bytes(16)
+    |> Base.url_encode64(padding: false)
+    |> binary_part(0, 16)
   end
 
   @doc """
@@ -155,6 +163,12 @@ defmodule Register.Students do
 
   """
   def delete_student(%Student{} = student) do
+    # Delete associated user if it exists
+    if user = Register.Accounts.get_user_by_email(student.email) do
+      Repo.delete(user)
+    end
+    
+    # Delete the student
     Repo.delete(student)
   end
 
