@@ -4,7 +4,11 @@ defmodule Register.Attendance do
   This initial version derives structure from enrolled courses.
   """
 
+  import Ecto.Query, warn: false
   alias Register.Academic
+  alias Register.Attendance.AttendanceRecord
+  alias Register.Repo
+  alias Register.Accounts
 
   def student_attendance_summary(student_id) do
     courses = Academic.list_student_courses(student_id)
@@ -49,5 +53,64 @@ defmodule Register.Attendance do
       attendance_rate: 0.0,
       sessions: []
     }
+  end
+
+  def record_attendance(student_id, course_id, module_code, module_name, session_date, attrs) do
+    user = Accounts.get_user!(student_id)
+    first_name = attrs[:first_name] || user.first_name || ""
+    last_name = attrs[:last_name] || user.last_name || ""
+
+    {first_name, last_name} =
+      case {String.trim(first_name), String.trim(last_name)} do
+        {"", ""} ->
+          local = String.split(user.email || "", "@") |> List.first() || ""
+          parts = Regex.split(~r/[._-]+/, local, trim: true)
+          case parts do
+            [p1, p2 | _] -> {String.capitalize(p1), String.capitalize(p2)}
+            [p1] -> {String.capitalize(p1), ""}
+            _ -> {"", ""}
+          end
+        {f, l} -> {f, l}
+      end
+
+    # Prevent duplicates: one attendance per student per course per session_date
+    dup? =
+      from(ar in AttendanceRecord,
+        where:
+          ar.student_id == ^student_id and
+          ar.course_id == ^course_id and
+          ar.module_code == ^module_code and
+          ar.session_date == ^session_date
+      )
+      |> Repo.exists?()
+
+    if dup? do
+      {:error, :already_marked}
+    else
+      changeset = AttendanceRecord.changeset(%AttendanceRecord{}, %{
+        student_id: student_id,
+        first_name: first_name,
+        last_name: last_name,
+        course_id: course_id,
+        module_code: module_code,
+        module_name: module_name,
+        session_date: session_date,
+        method: attrs[:method] || "otp"
+      })
+
+      case Repo.insert(changeset) do
+        {:ok, record} -> {:ok, record}
+        {:error, %Ecto.Changeset{} = changeset} ->
+          # If the DB unique index is hit, the unique_constraint in the changeset
+          # will surface a friendly message. Convert to {:error, :already_marked}
+          if Enum.any?(changeset.errors, fn {_field, {msg, _opts}} ->
+               msg == "attendance already recorded for this session"
+             end) do
+            {:error, :already_marked}
+          else
+            {:error, changeset}
+          end
+      end
+    end
   end
 end

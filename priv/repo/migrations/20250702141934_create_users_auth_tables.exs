@@ -8,9 +8,15 @@ defmodule Register.Repo.Migrations.CreateUsersAuthTables do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :utc_datetime
+      add :is_active, :boolean, default: true, null: false
+      add :first_name, :string
+      add :last_name, :string
+      add :role, :string, null: false, default: "student"
 
       timestamps(type: :utc_datetime)
     end
+
+    create index(:users, [:role])
 
     create unique_index(:users, [:email])
 

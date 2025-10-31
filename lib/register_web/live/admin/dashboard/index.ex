@@ -156,7 +156,7 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
       select: {fragment("date_trunc('day', ?)", u.inserted_at), count(u.id)}
 
     results = Repo.all(q)
-    days = for i <- 6..0, do: Date.utc_today() |> Date.add(-i)
+    days = for i <- 6..0//-1, do: Date.utc_today() |> Date.add(-i)
 
     map =
       Enum.reduce(results, %{}, fn {dt, c}, acc ->

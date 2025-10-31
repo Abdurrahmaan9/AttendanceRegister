@@ -2,19 +2,22 @@ defmodule RegisterWeb.Students.AttendanceLive.Index do
   use RegisterWeb, :live_view
 
   alias Register.Attendance
+  alias Register.Students
 
   @impl true
   def mount(_params, session, socket) do
     current_user = get_session_user(session)
+    current_student = if current_user, do: Students.get_student_by_email(current_user.email)
 
     socket =
       socket
       |> assign(:current_user, current_user)
+      |> assign(:current_student, current_student)
       |> assign(:summary, nil)
       |> assign(:sidebar_open, false)
       |> assign(:page_title, "Attendance Overview")
 
-    if connected?(socket) and current_user do
+    if connected?(socket) and current_student do
       {:ok, load_summary(socket)}
     else
       {:ok, socket}
@@ -28,8 +31,8 @@ defmodule RegisterWeb.Students.AttendanceLive.Index do
     end
   end
 
-  defp load_summary(%{assigns: %{current_user: %{id: user_id}}} = socket) do
-    summary = Attendance.student_attendance_summary(user_id)
+  defp load_summary(%{assigns: %{current_student: %{id: student_id}}} = socket) do
+    summary = Attendance.student_attendance_summary(student_id)
     assign(socket, :summary, summary)
   end
 

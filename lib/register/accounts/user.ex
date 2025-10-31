@@ -4,11 +4,14 @@ defmodule Register.Accounts.User do
 
   schema "users" do
     field :email, :string
+    field :first_name, :string
+    field :last_name, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :role, :string, default: "admin"
+    field :is_active, :boolean, default: true
 
     timestamps(type: :utc_datetime)
   end
@@ -18,7 +21,7 @@ defmodule Register.Accounts.User do
 
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:role, :email, :password])
+    |> cast(attrs, [:role, :email, :password, :is_active, :first_name, :last_name])
     |> validate_inclusion(:role, @roles)
     |> validate_required([:role])
   end
@@ -57,7 +60,7 @@ defmodule Register.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :is_active, :first_name, :last_name])
     |> validate_email(opts)
     |> validate_password(opts)
   end
@@ -115,7 +118,7 @@ defmodule Register.Accounts.User do
   """
   def email_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email])
+    |> cast(attrs, [:email, :is_active, :first_name, :last_name])
     |> validate_email(opts)
     |> case do
       %{changes: %{email: _}} = changeset -> changeset
@@ -137,7 +140,7 @@ defmodule Register.Accounts.User do
   """
   def password_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:password])
+    |> cast(attrs, [:password, :is_active, :first_name, :last_name])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
