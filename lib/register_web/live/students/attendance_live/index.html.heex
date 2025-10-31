@@ -26,7 +26,7 @@
 
       <div class="mb-4">
         <div class="text-sm text-gray-500">Attendance Rate</div>
-        <div class="text-2xl font-bold"><%= :io_lib.format("~.1f", [@summary.attendance_rate * 100]) |> to_string() %>%</div>
+        <div class="text-2xl font-bold"><%= :io_lib.format("~.1f", [@summary.attendance_rate]) |> to_string() %>%</div>
       </div>
 
       <div class="overflow-x-auto">
@@ -47,7 +47,7 @@
                 <td class="px-3 py-2"><%= course.title %></td>
                 <td class="px-3 py-2"><%= attended %></td>
                 <td class="px-3 py-2"><%= missed %></td>
-                <td class="px-3 py-2"><%= :io_lib.format("~.1f", [rate * 100]) |> to_string() %>%</td>
+                <td class="px-3 py-2"><%= :io_lib.format("~.1f", [rate]) |> to_string() %>%</td>
               </tr>
             <% end %>
           </tbody>

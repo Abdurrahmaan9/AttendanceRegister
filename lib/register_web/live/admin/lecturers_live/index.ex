@@ -26,9 +26,9 @@ defmodule RegisterWeb.Admin.LecturersLive.Index do
   end
 
   @impl true
-  def handle_event("create_lecturer", %{"email" => email, "phone" => _phone}, socket) do
+  def handle_event("create_lecturer", %{"email" => email, "first_name" => first_name, "last_name" => last_name, "phone" => _phone}, socket) do
     # Password is auto-generated and emailed; phone is currently unused
-    case Accounts.create_user_with_role(%{email: email}, "lecturer") do
+    case Accounts.create_user_with_role(%{email: email, first_name: first_name, last_name: last_name}, "lecturer") do
       {:ok, _user} ->
         send(self(), :load)
         {:noreply, put_flash(socket, :info, "Lecturer added successfully")}

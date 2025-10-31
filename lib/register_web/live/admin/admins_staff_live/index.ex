@@ -34,9 +34,9 @@ defmodule RegisterWeb.Admin.AdminsStaffLive.Index do
   end
 
   @impl true
-  def handle_event("create_member", %{"email" => email, "phone" => _phone}, socket) do
+  def handle_event("create_member", %{"email" => email, "first_name" => first_name, "last_name" => last_name, "phone" => _phone}, socket) do
     role = socket.assigns.active_tab
-    case Accounts.create_user_with_role(%{email: email}, role) do
+    case Accounts.create_user_with_role(%{email: email, first_name: first_name, last_name: last_name}, role) do
       {:ok, _user} ->
         send(self(), {:load_users, role})
         {:noreply, put_flash(socket, :info, "#{String.capitalize(role)} added successfully")}

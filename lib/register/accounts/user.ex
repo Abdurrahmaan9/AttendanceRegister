@@ -61,6 +61,7 @@ defmodule Register.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email, :password, :is_active, :first_name, :last_name])
+    |> validate_required([:first_name, :last_name])
     |> validate_email(opts)
     |> validate_password(opts)
   end

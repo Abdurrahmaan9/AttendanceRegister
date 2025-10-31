@@ -17,7 +17,7 @@ defmodule RegisterWeb.Students.AttendanceLive.Index do
       |> assign(:sidebar_open, false)
       |> assign(:page_title, "Attendance Overview")
 
-    if connected?(socket) and current_student do
+    if connected?(socket) and current_user do
       {:ok, load_summary(socket)}
     else
       {:ok, socket}
@@ -31,8 +31,8 @@ defmodule RegisterWeb.Students.AttendanceLive.Index do
     end
   end
 
-  defp load_summary(%{assigns: %{current_student: %{id: student_id}}} = socket) do
-    summary = Attendance.student_attendance_summary(student_id)
+  defp load_summary(%{assigns: %{current_user: %{id: user_id}}} = socket) do
+    summary = Attendance.student_attendance_summary(user_id)
     assign(socket, :summary, summary)
   end
 

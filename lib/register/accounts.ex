@@ -78,21 +78,39 @@ defmodule Register.Accounts do
   @doc """
   Creates a user with the given role in a single convenience call.
   """
-  def create_user_with_role(%{email: email} = attrs, role) do
-    # Ensure there is a password; generate a temporary one if missing
-    temp_password = Map.get(attrs, :password) || Map.get(attrs, "password") || generate_temp_password()
-    attrs = Map.put(attrs, :password, temp_password)
+def create_user_with_role(%{email: email} = attrs, role) do
+  # Ensure there is a password; generate a temporary one if missing
+  temp_password = Map.get(attrs, :password) || Map.get(attrs, "password") || generate_temp_password()
+  attrs = Map.put(attrs, :password, temp_password)
 
-    with {:ok, %User{} = user} <- register_user(attrs),
-         {:ok, %User{} = user} <- assign_role(user, role) do
-      # Notify user of their temporary password
-      _ = UserNotifier.deliver_temporary_password(user, temp_password)
-      {:ok, user}
-    else
-      {:error, changeset} -> {:error, changeset}
-      error -> error
-    end
+  with {:ok, %User{} = user} <- register_user(attrs),
+       {:ok, %User{} = user} <- assign_role(user, role) do
+    # Build name from first_name and last_name, fallback to email username
+    name =
+      [Map.get(attrs, :first_name, ""), Map.get(attrs, :last_name, "")]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+      |> Enum.join(" ")
+      |> case do
+        "" ->
+          email
+          |> String.split("@")
+          |> List.first()
+        name -> name
+      end
+
+    # Send welcome email
+    Task.start(fn ->
+      Register.Emails.send_welcome_email(email, name, temp_password)
+    end)
+
+    {:ok, user}
+  else
+    {:error, changeset} -> {:error, changeset}
+    error -> error
   end
+end
 
   defp generate_temp_password() do
     :crypto.strong_rand_bytes(16)

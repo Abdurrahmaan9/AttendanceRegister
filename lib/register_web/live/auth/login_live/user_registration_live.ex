@@ -56,6 +56,22 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
             </.error>
 
             <div class="space-y-5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <.input
+                  field={@form[:first_name]}
+                  type="text"
+                  label="First name"
+                  required
+                  placeholder="Enter your first name"
+                />
+                <.input
+                  field={@form[:last_name]}
+                  type="text"
+                  label="Last name"
+                  required
+                  placeholder="Enter your last name"
+                />
+              </div>
               <div>
                 <.input
                   field={@form[:email]}

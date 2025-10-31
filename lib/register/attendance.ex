@@ -9,26 +9,68 @@ defmodule Register.Attendance do
   alias Register.Attendance.AttendanceRecord
   alias Register.Repo
   alias Register.Accounts
+  alias Register.Otps.Otp
+  alias Register.Attendance.SummaryHelper
+  alias Register.Attendance.SummaryCache
 
   def student_attendance_summary(student_id) do
+    case SummaryCache.get(student_id) do
+      {:ok, summary} -> summary
+      :miss ->
+        summary = compute_attendance_summary(student_id)
+        SummaryCache.put(student_id, summary)
+        summary
+    end
+  end
+
+  def compute_attendance_summary(student_id) do
     courses = Academic.list_student_courses(student_id)
+
+    per_course =
+      Enum.map(courses, fn %{course: course} = info ->
+        module_code = course.code
+        course_id = course.id
+
+        total_sessions =
+          from(o in Otp,
+            where: o.course_id == ^course_id and o.module_code == ^module_code
+          )
+          |> Repo.aggregate(:count, :id)
+
+        attended =
+          from(ar in AttendanceRecord,
+            where:
+              ar.student_id == ^student_id and
+              ar.course_id == ^course_id and
+              ar.module_code == ^module_code
+          )
+          |> Repo.aggregate(:count, :id)
+
+        missed = max(total_sessions - attended, 0)
+        rate = SummaryHelper.rate(attended, total_sessions)
+
+        %{
+          course: course,
+          year: Map.get(info, :year),
+          semester: Map.get(info, :semester),
+          sessions: total_sessions,
+          attended: attended,
+          missed: missed,
+          rate: rate
+        }
+      end)
+
+    total_sessions = Enum.reduce(per_course, 0, fn m, acc -> acc + m.sessions end)
+    attended_sessions = Enum.reduce(per_course, 0, fn m, acc -> acc + m.attended end)
+    missed_sessions = Enum.reduce(per_course, 0, fn m, acc -> acc + m.missed end)
 
     %{
       total_courses: length(courses),
-      total_sessions: 0,
-      attended_sessions: 0,
-      missed_sessions: 0,
-      attendance_rate: 0.0,
-      per_course:
-        Enum.map(courses, fn %{course: course} ->
-          %{
-            course: course,
-            sessions: 0,
-            attended: 0,
-            missed: 0,
-            rate: 0.0
-          }
-        end)
+      total_sessions: total_sessions,
+      attended_sessions: attended_sessions,
+      missed_sessions: missed_sessions,
+      attendance_rate: SummaryHelper.rate(attended_sessions, total_sessions),
+      per_course: per_course
     }
   end
 
@@ -99,7 +141,10 @@ defmodule Register.Attendance do
       })
 
       case Repo.insert(changeset) do
-        {:ok, record} -> {:ok, record}
+        {:ok, record} ->
+          # Refresh cached summary so dashboards update immediately
+          SummaryCache.refresh_student(student_id)
+          {:ok, record}
         {:error, %Ecto.Changeset{} = changeset} ->
           # If the DB unique index is hit, the unique_constraint in the changeset
           # will surface a friendly message. Convert to {:error, :already_marked}
