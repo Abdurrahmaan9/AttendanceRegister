@@ -35,9 +35,14 @@ defmodule RegisterWeb.Plugs.MfaAuth do
     Otps.generate_attendance_otp(lecturer, course, opts)
   end
 
-  def valid_attendance_code?(code) when is_binary(code) do
-    case Otps.verify_attendance_otp(code) do
-      {:ok, course_info} -> {:ok, course_info}
+  def valid_attendance_code?(module_code, otp) do
+    case Otps.verify_attendance_otp(otp) do
+      {:ok, course_info} ->
+        if course_info.module_code == module_code do
+          {:ok, course_info}
+        else
+          {:error, :not_found}
+        end
       other -> other
     end
   end

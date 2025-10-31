@@ -68,6 +68,21 @@ defmodule Register.Students do
   end
 
   @doc """
+  Gets a student by user ID.
+
+  ## Examples
+
+      iex> get_student_by_user_id(123)
+      %Student{}
+
+      iex> get_student_by_user_id(999)
+      nil
+  """
+  def get_student_by_user_id(id) do
+    Repo.get_by(Student, user_id: id)
+  end
+
+  @doc """
   Creates a student and registers a user account with a random password.
 
   ## Examples

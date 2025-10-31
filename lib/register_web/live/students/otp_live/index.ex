@@ -1,17 +1,20 @@
 defmodule RegisterWeb.Students.OtpLive.Index do
   use RegisterWeb, :live_view
-  import Phoenix.HTML.Form
-  alias Register.Otps
-  alias Register.Attendance
+  require Logger
   alias RegisterWeb.Plugs.MfaAuth
-  
+  alias Register.Attendance
+  alias Register.Accounts
+
   @impl true
   def mount(_params, _session, socket) do
-    form = to_form(%{"otp" => ""}, as: :form)
-    
-    {:ok, 
+    form = to_form(%{"module_code" => "", "otp" => ""}, as: :form)
+    # Refresh the current_user from DB so first_name/last_name are present
+    user = Accounts.get_user!(socket.assigns.current_user.id)
+
+    {:ok,
       socket
       |> assign(:sidebar_open, false)
+      |> assign(:current_user, user)
       |> assign(:form, form)
       |> assign(:attendance_recorded, false)
       |> assign(:course_info, nil)
@@ -25,41 +28,108 @@ defmodule RegisterWeb.Students.OtpLive.Index do
   end
 
   @impl true
-  def handle_event("verify_otp", %{"otp" => otp}, socket) do
-    case MfaAuth.valid_attendance_code?(otp) do
+  def handle_event("verify_otp", %{"form" => %{"module_code" => module_code, "otp" => otp}}, socket) do
+    case MfaAuth.valid_attendance_code?(module_code, otp) do
       {:ok, course_info} ->
         # Record attendance
         case Attendance.record_attendance(
           socket.assigns.current_user.id,
           course_info.course_id,
           course_info.module_code,
+          course_info.course_name,
           course_info.session_date,
-          %{method: "otp"}
+          %{
+            method: "otp",
+            first_name: socket.assigns.current_user.first_name,
+            last_name: socket.assigns.current_user.last_name
+          }
         ) do
           {:ok, _attendance} ->
-            {:noreply, 
-              socket 
+            {:noreply,
+              socket
               |> assign(:attendance_recorded, true)
               |> assign(:course_info, course_info)
               |> assign(:error, nil)
             }
-              
+
+          {:error, :already_marked} ->
+            {:noreply,
+              socket
+              |> assign(:attendance_recorded, false)
+              |> assign(:course_info, course_info)
+              |> assign(:error, "You have already marked attendance for this session.")
+            }
+
           {:error, _changeset} ->
-            {:noreply, 
-              socket 
+            {:noreply,
+              socket
               |> assign(:error, "Failed to record attendance. Please try again.")
             }
         end
-        
+
       {:error, :not_found} ->
-        {:noreply, 
-          socket 
+        {:noreply,
+          socket
           |> assign(:error, "Invalid or expired OTP. Please check and try again.")
         }
-        
+
       {:error, :expired} ->
-        {:noreply, 
-          socket 
+        {:noreply,
+          socket
+          |> assign(:error, "This OTP has expired. Please ask your lecturer for a new one.")
+        }
+    end
+  end
+
+  @impl true
+  def handle_event("verify_otp", %{"module_code" => module_code, "otp" => otp}, socket) do
+    case MfaAuth.valid_attendance_code?(module_code, otp) do
+      {:ok, course_info} ->
+        # Record attendance
+        case Attendance.record_attendance(
+          socket.assigns.current_user.id,
+          course_info.course_id,
+          course_info.module_code,
+          course_info.course_name,
+          course_info.session_date,
+          %{
+            method: "otp",
+            first_name: socket.assigns.current_user.first_name,
+            last_name: socket.assigns.current_user.last_name
+          }
+        ) do
+          {:ok, _attendance} ->
+            {:noreply,
+              socket
+              |> assign(:attendance_recorded, true)
+              |> assign(:course_info, course_info)
+              |> assign(:error, nil)
+            }
+
+          {:error, :already_marked} ->
+            {:noreply,
+              socket
+              |> assign(:attendance_recorded, false)
+              |> assign(:course_info, course_info)
+              |> assign(:error, "You have already marked attendance for this session.")
+            }
+
+          {:error, _changeset} ->
+            {:noreply,
+              socket
+              |> assign(:error, "Failed to record attendance. Please try again.")
+            }
+        end
+
+      {:error, :not_found} ->
+        {:noreply,
+          socket
+          |> assign(:error, "Invalid or expired OTP. Please check and try again.")
+        }
+
+      {:error, :expired} ->
+        {:noreply,
+          socket
           |> assign(:error, "This OTP has expired. Please ask your lecturer for a new one.")
         }
     end

@@ -2,9 +2,6 @@ defmodule Register.QR.QRCode do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query, warn: false
-
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
   schema "qr_codes" do
     field :name, :string
     field :description, :string
@@ -15,7 +12,7 @@ defmodule Register.QR.QRCode do
     field :expires_at, :naive_datetime
 
     # Relationships
-    belongs_to :created_by, Register.Accounts.User, type: :binary_id
+    belongs_to :created_by, Register.Accounts.User
     
     timestamps(type: :utc_datetime)
   end
