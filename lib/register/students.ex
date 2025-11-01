@@ -5,6 +5,7 @@ defmodule Register.Students do
 
   import Ecto.Query, warn: false
   alias Register.Repo
+  alias Register.Accounts
   alias Register.Students.Student
 
   @doc """
@@ -164,10 +165,10 @@ defmodule Register.Students do
   """
   def delete_student(%Student{} = student) do
     # Delete associated user if it exists
-    if user = Register.Accounts.get_user_by_email(student.email) do
+    if user = Accounts.get_user_by_email(student.email) do
       Repo.delete(user)
     end
-    
+
     # Delete the student
     Repo.delete(student)
   end
