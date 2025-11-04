@@ -94,6 +94,7 @@ defmodule RegisterWeb.Router do
 
       # ==================== LECTURER & ADMIN/STAFF MANAGEMENT =========
       live "/lecturers", Admin.LecturersLive.Index, :index
+      live "/lecturers/:id/programs", Admin.LecturerProgramsLive.Index, :edit, as: :admin_lecturer_programs
       live "/admins-staff", Admin.AdminsStaffLive.Index, :index
 
       # ==================== PROGRAM MANAGEMENT =========================

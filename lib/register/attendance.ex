@@ -251,6 +251,69 @@ defmodule Register.Attendance do
     end
   end
 
+  @doc """
+  Gets attendance statistics for a specific module code, combining both QR code and OTP records.
+  Groups by both module_code and session_date to ensure accurate session tracking.
+  """
+  def get_module_stats(module_code) when is_binary(module_code) do
+    # Get all attendance records for this module from both QR codes and OTPs
+    records = from(ar in "attendance_records",
+      where: ar.module_code == ^module_code,
+      select: %{
+        id: ar.id,
+        student_id: ar.student_id,
+        first_name: ar.first_name,
+        last_name: ar.last_name,
+        session_date: ar.session_date,
+        source: fragment("CASE WHEN qr_code_id IS NOT NULL THEN 'qr' ELSE 'otp' END")
+      }
+    ) |> Repo.all()
+
+    # Group by session date to identify unique sessions
+    sessions_by_date = Enum.group_by(records, & &1.session_date)
+    
+    # Calculate stats
+    total_sessions = map_size(sessions_by_date)
+    
+    # Get unique students who attended this module (regardless of source)
+    unique_students = records 
+      |> Enum.uniq_by(& &1.student_id)
+      |> length()
+
+    # Get attendance per session with source information
+    attendance_per_session = Enum.map(sessions_by_date, fn {date, records} ->
+      # Group by source (qr/otp) for this session date
+      by_source = Enum.group_by(records, & &1.source)
+      
+      %{
+        date: date,
+        count: length(records),
+        qr_attendance: length(Map.get(by_source, "qr", [])),
+        otp_attendance: length(Map.get(by_source, "otp", [])),
+        students: records
+          |> Enum.uniq_by(& &1.student_id)
+          |> Enum.map(&%{
+            id: &1.student_id,
+            name: "#{&1.first_name} #{&1.last_name}",
+            source: &1.source
+          })
+      }
+    end) |> Enum.sort_by(& &1.date, {:desc, Date})
+
+    # Calculate total attendance (unique student-session pairs)
+    total_attendance = records 
+      |> Enum.uniq_by(fn r -> {r.student_id, r.session_date} end)
+      |> length()
+
+    %{
+      module_code: module_code,
+      total_sessions: total_sessions,
+      unique_students: unique_students,
+      total_attendance: total_attendance,
+      attendance_per_session: attendance_per_session
+    }
+  end
+
   def total_classes_for_day do
     beginning_of_day = Date.utc_today()
 

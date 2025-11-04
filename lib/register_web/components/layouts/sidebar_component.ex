@@ -45,9 +45,6 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   Core Features
                 </h3>
                 <div class="mt-2 space-y-1">
-                  <.nav_link to="/Admin/dashboard" icon="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" active={@current_path == "/dashboard"}>
-                    Dashboard
-                  </.nav_link>
                   <div class="space-y-1">
                     <button
                       type="button"
