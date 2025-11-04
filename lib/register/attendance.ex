@@ -83,17 +83,109 @@ defmodule Register.Attendance do
     }
   end
 
-  # Admin overview filtered by program and/or course/module.
-  # Placeholder implementation until scan logging is implemented.
+  @doc """
+  Fetches attendance statistics for admin view, filtered by program and/or course.
+  """
   def admin_attendance_summary(%{program_id: program_id, course_id: course_id}) do
+    # Get all courses for the selected program if program_id is provided
+    course_ids =
+      if program_id do
+        from(pc in "program_courses",
+          where: pc.program_id == ^program_id,
+          select: pc.course_id
+        )
+        |> Repo.all()
+      else
+        []
+      end
+
+    # Base query for attendance records
+    attendance_query = from(ar in "attendance_records", as: :ar)
+
+    # Apply program filter (if any program courses found)
+    attendance_query =
+      if program_id && !Enum.empty?(course_ids) do
+        from(ar in attendance_query, where: ar.course_id in ^course_ids)
+      else
+        attendance_query
+      end
+
+    # Apply course filter if provided (takes precedence over program filter)
+    attendance_query = if course_id do
+      from(ar in attendance_query, where: ar.course_id == ^course_id)
+    else
+      attendance_query
+    end
+
+    # Get all unique sessions with attendance counts
+    sessions =
+      attendance_query
+      |> join(:left, [ar: ar], c in "courses", on: c.id == ar.course_id, as: :c)
+      |> group_by([ar: ar, c: c], [ar.course_id, ar.module_code, ar.session_date, c.title])
+      |> select([ar: ar, c: c], %{
+        course_id: ar.course_id,
+        course_name: c.title,
+        module_code: ar.module_code,
+        session_date: ar.session_date,
+        attended: count(ar.id)
+      })
+      |> Repo.all()
+
+    # Calculate total sessions (unique module + date combinations)
+    total_sessions =
+      attendance_query
+      |> distinct([ar: ar], [ar.course_id, ar.module_code, ar.session_date])
+      |> Repo.aggregate(:count, :id)
+
+    # Calculate total attendance
+    total_attended = Enum.sum(Enum.map(sessions, & &1.attended))
+
+    # Get unique students based on filters
+    total_students =
+      cond do
+        # If course is selected, get students who attended that course
+        course_id ->
+          from(ar in "attendance_records",
+            where: ar.course_id == ^course_id,
+            select: count(ar.student_id, :distinct)
+          )
+          |> Repo.one() || 0
+
+        # If program is selected, get students enrolled in that program
+        program_id && !Enum.empty?(course_ids) ->
+          from(sp in "student_programs",
+            where: sp.program_id == ^program_id and sp.is_active == true,
+            select: count(sp.student_id, :distinct)
+          )
+          |> Repo.one() || 0
+
+        # Otherwise, get all active students
+        true ->
+          from(u in Register.Accounts.User,
+            where: u.role == "student" and u.is_active == true
+          )
+          |> Repo.aggregate(:count, :id) || 0
+      end
+
+    # Calculate attendance statistics
+    {total_missed, attendance_rate} =
+      if total_students > 0 and total_sessions > 0 do
+        total_possible = total_sessions * total_students
+        missed = max(total_possible - total_attended, 0)
+        rate = (total_attended / total_possible) * 100
+        {missed, rate}
+      else
+        {0, 0.0}
+      end
+
     %{
       filter: %{program_id: program_id, course_id: course_id},
-      total_sessions: 0,
-      total_students: 0,
-      attended: 0,
-      missed: 0,
-      attendance_rate: 0.0,
-      sessions: []
+      total_sessions: total_sessions,
+      total_students: total_students,
+      attended: total_attended,
+      missed: total_missed,
+      attendance_rate: Float.round(attendance_rate, 2),
+      sessions: sessions
     }
   end
 
@@ -157,5 +249,15 @@ defmodule Register.Attendance do
           end
       end
     end
+  end
+
+  def total_classes_for_day do
+    beginning_of_day = Date.utc_today()
+
+    query = from a in "attendance_records",
+      where: a.session_date >= ^beginning_of_day,
+      select: count(a.id)
+
+    Repo.one(query) || 0
   end
 end

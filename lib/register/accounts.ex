@@ -415,4 +415,9 @@ end
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  def total_users_by_roles(roles) do
+    query = from u in User, where: u.role in ^roles, select: count(u.id)
+    Repo.one(query) || 0
+  end
 end
