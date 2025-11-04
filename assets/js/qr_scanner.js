@@ -3,20 +3,25 @@ import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 // QR Scanner Hook
 export const QRScanner = {
   mounted() {
+    console.log('QR Scanner mounted');
     this.initializeElements();
-    this.checkCameraSupport();
+    this.checkCameraSupport().then(supported => {
+      if (supported && this.el.dataset.active === "true") {
+        this.initializeScanner();
+      }
+    });
   },
-  
+
   updated() {
     const isActive = this.el.dataset.active === "true";
-    
+
     if (isActive && !this.html5QrCode) {
       this.initializeScanner();
     } else if (!isActive && this.html5QrCode) {
       this.cleanupScanner();
     }
   },
-  
+
   destroyed() {
     this.cleanupScanner();
   },
@@ -45,54 +50,28 @@ export const QRScanner = {
     return capabilities;
   },
   
-  checkCameraSupport() {
-    console.log('Checking camera support...');
-    const capabilities = this.logBrowserCapabilities();
-    
-    // Show debug info in the UI
-    const debugInfo = document.createElement('div');
-    debugInfo.id = 'camera-debug-info';
-    debugInfo.style.padding = '10px';
-    debugInfo.style.backgroundColor = '#f8f9fa';
-    debugInfo.style.border = '1px solid #dee2e6';
-    debugInfo.style.borderRadius = '4px';
-    debugInfo.style.marginTop = '10px';
-    debugInfo.style.fontFamily = 'monospace';
-    debugInfo.style.fontSize = '12px';
-    debugInfo.style.whiteSpace = 'pre';
-    debugInfo.style.overflowX = 'auto';
-    debugInfo.textContent = JSON.stringify(capabilities, null, 2);
-    
-    // Add debug info after the scanner container if it doesn't exist
-    if (!document.getElementById('camera-debug-info')) {
-      this.el.parentNode.insertBefore(debugInfo, this.el.nextSibling);
-    }
-    
-    // First, check if we're running in a secure context (required for camera access)
-    if (!capabilities.secureContext) {
-      const errorMsg = 'Page not loaded in a secure context. HTTPS or localhost required.';
-      console.error(errorMsg);
+  async checkCameraSupport() {
+    // Check if we're running in a secure context or localhost (for development)
+    const isLocalhost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+    const isSecure = window.isSecureContext || isLocalhost;
+
+    if (!isSecure) {
       this.showError('Camera access requires a secure connection (HTTPS or localhost)');
       return false;
     }
-    
+
     // Check for basic mediaDevices support
-    if (!capabilities.mediaDevices) {
-      const errorMsg = 'navigator.mediaDevices not available';
-      console.error(errorMsg);
-      this.showError('Your browser does not support camera access. Try Chrome or Firefox on a mobile device.');
+    if (!navigator.mediaDevices) {
+      this.showError('Your browser does not support camera access. Try Chrome or Firefox.');
       return false;
     }
-    
+
     // Check for getUserMedia support
-    if (!capabilities.getUserMedia) {
-      const errorMsg = 'navigator.mediaDevices.getUserMedia not available';
-      console.error(errorMsg);
-      this.showError('Your browser does not support camera access. Try Chrome or Firefox on a mobile device.');
+    if (!navigator.mediaDevices.getUserMedia) {
+      this.showError('Your browser does not support camera access. Try Chrome or Firefox.');
       return false;
     }
-    
-    console.log('Camera support check passed');
+
     return true;
   },
   
@@ -121,62 +100,46 @@ export const QRScanner = {
   
   async initializeScanner() {
     // Don't initialize if already active
-    if (this.html5QrCode) return;
-    
-    console.log('Initializing QR scanner...');
-    
+    if (this.html5QrCode) {
+      return;
+    }
+
+    // Ensure qr-reader element exists
+    let qrReaderElement = this.el.querySelector('#qr-reader');
+    if (!qrReaderElement) {
+      qrReaderElement = document.createElement('div');
+      qrReaderElement.id = 'qr-reader';
+      qrReaderElement.className = 'w-full h-full';
+      this.el.appendChild(qrReaderElement);
+    }
+
     // Show scanner UI
     this.showScannerUI();
-    
+
     // Configuration
-    const config = { 
+    const config = {
       fps: 10,
       qrbox: this.getQrBoxDimensions,
       aspectRatio: 1.0,
-      showZoomSliderIfSupported: true,
-      showTorchButtonIfSupported: true,
-      supportedScanTypes: [Html5Qrcode.ScanType.SCAN_TYPE_CAMERA],
-      // Disable experimental features that might cause issues
-      experimentalFeatures: {
-        useBarCodeDetectorIfSupported: false
-      },
-      // Try to use the native BarcodeDetector API if available
-      useBarCodeDetectorIfSupported: false,
-      // Disable flash by default
+      showZoomSliderIfSupported: false,
+      showTorchButtonIfSupported: false,
+      supportedScanTypes: [Html5Qrcode.ScanType.SCAN_TYPE_CAMERA]
     };
-    
-    // First, check if we can enumerate devices to see available cameras
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      console.log('Available devices:', devices);
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      console.log('Video devices:', videoDevices);
-      
-      if (videoDevices.length === 0) {
-        throw new Error('No video input devices found');
-      }
-    } catch (deviceError) {
-      console.error('Error enumerating devices:', deviceError);
-      this.showError('Could not access camera. Please check permissions.');
-      return;
-    }
-    
-    // Camera constraints - try environment (back) camera first, then user (front) camera
-    const constraints = { 
+
+    // Camera constraints - prefer back camera, but allow fallback
+    const constraints = {
       video: {
         facingMode: { ideal: 'environment' },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { ideal: 640 },
+        height: { ideal: 480 }
       },
       audio: false
     };
-    
-    console.log('Camera constraints:', JSON.stringify(constraints));
-    
+
     try {
-      // Create new scanner instance
+      // Create scanner instance
       this.html5QrCode = new Html5Qrcode("qr-reader");
-      
+
       // Start scanning
       await this.html5QrCode.start(
         constraints,
@@ -184,13 +147,11 @@ export const QRScanner = {
         this.handleScanSuccess.bind(this),
         this.handleScanError.bind(this)
       );
-      
-      // Hide the overlay after successful initialization
+
+      // Hide overlay on success
       this.hideScannerUI();
-      
-      // Mark as active
       this.el.dataset.active = "true";
-      
+
     } catch (error) {
       this.handleInitializationError(error);
     }
@@ -243,50 +204,23 @@ export const QRScanner = {
   
   handleInitializationError(error) {
     console.error('Scanner initialization error:', error);
-    
-    let errorMessage = 'Failed to initialize scanner';
-    let errorDetails = '';
-    
-    // Standard error types
+
+    let message = 'Unable to access camera';
+
     if (error.name === 'NotAllowedError') {
-      errorMessage = 'Camera access was denied';
-      errorDetails = 'Please check your browser settings and allow camera access to scan QR codes.';
+      message = 'Camera access denied. Please allow camera access in your browser settings and try again.';
     } else if (error.name === 'NotFoundError') {
-      errorMessage = 'No camera found';
-      errorDetails = 'This device does not have a camera or it cannot be accessed.';
+      message = 'No camera found on this device.';
     } else if (error.name === 'NotReadableError') {
-      errorMessage = 'Camera in use';
-      errorDetails = 'The camera is already in use by another application.';
+      message = 'Camera is already in use by another application.';
     } else if (error.name === 'OverconstrainedError') {
-      errorMessage = 'Camera configuration error';
-      errorDetails = 'The requested camera configuration is not supported.';
+      message = 'Camera configuration not supported. Try using a different browser.';
     } else if (error.name === 'SecurityError') {
-      errorMessage = 'Security restriction';
-      errorDetails = 'Camera access is not allowed in this context. Try accessing the site over HTTPS.';
-    } else if (error.message && error.message.includes('request a video mode')) {
-      errorMessage = 'Unsupported video mode';
-      errorDetails = 'The requested camera resolution is not supported.';
-    } else if (error.message) {
-      errorDetails = error.message;
+      message = 'Camera access blocked. Please ensure you are using HTTPS.';
     }
-    
-    // Log detailed error information
-    console.error('Error details:', {
-      name: error.name,
-      message: error.message,
-      constraint: error.constraint,
-      stack: error.stack
-    });
-    
-    // Show the error to the user
-    this.showError(`${errorMessage}. ${errorDetails}`);
+
+    this.showError(message);
     this.cleanupScanner();
-    
-    // If it's a permission issue, guide the user
-    if (error.name === 'NotAllowedError') {
-      console.log('User needs to grant camera permissions');
-      // You could add a button here to guide the user to settings
-    }
   },
   
   async cleanupScanner() {
