@@ -7,6 +7,7 @@ defmodule Register.Academic do
   alias Register.Academic.Program
   alias Register.Academic.ProgramCourse
   alias Register.Academic.StudentProgram
+  alias Register.Academic.LecturerCourse
   alias Register.Academic.LecturerProgram
   alias Register.Courses.Course
   alias Register.Accounts.User
@@ -105,7 +106,7 @@ defmodule Register.Academic do
   """
   def list_lecturer_courses(user_id, program_id) do
     # First, get all program courses for the given program
-    program_courses = 
+    program_courses =
       from(pc in ProgramCourse,
         where: pc.program_id == ^program_id,
         preload: [:course],
@@ -121,36 +122,36 @@ defmodule Register.Academic do
   @doc """
   Assigns a program to a lecturer.
   """
-  def assign_lecturer_to_program(user_id, program_id, attrs \\ %{}) do
-    %Register.Academic.LecturerProgram{}
-    |> Register.Academic.LecturerProgram.changeset(
-      Map.merge(%{user_id: user_id, program_id: program_id}, attrs)
-    )
-    |> Repo.insert()
-  end
+  # def assign_lecturer_to_program(user_id, program_id, attrs \\ %{}) do
+  #   %Register.Academic.LecturerProgram{}
+  #   |> Register.Academic.LecturerProgram.changeset(
+  #     Map.merge(%{user_id: user_id, program_id: program_id}, attrs)
+  #   )
+  #   |> Repo.insert()
+  # end
 
   @doc """
   Removes a program assignment from a lecturer.
   """
-  def remove_lecturer_from_program(user_id, program_id) do
-    from(lp in LecturerProgram, where: lp.user_id == ^user_id and lp.program_id == ^program_id)
-    |> Repo.delete_all()
-    :ok
-  end
+  # def remove_lecturer_from_program(user_id, program_id) do
+  #   from(lp in LecturerProgram, where: lp.user_id == ^user_id and lp.program_id == ^program_id)
+  #   |> Repo.delete_all()
+  #   :ok
+  # end
 
   @doc """
   Lists all lecturers with their assigned programs.
   """
-  def list_lecturers_with_programs do
-    from(u in Register.Accounts.User,
-      where: u.role == "lecturer",
-      left_join: lp in assoc(u, :lecturer_programs),
-      left_join: p in assoc(lp, :program),
-      preload: [lecturer_programs: {lp, program: p}],
-      order_by: [asc: u.last_name, asc: u.first_name]
-    )
-    |> Repo.all()
-  end
+  # def list_lecturers_with_programs do
+  #   from(u in Register.Accounts.User,
+  #     where: u.role == "lecturer",
+  #     left_join: lp in assoc(u, :lecturer_programs),
+  #     left_join: p in assoc(lp, :program),
+  #     preload: [lecturer_programs: {lp, program: p}],
+  #     order_by: [asc: u.last_name, asc: u.first_name]
+  #   )
+  #   |> Repo.all()
+  # end
 
   @doc """
   Gets a lecturer with their assigned programs.
@@ -169,8 +170,8 @@ defmodule Register.Academic do
   Lists all programs not assigned to a lecturer.
   """
   def list_unassigned_programs(user_id) do
-    assigned_program_ids = 
-      from(lp in LecturerProgram, 
+    assigned_program_ids =
+      from(lp in LecturerProgram,
         where: lp.user_id == ^user_id,
         select: lp.program_id
       )
@@ -284,6 +285,93 @@ defmodule Register.Academic do
         program: p,
         academic_year: sp.academic_year
       }
+    )
+    |> Repo.all()
+  end
+
+
+
+  # ===================== LECTURER COURSES =====================
+
+  def list_lecturers_with_courses do
+    from(u in User,
+      where: u.role == "lecturer",
+      preload: [lecturer_courses: :course]
+    )
+    |> Repo.all()
+  end
+
+  def get_lecturer_with_courses(user_id) do
+    from(u in User,
+      where: u.id == ^user_id and u.role == "lecturer",
+      preload: [lecturer_courses: :course]
+    )
+    |> Repo.one()
+  end
+
+  def list_unassigned_courses(user_id) do
+    # Get all courses not assigned to this lecturer
+    assigned_course_ids =
+      from(lc in LecturerCourse,
+        where: lc.user_id == ^user_id,
+        select: lc.course_id
+      )
+      |> Repo.all()
+
+    from(c in Course,
+      where: c.id not in ^assigned_course_ids
+    )
+    |> Repo.all()
+  end
+
+  def assign_lecturer_to_course(user_id, course_id) do
+    %LecturerCourse{}
+    |> LecturerCourse.changeset(%{
+      user_id: user_id,
+      course_id: course_id,
+      is_primary: false
+    })
+    |> Repo.insert()
+  end
+
+  def remove_lecturer_from_course(user_id, course_id) do
+    from(lc in LecturerCourse,
+      where: lc.user_id == ^user_id and lc.course_id == ^course_id
+    )
+    |> Repo.delete_all()
+    |> case do
+      {1, _} -> :ok
+      _ -> {:error, :not_found}
+    end
+  end
+
+  @doc """
+  Lists all courses for a specific lecturer in a specific program.
+  """
+  @doc """
+  Lists all courses assigned to a specific lecturer.
+  """
+  def list_lecturer_courses(user_id) do
+    from(lc in LecturerCourse,
+      where: lc.user_id == ^user_id,
+      preload: [:course],
+      order_by: [desc: :is_primary, asc: :id]
+    )
+    |> Repo.all()
+    |> Enum.map(& &1.course)
+  end
+
+  def list_unassigned_courses(user_id) do
+    # Get all courses not assigned to this lecturer
+    assigned_course_ids =
+      from(lc in LecturerCourse,
+        where: lc.user_id == ^user_id,
+        select: lc.course_id
+      )
+      |> Repo.all()
+
+    from(c in Course,
+      where: c.id not in ^assigned_course_ids
     )
     |> Repo.all()
   end
