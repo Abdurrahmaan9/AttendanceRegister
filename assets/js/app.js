@@ -2,49 +2,26 @@
 // to get started and then uncomment the line below.
 // import "./user_socket.js"
 
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
-
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 
-// Import Alpine.js
-// Alpine.js removed (package not installed). Re-add if needed.
+// Import dependencies
+import { QRScanner } from "./qr_scanner_bk"
+import { Socket } from "phoenix"
+import { LiveSocket } from "phoenix_live_view"
+import topbar from "../vendor/topbar"
 
-// Import QR Scanner
-import { QRScanner } from "./qr_scanner"
-
-// Import Sidebar Dropdowns
+// Import application modules
 import "./sidebar_dropdowns"
-
-// Import background carousels
 import bgCarousel from "./bg_carousel"
-
-// Import student actions
 import "./student_actions"
-
-// Import modal functionality
 import "./modal"
 
-// Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
-import topbar from "../vendor/topbar"
 
 // Get CSRF token for secure requests
 let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
 
-// Initialize LiveSocket with hooks
+// Initialize all hooks in one place
 let hooks = {
   // Register QRScanner hook
   QRScanner: QRScanner,
@@ -123,8 +100,8 @@ let hooks = {
         console.warn('SystemCharts parse/update error', e)
       }
     }
-  }
-  ,
+  },
+  
   // Statistical charts hook
   StatsCharts: {
     mounted() {
@@ -207,12 +184,12 @@ let hooks = {
       }
     }
   }
-};
+}
 
-// Create LiveSocket instance with hooks
+// Create and initialize LiveSocket instance with all hooks
 let liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken },
-  hooks: hooks,
+  hooks: hooks, // <-- FIXED: Use the hooks object directly, no spreading or duplicates
   dom: {
     // Add any custom DOM handling here
   },
@@ -237,4 +214,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

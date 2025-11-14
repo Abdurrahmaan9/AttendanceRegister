@@ -94,6 +94,7 @@ defmodule RegisterWeb.Router do
 
       # ==================== LECTURER & ADMIN/STAFF MANAGEMENT =========
       live "/lecturers", Admin.LecturersLive.Index, :index
+      live "/lecturers/:id/programs", Admin.LecturerProgramsLive.Index, :edit, as: :admin_lecturer_programs
       live "/admins-staff", Admin.AdminsStaffLive.Index, :index
 
       # ==================== PROGRAM MANAGEMENT =========================
@@ -175,6 +176,9 @@ defmodule RegisterWeb.Router do
 
       # ===================== STUDENT ATTENDANCE ======================
       live "/attendance", Students.AttendanceLive.Index, :index
+
+      # ===================== STUDENT QR SCANNER =======================
+      live "/scan", Students.ScanLive.Index, :index
 
     end
   end

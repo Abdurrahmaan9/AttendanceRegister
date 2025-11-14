@@ -1,6 +1,8 @@
 defmodule RegisterWeb.Admin.Dashboard.Index do
   use RegisterWeb, :live_view
   alias Register.Students
+  alias Register.Accounts
+  alias Register.Attendance
   alias Register.Accounts.User
   alias Register.Repo
   import Ecto.Query
@@ -16,12 +18,16 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
   @impl true
   def mount(_params, _session, socket) do
     total_students = Students.count_students()
+    total_staff = Accounts.total_users_by_roles(["lecturer", "admin", "staff"])
+    total_sessions_for_day = Attendance.total_classes_for_day()
 
     socket =
       socket
       |> assign(:current_path, @url)
       |> assign(:sidebar_open, false)
       |> assign(:total_students, total_students)
+      |> assign(:total_staff, total_staff)
+      |> assign(:total_sessions_for_day, total_sessions_for_day)
       |> assign_new(:metrics, fn -> initial_metrics() end)
       |> assign_stats()
 

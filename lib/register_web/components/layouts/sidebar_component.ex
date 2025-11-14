@@ -45,9 +45,6 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   Core Features
                 </h3>
                 <div class="mt-2 space-y-1">
-                  <.nav_link to="/Admin/dashboard" icon="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" active={@current_path == "/dashboard"}>
-                    Dashboard
-                  </.nav_link>
                   <div class="space-y-1">
                     <button
                       type="button"
@@ -173,6 +170,9 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   </.nav_link>
                   <.nav_link to="/Students/qr-codes" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/Students/scan-register"}>
                     Scan Register
+                  </.nav_link>
+                  <.nav_link to="/Students/scan" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/Students/scan"}>
+                    Scan QR Code
                   </.nav_link>
                   <.nav_link to="/Students/otp-management" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={@current_path == "/Students/enter-register-otp"}>
                     Enter Register OTP

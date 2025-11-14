@@ -50,6 +50,7 @@ defmodule RegisterWeb.Students.QrCodesLive.Index do
 
   @impl true
   def handle_event("start_scan", _params, %{assigns: %{current_user: nil}} = socket) do
+    IO.inspect("Start scan: User not logged in")
     {:noreply,
       socket
       |> put_flash(:error, "You must be logged in to scan QR codes")
@@ -60,10 +61,12 @@ defmodule RegisterWeb.Students.QrCodesLive.Index do
   def handle_event("start_scan", _params, socket) do
     # Toggle camera state
     new_state = !socket.assigns.camera_active
+    IO.inspect("Toggling camera state. New state: #{inspect(new_state)}")
 
     {:noreply,
       socket
       |> assign(camera_active: new_state, scanned_data: nil, error: nil)
+      |> push_event("js-exec", %{to: "#qr-scanner", attr: "phx-mounted"})  # Force re-mount
       |> clear_flash()
     }
   end
