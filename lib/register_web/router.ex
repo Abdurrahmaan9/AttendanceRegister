@@ -177,6 +177,9 @@ defmodule RegisterWeb.Router do
       # ===================== STUDENT ATTENDANCE ======================
       live "/attendance", Students.AttendanceLive.Index, :index
 
+      # ===================== STUDENT QR SCANNER =======================
+      live "/scan", Students.ScanLive.Index, :index
+
     end
   end
 

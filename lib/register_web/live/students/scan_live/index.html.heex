@@ -1,0 +1,214 @@
+<!-- QR Code Scanner Page -->
+<div class="w-full min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">QR Code Scanner</h1>
+          <p class="mt-2 text-gray-600">Scan QR codes for attendance, student verification, or other purposes</p>
+        </div>
+        <div class="flex space-x-3">
+          <%= if @scanning do %>
+            <button phx-click="stop_scan" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <i class="fas fa-stop mr-2"></i>Stop Scanning
+            </button>
+          <% else %>
+            <button phx-click="start_scan" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <i class="fas fa-qrcode mr-2"></i>Start Scanning
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Scanner Section -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Camera Feed</h2>
+            <p class="text-gray-600 mt-1">Position QR code within the camera view</p>
+          </div>
+
+          <!-- Scanner Container -->
+          <div class="relative">
+            <div
+              id="qr-scanner-container"
+              phx-hook="QRScanner"
+              data-active={to_string(@scanning)}
+              class="relative bg-gray-900 min-h-[400px] flex items-center justify-center"
+            >
+              <!-- Scanner Overlay -->
+              <div id="qr-scanner-overlay" class={"absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-10 #{if @scanning, do: "hidden", else: ""}"}>
+                <div class="text-center text-white">
+                  <i class="fas fa-qrcode text-6xl mb-4 opacity-50"></i>
+                  <p class="text-xl font-medium mb-2">Ready to Scan</p>
+                  <p class="text-gray-300">Click "Start Scanning" to begin</p>
+                </div>
+              </div>
+
+              <!-- Camera Permission Message -->
+              <%= unless @scanning do %>
+                <div class="text-center text-gray-400">
+                  <i class="fas fa-camera text-4xl mb-4"></i>
+                  <p class="text-lg">Camera access required</p>
+                  <p class="text-sm mt-2">Click "Start Scanning" to grant camera permission</p>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Scanning Indicator -->
+            <%= if @scanning do %>
+              <div class="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                <i class="fas fa-circle text-xs mr-2 animate-pulse"></i>Scanning...
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
+          <h3 class="text-lg font-medium text-blue-900 mb-3">Scanning Instructions</h3>
+          <ul class="space-y-2 text-blue-800">
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-600 mt-0.5 mr-3"></i>
+              Ensure good lighting for better scanning
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-600 mt-0.5 mr-3"></i>
+              Hold the QR code steady within the camera frame
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-600 mt-0.5 mr-3"></i>
+              Keep a distance of 6-12 inches from the camera
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-600 mt-0.5 mr-3"></i>
+              Avoid blurry or damaged QR codes
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="space-y-6">
+
+        <!-- Scan Result -->
+        <%= if @scan_result do %>
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">Scan Result</h3>
+              <button phx-click="clear_result" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Success Result -->
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-check-circle text-green-600 text-xl mr-3"></i>
+                  <span class="text-green-800 font-medium">Success</span>
+                </div>
+                <p class="text-green-700"><%= @scan_result.message %></p>
+
+                <div class="mt-3 p-3 bg-white rounded border space-y-2">
+                  <div class="grid grid-cols-2 gap-2">
+                    <p class="text-sm text-gray-600">Class:</p>
+                    <p class="text-sm font-medium text-gray-900"><%= @scan_result.class_name %></p>
+                    
+                    <p class="text-sm text-gray-600">Program:</p>
+                    <p class="text-sm font-medium text-gray-900"><%= @scan_result.program_name %></p>
+                    
+                    <p class="text-sm text-gray-600">Time:</p>
+                    <p class="text-sm font-medium text-gray-900"><%= @scan_result.timestamp %></p>
+                  </div>
+                </div>
+
+                <!-- Action buttons based on scan type -->
+                <div class="mt-4 flex space-x-2">
+                  <%= case @scan_result.type do %>
+                    <% :student_id -> %>
+                      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        View Student Profile
+                      </button>
+                      <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        Mark Attendance
+                      </button>
+                    <% :attendance -> %>
+                      <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        Confirm Attendance
+                      </button>
+                    <% _ -> %>
+                      <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        Process Data
+                      </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Error Message -->
+        <%= if @error_message do %>
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">Scan Error</h3>
+              <button phx-click="clear_result" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex items-center mb-3">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-3"></i>
+                <span class="text-red-800 font-medium">Error</span>
+              </div>
+              <p class="text-red-700"><%= @error_message %></p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Scan History -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Scans</h3>
+
+          <div class="space-y-3">
+            <!-- Placeholder for recent scans - you can implement this with actual data -->
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-history text-3xl mb-3 opacity-50"></i>
+              <p>No recent scans</p>
+              <p class="text-sm mt-1">Scanned QR codes will appear here</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Supported Formats -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Supported Formats</h3>
+
+          <div class="space-y-2">
+            <div class="flex items-center text-sm">
+              <i class="fas fa-check text-green-600 mr-3"></i>
+              <span>Student IDs (STU-*)</span>
+            </div>
+            <div class="flex items-center text-sm">
+              <i class="fas fa-check text-green-600 mr-3"></i>
+              <span>Attendance Codes (ATT-*)</span>
+            </div>
+            <div class="flex items-center text-sm">
+              <i class="fas fa-check text-green-600 mr-3"></i>
+              <span>Custom QR Codes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
