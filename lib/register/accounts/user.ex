@@ -13,8 +13,10 @@ defmodule Register.Accounts.User do
     field :role, :string, default: "admin"
     field :is_active, :boolean, default: true
 
-    has_many :lecturer_programs, Register.Academic.LecturerProgram
-    has_many :programs, through: [:lecturer_programs, :program]
+    # has_many :lecturer_programs, Register.Academic.LecturerProgram
+    has_many :lecturer_courses, Register.Academic.LecturerCourse
+    has_many :taught_courses, through: [:lecturer_courses, :course]
+    # has_many :programs, through: [:lecturer_programs, :program]
 
     timestamps(type: :utc_datetime)
   end

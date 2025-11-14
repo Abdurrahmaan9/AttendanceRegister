@@ -11,89 +11,90 @@
     <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900">
-          Programs for <%= @lecturer.first_name %> <%= @lecturer.last_name %>
+          Courses for <%= @lecturer.first_name %> <%= @lecturer.last_name %>
         </h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          Manage program assignments for this lecturer
+          Manage course assignments for this lecturer
         </p>
       </div>
 
       <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
         <dl class="sm:divide-y sm:divide-gray-200">
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Current Programs</dt>
+            <dt class="text-sm font-medium text-gray-500">Current Courses</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <%= if @lecturer.lecturer_programs != [] do %>
+              <%= if @lecturer.lecturer_courses != [] do %>
                 <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
-                  <%= for lp <- @lecturer.lecturer_programs do %>
+                  <%= for lc <- @lecturer.lecturer_courses do %>
                     <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
                       <div class="w-0 flex-1 flex items-center">
                         <span class="flex-1 w-0 truncate">
-                          <%= lp.program.name %>
+                          <%= lc.course.title %>
                         </span>
-                        <%= if lp.is_primary do %>
+                        <%= if lc.is_primary do %>
                           <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Primary
                           </span>
                         <% end %>
                       </div>
                       <div class="ml-4 flex-shrink-0 flex space-x-4">
-                        <%= unless lp.is_primary do %>
-                          <button 
-                            phx-click="set_primary" 
-                            phx-value-user_id="#{@lecturer.id}"
-                            phx-value-program_id="#{lp.program_id}"
-                            class="text-indigo-600 hover:text-indigo-900"
-                          >
-                            Set as primary
-                          </button>
+                        <%= unless lc.is_primary do %>
+                           <button 
+                           phx-click="set_primary" 
+                           phx-value-user_id={@lecturer.id}
+                           phx-value-course_id={lc.course_id}
+                           class="text-indigo-600 hover:text-indigo-900"
+                           >
+                           Set as primary
+                           </button>
+
+                           <button 
+                           phx-click="remove_course" 
+                           phx-value-user_id={@lecturer.id}
+                           phx-value-course_id={lc.course_id}
+                           class="text-red-600 hover:text-red-900"
+                           data-confirm="Are you sure you want to remove this course?"
+                           >
+                           Remove
+                           </button>
                         <% end %>
-                        <button 
-                          phx-click="remove_program" 
-                          phx-value-user_id="#{@lecturer.id}"
-                          phx-value-program_id="#{lp.program_id}"
-                          class="text-red-600 hover:text-red-900"
-                          data-confirm="Are you sure you want to remove this program?"
-                        >
-                          Remove
-                        </button>
                       </div>
                     </li>
                   <% end %>
                 </ul>
               <% else %>
-                <p class="text-gray-500 italic">No programs assigned yet</p>
+                <p class="text-gray-500 italic">No courses assigned yet</p>
               <% end %>
             </dd>
           </div>
 
-          <%= if @unassigned_programs != [] do %>
+          <%= if @unassigned_courses != [] do %>
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Available Programs</dt>
+              <dt class="text-sm font-medium text-gray-500">Available Courses</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <form phx-submit="assign_program" class="flex">
+               <form phx-submit="assign_course" class="flex">
                   <input type="hidden" name="user_id" value={@lecturer.id} />
                   <div class="flex-1">
-                    <select 
-                      name="program_id" 
-                      class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                      required
-                    >
-                      <option value="">Select a program</option>
-                      <%= for program <- @unassigned_programs do %>
-                        <option value={program.id}><%= program.name %></option>
-                      <% end %>
-                    </select>
+                     <select 
+                        name="course_id" 
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        required
+                     >
+                        <option value="">Select a course</option>
+                        <%= for course <- @unassigned_courses do %>
+                        <option value={course.id}><%= course.title %></option>
+                        <% end %>
+                     </select>
                   </div>
                   <div class="ml-3">
-                    <button 
-                      type="submit" 
-                      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Add Program
-                    </button>
+                     <button 
+                        type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                     >
+                        Add Course
+                     </button>
                   </div>
-                </form>
+               </form>
               </dd>
             </div>
           <% end %>
@@ -120,7 +121,7 @@
                 Lecturer
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Programs
+                Courses
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -147,26 +148,26 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="text-sm text-gray-900">
-                    <%= if lecturer.lecturer_programs != [] do %>
+                    <%= if lecturer.lecturer_courses != [] do %>
                       <div class="flex flex-wrap gap-2">
-                        <%= for lp <- lecturer.lecturer_programs do %>
+                        <%= for lc <- lecturer.lecturer_courses do %>
                           <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                            #{if lp.is_primary, do: "bg-indigo-100 text-indigo-800", else: "bg-gray-100 text-gray-800"}"}>
-                            <%= lp.program.name %>
-                            <%= if lp.is_primary do %>
+                            #{if lc.is_primary, do: "bg-indigo-100 text-indigo-800", else: "bg-gray-100 text-gray-800"}"}>
+                            <%= lc.course.name %>
+                            <%= if lc.is_primary do %>
                               <span class="ml-1">★</span>
                             <% end %>
                           </span>
                         <% end %>
                       </div>
                     <% else %>
-                      <span class="text-gray-500 italic">No programs assigned</span>
+                      <span class="text-gray-500 italic">No courses assigned</span>
                     <% end %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <.link 
-                    patch={Routes.admin_lecturer_programs_path(@socket, :edit, lecturer.id)}
+                    patch={Routes.admin_lecturer_courses_path(@socket, :edit, lecturer.id)}
                     class="text-indigo-600 hover:text-indigo-900"
                   >
                     Manage
