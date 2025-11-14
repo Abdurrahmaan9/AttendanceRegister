@@ -53,9 +53,7 @@ export const QRScanner = {
     this.overlay = this.el.querySelector('#qr-scanner-overlay');
     this.scanResult = null;
     this.lastScannedText = null;
-    this.lastScanTime = 0;
-    this.isInitializing = false;
-    this.scanCount = 0; // Track successful scans
+    this.isInitializing = false; // Prevent duplicate initialization
     
     console.log('Elements initialized:', {
       container: !!this.scannerContainer,
@@ -80,6 +78,7 @@ export const QRScanner = {
   },
   
   async checkCameraSupport() {
+    // Check if we're running in a secure context or localhost (for development)
     const isLocalhost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
     const isSecure = window.isSecureContext || isLocalhost;
 
@@ -90,11 +89,13 @@ export const QRScanner = {
       return false;
     }
 
+    // Check for basic mediaDevices support
     if (!navigator.mediaDevices) {
       this.showError('Your browser does not support camera access. Try Chrome or Firefox.');
       return false;
     }
 
+    // Check for getUserMedia support
     if (!navigator.mediaDevices.getUserMedia) {
       this.showError('Your browser does not support camera access. Try Chrome or Firefox.');
       return false;
@@ -106,6 +107,13 @@ export const QRScanner = {
   showError(message) {
     console.error('Showing error:', message);
     this.pushEvent("scan_error", { error: message });
+  },
+  
+  disableScanner() {
+    this.el.classList.add('opacity-50', 'cursor-not-allowed');
+    this.el.querySelectorAll('button, [phx-click]').forEach(el => {
+      el.disabled = true;
+    });
   },
   
   showScannerUI() {
@@ -125,6 +133,7 @@ export const QRScanner = {
   async initializeScanner() {
     console.log('=== initializeScanner called ===');
     
+    // Prevent duplicate initialization
     if (this.html5QrCode || this.isInitializing) {
       console.log('Scanner already active or initializing, skipping');
       return;
@@ -142,50 +151,25 @@ export const QRScanner = {
       this.el.appendChild(qrReaderElement);
     } else {
       console.log('qr-reader element already exists');
-      // Clear any existing content
-      qrReaderElement.innerHTML = '';
     }
 
     // Show scanner UI
     this.showScannerUI();
 
-    // OPTIMIZED CONFIGURATION FOR BETTER SCANNING
+    // Configuration
     const config = {
-      fps: 15, // Increased from 10 for faster detection
+      fps: 10,
       qrbox: this.getQrBoxDimensions,
       aspectRatio: 1.0,
-      showZoomSliderIfSupported: true, // Allow zoom for better focus
-      showTorchButtonIfSupported: true, // Enable flashlight for low light
-      
-      // Advanced configuration for better detection
-      formatsToSupport: [
-        Html5Qrcode.SCAN_TYPE_QR_CODE // Focus only on QR codes for faster processing
-      ],
-      
-      // Video constraints for better quality
-      videoConstraints: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: "environment"
-      },
-      
-      // Disable audio
-      disableFlip: false, // Allow horizontal flip if needed
-      
-      // Experimental features for better detection
-      experimentalFeatures: {
-        useBarCodeDetectorIfSupported: true // Use native detector if available
-      }
+      showZoomSliderIfSupported: false,
+      showTorchButtonIfSupported: false
     };
 
     try {
       console.log('Creating Html5Qrcode instance');
-      this.html5QrCode = new Html5Qrcode("qr-reader", {
-        verbose: false, // Set to true for debugging
-        formatsToSupport: [Html5Qrcode.SCAN_TYPE_QR_CODE]
-      });
+      this.html5QrCode = new Html5Qrcode("qr-reader");
 
-      // Try to get cameras first
+      // Try to get cameras first to determine best approach
       const cameras = await Html5Qrcode.getCameras();
       console.log('Available cameras:', cameras);
 
@@ -200,10 +184,11 @@ export const QRScanner = {
         );
         
         cameraId = backCamera ? backCamera.id : cameras[cameras.length - 1].id;
-        console.log('Using camera:', cameraId, backCamera ? '(back camera)' : '(default)');
+        console.log('Using camera:', cameraId);
       } else {
+        // Fallback to constraint-based approach with correct format
         console.log('No specific cameras found, using facingMode constraint');
-        cameraId = { facingMode: "environment" };
+        cameraId = { facingMode: "environment" }; // FIXED: Simple string value
       }
 
       console.log('Starting scanner with camera:', cameraId);
@@ -215,15 +200,11 @@ export const QRScanner = {
       );
 
       console.log('Scanner started successfully!');
-      console.log('Scanner state:', this.html5QrCode.getState());
       
       // Hide overlay on success
       this.hideScannerUI();
       this.el.dataset.active = "true";
       this.isInitializing = false;
-      
-      // Add visual feedback that scanner is ready
-      this.showScannerReady();
 
     } catch (error) {
       console.error('Scanner initialization failed:', error);
@@ -232,14 +213,8 @@ export const QRScanner = {
     }
   },
   
-  showScannerReady() {
-    // You can add a visual indicator here
-    console.log('✅ Scanner is ready and actively looking for QR codes');
-  },
-  
   getQrBoxDimensions(viewfinderWidth, viewfinderHeight) {
-    // OPTIMIZED: Larger scan area for easier positioning
-    const minEdgePercentage = 0.8; // Increased from 0.7 to 80% for larger scan area
+    const minEdgePercentage = 0.7; // 70% of the smaller dimension
     const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
     const qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
     
@@ -252,52 +227,29 @@ export const QRScanner = {
   },
   
   async handleScanSuccess(decodedText, decodedResult) {
-    const now = Date.now();
     console.log('=== QR Code Scanned ===', decodedText);
-    console.log('Scan result details:', decodedResult);
     
-    // IMPROVED DEBOUNCING: Prevent multiple scans within 500ms
-    if (this.lastScannedText === decodedText && (now - this.lastScanTime) < 500) {
-      console.log('Duplicate scan ignored (too soon)');
+    // Debounce multiple scans of the same code
+    if (this.lastScannedText === decodedText) {
+      console.log('Duplicate scan ignored');
       return;
     }
     
     this.lastScannedText = decodedText;
-    this.lastScanTime = now;
-    this.scanCount++;
-    
-    console.log(`✅ Scan #${this.scanCount} successful: ${decodedText}`);
-    
-    // Provide haptic feedback if available
-    if (navigator.vibrate) {
-      navigator.vibrate(200); // Vibrate for 200ms
-    }
-    
-    // Provide audio feedback
-    this.playSuccessSound();
     
     try {
-      // Keep scanner running but pause briefly for UX
-      console.log('Processing QR code...');
-      
-      // Push event to server
-      this.pushEvent("process_qr", { 
-        data: decodedText,
-        format: decodedResult.result?.format || 'QR_CODE',
-        timestamp: new Date().toISOString()
-      });
-      
-      // OPTION 1: Stop scanner after successful scan (current behavior)
+      // Stop the scanner
       await this.cleanupScanner();
       
-      // OPTION 2: Keep scanner running (uncomment below, comment above)
-      // console.log('Scanner continues running for next scan');
+      console.log('Pushing process_qr event to server');
+      // Notify the server about the scanned code
+      this.pushEvent("process_qr", { data: decodedText });
       
-      // Reset after delay to allow rescanning
+      // Reset the lastScannedText after a delay to allow rescanning the same code
       setTimeout(() => {
-        console.log('Ready for next scan');
+        console.log('Resetting lastScannedText');
         this.lastScannedText = null;
-      }, 2000); // Reduced from 3000ms to 2000ms
+      }, 3000);
       
     } catch (error) {
       console.error("Error handling scan success:", error);
@@ -305,39 +257,11 @@ export const QRScanner = {
     }
   },
   
-  playSuccessSound() {
-    // Simple beep sound using Web Audio API
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.value = 800; // Hz
-      oscillator.type = 'sine';
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.2);
-    } catch (error) {
-      // Audio not supported or failed, ignore
-      console.log('Audio feedback not available');
-    }
-  },
-  
   handleScanError(errorMessage) {
-    // Only log non-routine errors
-    if (errorMessage && 
-        !errorMessage.includes('No QR code found') && 
-        !errorMessage.includes('No MultiFormat Readers') &&
-        !errorMessage.includes('NotFoundException')) {
-      console.warn("QR Code scan error:", errorMessage);
+    // Ignore errors about not finding a QR code (these happen continuously while scanning)
+    if (errorMessage && !errorMessage.includes('No QR code found') && !errorMessage.includes('No MultiFormat Readers')) {
+      console.error("QR Code scan error:", errorMessage);
     }
-    // Don't show errors to user for routine "not found" messages
   },
   
   handleInitializationError(error) {
@@ -350,9 +274,9 @@ export const QRScanner = {
     } else if (error.name === 'NotFoundError') {
       message = 'No camera found on this device.';
     } else if (error.name === 'NotReadableError') {
-      message = 'Camera is already in use by another application. Please close other apps using the camera.';
+      message = 'Camera is already in use by another application.';
     } else if (error.name === 'OverconstrainedError') {
-      message = 'Camera configuration not supported. Try using a different browser or camera.';
+      message = 'Camera configuration not supported. Try using a different browser.';
     } else if (error.name === 'SecurityError') {
       message = 'Camera access blocked. Please ensure you are using HTTPS.';
     } else if (error.message) {
@@ -375,12 +299,14 @@ export const QRScanner = {
       const currentState = this.html5QrCode.getState();
       console.log('Current scanner state:', currentState);
       
+      // Check if scanner is already stopped
       if (currentState !== Html5QrcodeScannerState.NOT_STARTED) {
         console.log('Stopping scanner...');
         await this.html5QrCode.stop();
         console.log('Scanner stopped');
       }
       
+      // Clear the scanner UI
       console.log('Clearing scanner UI');
       this.html5QrCode.clear();
       
@@ -388,9 +314,11 @@ export const QRScanner = {
       
     } catch (error) {
       console.error("Error cleaning up scanner:", error);
+      this.showError("Error stopping the camera");
       return Promise.reject(error);
       
     } finally {
+      // Always clean up references
       console.log('Cleaning up references');
       this.html5QrCode = null;
       this.isInitializing = false;

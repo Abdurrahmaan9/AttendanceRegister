@@ -116,3 +116,4 @@ defmodule RegisterWeb.Lecturer.OTPLive.Index do
     Courses.list_courses()
   end
 end
+

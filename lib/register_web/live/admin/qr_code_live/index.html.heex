@@ -23,10 +23,10 @@
             </div>
           </div>
           <div class="text-sm text-gray-700 space-y-1">
-            <div><span class="font-medium">Name:</span> <%= @created_qr.name %></div>
+           <!-- <div><span class="font-medium">Name:</span> <%= @created_qr.name %></div>
             <div><span class="font-medium">Class:</span> <%= @created_qr.class_name %></div>
             <div><span class="font-medium">Program:</span> <%= @created_qr.program_name %></div>
-            <div><span class="font-medium">Active:</span> <%= if @created_qr.is_active, do: "Yes", else: "No" %></div>
+            <div><span class="font-medium">Active:</span> <%= if @created_qr.is_active, do: "Yes", else: "No" %></div> -->
             <%= if @created_qr.expires_at do %>
               <div><span class="font-medium">Expires:</span> <%= Calendar.strftime(@created_qr.expires_at, "%Y-%m-%d %H:%M") %></div>
             <% end %>

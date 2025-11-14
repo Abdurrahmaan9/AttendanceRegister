@@ -48,12 +48,9 @@
         </div>
 
         <div class="flex justify-end">
-          <button
-            type="submit"
-          class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"                      phx-click="view_otp" 
-          >
+          <.button type="submit" class="btn-spacing" variant={:primary}>
             Generate OTP
-          </button>
+          </.button>
         </div>
       </form>
     </div>
@@ -120,20 +117,23 @@
                 <td class="px-3 py-2"><%= if otp.is_active, do: "Yes", else: "No" %></td>
                 <td class="px-3 py-2">
                   <div class="flex justify-end gap-2">
-                    <button 
-                      class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"                      phx-click="view_otp" 
+                    <.button
+                      class="btn-spacing"
+                      variant={:primary}
+                      phx-click="view_otp"
                       phx-value-id={otp.id}
-                      >
+                    >
                       View
-                    </button>
-                    <button 
-                      class="text-white bg-gradient-to-br from-red-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                      phx-click="delete_otp" 
+                    </.button>
+                    <.button
+                      class="btn-spacing"
+                      variant={:danger}
+                      phx-click="delete_otp"
                       phx-value-id={otp.id}
                       data-confirm="Are you sure you want to delete this OTP?"
-                      >
+                    >
                       Delete
-                    </button>
+                    </.button>
                   </div>
                 </td>
               </tr>
