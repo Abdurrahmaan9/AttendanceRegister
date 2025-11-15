@@ -111,9 +111,7 @@ defmodule RegisterWeb.Lecturer.OTPLive.Index do
     {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
   end
 
-  defp list_lecturer_courses(_user_id) do
-    # TODO: Update this to filter courses by the current lecturer
-    Courses.list_courses()
+  defp list_lecturer_courses(user_id) do
+    Register.Academic.list_lecturer_courses(user_id)
   end
 end
-
