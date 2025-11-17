@@ -3,31 +3,6 @@ defmodule RegisterWeb.Auth.SettingsLive.Index do
 
   alias Register.Accounts
 
-  @impl true
-  def render(assigns) do
-    ~H"""
-    <div class="min-h-screen bg-gray-50">
-      <.flash_group flash={@flash} />
-      <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        <div class="px-4 sm:px-6 lg:px-8">
-          <!-- Move your existing template content here -->
-          <%= if @live_action == :edit do %>
-            <.live_component
-              module={RegisterWeb.Auth.SettingsLive.FormComponent}
-              id="settings"
-              action={@live_action}
-              current_user={@current_user}
-              current_email={@current_email}
-              email_form={@email_form}
-              password_form={@password_form}
-            />
-          <% end %>
-        </div>
-      </main>
-    </div>
-    """
-  end
-
   def mount(%{"token" => token}, _session, socket) do
     socket =
       case Accounts.update_user_email(socket.assigns.current_user, token) do
