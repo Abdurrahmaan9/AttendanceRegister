@@ -1,65 +1,87 @@
-<.header class="text-center">
-    Account Settings
-    <:subtitle>Manage your account email address and password settings</:subtitle>
-</.header>
+<!-- Navigation -->
+<nav class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2">
+            <img
+              src={~p"/logo/syncin-high-resolution-logo-grayscale-transparent.png"}
+              alt="SyncIn logo"
+              class="h-6 w-auto"
+            />
+            <!--<span class="text-2xl font-bold text-blue-600 whitespace-nowrap">SyncIn</span>-->
+          </a>
+        </div>
+          <div class="flex items-center space-x-8">
+            <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</a>
+            <a href="/about" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">About</a>
+          </div>
+        </div>
+      </div>
+    </nav>
 
-<div class="space-y-12 divide-y">
-    <div>
-    <.simple_form
-        for={@email_form}
-        id="email_form"
-        phx-submit="update_email"
-        phx-change="validate_email"
-    >
-        <.input field={@email_form[:email]} type="email" label="Email" required />
-        <.input
-        field={@email_form[:current_password]}
-        name="current_password"
-        id="current_password_for_email"
-        type="password"
-        label="Current password"
-        value={@email_form_current_password}
-        required
-        />
+    <div class="pt-24;">
+      <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+          <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 0112 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+        </div>
+    
+        <div class="bg-white py-8 px-6 shadow-xl rounded-xl">
+        <.simple_form 
+            for={@password_form} 
+            id="password_form" 
+            phx-change="validate_password" 
+            phx-submit="update_password"
+            class="space-y-6"
+        >
+        <div class="space-y-5">
+            <div>
+            <.input 
+                field={@password_form[:password]} 
+                type="password"
+                label="New Password"
+                required
+            />
+            </div>
+            
+            <div>
+            <.input 
+                field={@password_form[:password_confirmation]}
+                type="password"
+                label="Confirm New Password"
+                required
+            />
+            </div>
+            
+            <div>
+            <.input
+                field={@password_form[:current_password]}
+                type="password"
+                label="Current Password"
+                value={@current_password}
+                required
+            />
+            </div>
+        </div>
+        
         <:actions>
-        <.button phx-disable-with="Changing...">Change Email</.button>
+            <.button phx-disable-with="Changing..." class="w-full">
+            <span class="flex items-center justify-center">
+                <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                </svg>
+                Change Password
+            </span>
+            </.button>
         </:actions>
-    </.simple_form>
+        </.simple_form>
     </div>
-    <div>
-    <.simple_form
-        for={@password_form}
-        id="password_form"
-        action={~p"/users/login?_action=password_updated"}
-        method="post"
-        phx-change="validate_password"
-        phx-submit="update_password"
-        phx-trigger-action={@trigger_submit}
-    >
-        <input
-        name={@password_form[:email].name}
-        type="hidden"
-        id="hidden_user_email"
-        value={@current_email}
-        />
-        <.input field={@password_form[:password]} type="password" label="New password" required />
-        <.input
-        field={@password_form[:password_confirmation]}
-        type="password"
-        label="Confirm new password"
-        />
-        <.input
-        field={@password_form[:current_password]}
-        name="current_password"
-        type="password"
-        label="Current password"
-        id="current_password_for_password"
-        value={@current_password}
-        required
-        />
-        <:actions>
-        <.button phx-disable-with="Changing...">Change Password</.button>
-        </:actions>
-    </.simple_form>
-    </div>
+  </div>
 </div>
+
+
+
