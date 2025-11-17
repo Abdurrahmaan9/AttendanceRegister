@@ -7,20 +7,26 @@ defmodule RegisterWeb.Lecturer.AttendanceLive.Index do
   @impl true
   def mount(_params, session, socket) do
     current_user = get_session_user(session)
-    
-    programs = if current_user, do: Academic.list_lecturer_programs(current_user.id), else: []
-    courses = []
-    
+
+    courses = if current_user, do: Academic.list_lecturer_courses(current_user.id), else: []
+
+    summary = %{
+      per_course: [],
+      total_courses: 0,
+      total_sessions: 0,
+      total_attendance: 0,
+      unique_students: 0,
+      sessions: []
+    }
+
     socket =
       socket
       |> assign(:current_user, current_user)
       |> assign(:sidebar_open, false)
       |> assign(:page_title, "Attendance View")
-      |> assign(:programs, programs)
       |> assign(:courses, courses)
-      |> assign(:selected_program_id, nil)
       |> assign(:selected_course_id, nil)
-      |> assign(:summary, %{sessions: []})
+      |> assign(:summary, summary)
       |> assign(:module_stats, %{})
       |> assign(:current_module_stats, %{})
 
@@ -40,29 +46,29 @@ defmodule RegisterWeb.Lecturer.AttendanceLive.Index do
 
   defp load_data(%{assigns: %{current_user: %{id: lecturer_id}}} = socket) do
     summary = Attendance.list_recent_scans_for_lecturer(lecturer_id)
-    
+
     # Get all unique module codes from the summary
-    module_codes = 
+    module_codes =
       summary.sessions
       |> Enum.map(& &1.module_code)
       |> Enum.uniq()
-    
+
     # Get stats for each module
-    module_stats = 
+    module_stats =
       module_codes
       |> Enum.map(fn module_code ->
         stats = Register.Attendance.get_module_stats(module_code)
         {module_code, stats}
       end)
       |> Map.new()
-    
+
     # Get the first module's stats for the main display
-    current_module_stats = 
+    current_module_stats =
       case Enum.take(module_stats, 1) |> List.first() do
         {_module_code, stats} -> stats
         nil -> %{}
       end
-    
+
     socket
     |> assign(:summary, summary)
     |> assign(:module_stats, module_stats)
@@ -80,28 +86,28 @@ defmodule RegisterWeb.Lecturer.AttendanceLive.Index do
     socket |> assign(:page_title, "Attendance View")
   end
 
-  @impl true
-  def handle_event("select_program", %{"program_id" => program_id_str}, socket) do
-    program_id = parse_int(program_id_str)
-    courses =
-      case program_id do
-        nil -> []
-        id -> Academic.list_lecturer_courses(socket.assigns.current_user.id, id)
-      end
+  # @impl true
+  # def handle_event("select_program", %{"program_id" => program_id_str}, socket) do
+  #   program_id = parse_int(program_id_str)
+  #   courses =
+  #     case program_id do
+  #       nil -> []
+  #       id -> Academic.list_lecturer_courses(socket.assigns.current_user.id, id)
+  #     end
 
-    summary = Attendance.lecturer_attendance_summary(%{
-      lecturer_id: socket.assigns.current_user.id,
-      program_id: program_id,
-      course_id: nil
-    })
+  #   summary = Attendance.lecturer_attendance_summary(%{
+  #     lecturer_id: socket.assigns.current_user.id,
+  #     program_id: program_id,
+  #     course_id: nil
+  #   })
 
-    {:noreply,
-     socket
-     |> assign(:selected_program_id, program_id)
-     |> assign(:selected_course_id, nil)
-     |> assign(:courses, courses)
-     |> assign(:summary, summary)}
-  end
+  #   {:noreply,
+  #    socket
+  #    |> assign(:selected_program_id, program_id)
+  #    |> assign(:selected_course_id, nil)
+  #    |> assign(:courses, courses)
+  #    |> assign(:summary, summary)}
+  # end
 
   @impl true
   def handle_event("select_course", %{"course_id" => course_id_str}, socket) do
@@ -109,14 +115,28 @@ defmodule RegisterWeb.Lecturer.AttendanceLive.Index do
 
     summary = Attendance.lecturer_attendance_summary(%{
       lecturer_id: socket.assigns.current_user.id,
-      program_id: socket.assigns.selected_program_id,
       course_id: course_id
     })
+
+    # Update current module stats with the selected course's data
+    current_module_stats =
+      case Enum.find(summary.per_course, &(&1.course_id == course_id)) do
+        nil -> %{}
+        course_stats ->
+          %{
+            total_sessions: course_stats.total_sessions,
+            unique_students: course_stats.unique_students,
+            total_attendance: course_stats.total_attendance,
+            qr_attendance: course_stats.qr_attendance,
+            otp_attendance: course_stats.otp_attendance
+          }
+      end
 
     {:noreply,
      socket
      |> assign(:selected_course_id, course_id)
-     |> assign(:summary, summary)}
+     |> assign(:summary, summary)
+     |> assign(:current_module_stats, current_module_stats)}
   end
 
   @impl true

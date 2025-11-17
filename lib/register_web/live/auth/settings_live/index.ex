@@ -3,6 +3,31 @@ defmodule RegisterWeb.Auth.SettingsLive.Index do
 
   alias Register.Accounts
 
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div class="min-h-screen bg-gray-50">
+      <.flash_group flash={@flash} />
+      <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <div class="px-4 sm:px-6 lg:px-8">
+          <!-- Move your existing template content here -->
+          <%= if @live_action == :edit do %>
+            <.live_component
+              module={RegisterWeb.Auth.SettingsLive.FormComponent}
+              id="settings"
+              action={@live_action}
+              current_user={@current_user}
+              current_email={@current_email}
+              email_form={@email_form}
+              password_form={@password_form}
+            />
+          <% end %>
+        </div>
+      </main>
+    </div>
+    """
+  end
+
   def mount(%{"token" => token}, _session, socket) do
     socket =
       case Accounts.update_user_email(socket.assigns.current_user, token) do
@@ -30,7 +55,6 @@ defmodule RegisterWeb.Auth.SettingsLive.Index do
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
       |> assign(:sidebar_open, false)
-
 
     {:ok, socket}
   end
@@ -67,30 +91,31 @@ defmodule RegisterWeb.Auth.SettingsLive.Index do
     end
   end
 
-  def handle_event("validate_password", params, socket) do
-    %{"current_password" => password, "user" => user_params} = params
-
+  def handle_event("validate_password", %{"user" => user_params}, socket) do
     password_form =
       socket.assigns.current_user
       |> Accounts.change_user_password(user_params)
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, password_form: password_form, current_password: password)}
+    {:noreply, assign(socket, password_form: password_form)}
   end
 
-  def handle_event("update_password", params, socket) do
-    %{"current_password" => password, "user" => user_params} = params
+  def handle_event("update_password", %{"user" => user_params}, socket) do
+    %{"current_password" => current_password} = user_params
     user = socket.assigns.current_user
 
-    case Accounts.update_user_password(user, password, user_params) do
+    case Accounts.update_user_password(user, current_password, user_params) do
       {:ok, user} ->
         password_form =
           user
           |> Accounts.change_user_password(user_params)
           |> to_form()
 
-        {:noreply, assign(socket, trigger_submit: true, password_form: password_form)}
+        {:noreply,
+        socket
+        |> put_flash(:info, "Password updated successfully. Please log in with your new password.")
+        |> push_redirect(to: ~p"/users/login")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_form: to_form(changeset))}

@@ -189,6 +189,131 @@ defmodule Register.Attendance do
     }
   end
 
+  @doc """
+  Returns attendance summary for a lecturer's courses.
+  """
+  def lecturer_attendance_summary(%{lecturer_id: lecturer_id, course_id: course_id}) do
+    # Get all courses for the lecturer if no specific course is selected
+    courses =
+      if course_id do
+        [Register.Courses.get_course!(course_id)]
+      else
+        Register.Academic.list_lecturer_courses(lecturer_id)
+      end
+
+    # Calculate statistics for each course
+    per_course =
+      courses
+      |> Enum.map(fn course ->
+        module_code = course.code
+
+        # Get total number of sessions for this course
+        total_sessions =
+          from(o in Otp,
+            where: o.course_id == ^course.id and o.module_code == ^module_code,
+            select: count(o.id)
+          )
+          |> Repo.one()
+
+        # Get total attendance for this course
+        total_attendance =
+          from(ar in AttendanceRecord,
+            where: ar.course_id == ^course.id and ar.module_code == ^module_code,
+            select: count(ar.id)
+          )
+          |> Repo.one()
+
+        # Get unique students who attended
+        unique_students =
+          from(ar in AttendanceRecord,
+            where: ar.course_id == ^course.id and ar.module_code == ^module_code,
+            select: fragment("COUNT(DISTINCT ?)", ar.student_id)
+          )
+          |> Repo.one() || 0
+
+        # Get attendance by method (QR vs OTP)
+        qr_attendance =
+          from(ar in AttendanceRecord,
+            where: ar.course_id == ^course.id and ar.module_code == ^module_code and ar.method == "qr",
+            select: count(ar.id)
+          )
+          |> Repo.one()
+
+        otp_attendance = total_attendance - qr_attendance
+
+        %{
+          course_id: course.id,
+          module_code: module_code,
+          title: course.title,
+          total_sessions: total_attendance,
+          unique_students: unique_students,
+          total_attendance: total_attendance,
+          qr_attendance: qr_attendance,
+          otp_attendance: otp_attendance
+        }
+      end)
+
+    # Calculate overall statistics
+    total_sessions = Enum.reduce(per_course, 0, &(&2 + &1.total_sessions))
+    total_attendance = Enum.reduce(per_course, 0, &(&2 + &1.total_attendance))
+    unique_students =
+      per_course
+      |> Enum.flat_map(fn c -> [c.unique_students] end)
+      |> Enum.uniq()
+      |> length()
+
+    %{
+      per_course: per_course,
+      total_courses: length(per_course),
+      total_sessions: total_sessions,
+      total_attendance: total_attendance,
+      unique_students: unique_students,
+      sessions: list_recent_sessions(lecturer_id, course_id)
+    }
+  end
+
+  defp list_recent_sessions(lecturer_id, course_id) do
+    base_query =
+      from(ar in AttendanceRecord,
+        join: o in Otp, on: o.course_id == ar.course_id and o.module_code == ar.module_code,
+        where: o.created_by_id == ^lecturer_id,
+        preload: [:course],
+        order_by: [desc: ar.inserted_at],
+        limit: 10
+      )
+
+    query =
+      if course_id do
+        from(ar in base_query, where: ar.course_id == ^course_id)
+      else
+        base_query
+      end
+
+    # Get records with preloaded course
+    records = Repo.all(query)
+
+    # Transform records to include all necessary fields
+    Enum.map(records, fn ar ->
+      %{
+        id: ar.id,
+        module_code: ar.module_code,
+        module_name: ar.module_name,
+        inserted_at: ar.inserted_at,
+        method: ar.method,
+        first_name: ar.first_name,
+        last_name: ar.last_name,
+        course: %{
+          id: ar.course.id,
+          title: ar.course.title,
+          code: ar.course.code
+        },
+        student_name: "#{ar.first_name} #{ar.last_name}",
+        type: ar.method,
+        title: ar.module_name
+      }
+    end)
+  end
+
   def record_attendance(student_id, course_id, module_code, module_name, session_date, attrs) do
     user = Accounts.get_user!(student_id)
     first_name = attrs[:first_name] || user.first_name || ""
@@ -271,12 +396,12 @@ defmodule Register.Attendance do
 
     # Group by session date to identify unique sessions
     sessions_by_date = Enum.group_by(records, & &1.session_date)
-    
+
     # Calculate stats
     total_sessions = map_size(sessions_by_date)
-    
+
     # Get unique students who attended this module (regardless of source)
-    unique_students = records 
+    unique_students = records
       |> Enum.uniq_by(& &1.student_id)
       |> length()
 
@@ -284,7 +409,7 @@ defmodule Register.Attendance do
     attendance_per_session = Enum.map(sessions_by_date, fn {date, records} ->
       # Group by source (qr/otp) for this session date
       by_source = Enum.group_by(records, & &1.source)
-      
+
       %{
         date: date,
         count: length(records),
@@ -301,7 +426,7 @@ defmodule Register.Attendance do
     end) |> Enum.sort_by(& &1.date, {:desc, Date})
 
     # Calculate total attendance (unique student-session pairs)
-    total_attendance = records 
+    total_attendance = records
       |> Enum.uniq_by(fn r -> {r.student_id, r.session_date} end)
       |> length()
 
