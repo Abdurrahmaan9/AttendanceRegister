@@ -21,7 +21,6 @@ defmodule Register.Emails do
   """
   def send_welcome_email(email, name, password) do
     subject = "Welcome to Register App!"
-
     body = """
     Hello #{name},
 
@@ -37,17 +36,18 @@ defmodule Register.Emails do
     The Register Team
     """
 
-    # Create email record
-    case create_email(Email.new_attrs(email, subject, body)) do
+    # Truncate sent_at before creating the email record
+    attrs = Email.new_attrs(email, subject, body)
+            |> Map.put(:sent_at, DateTime.truncate(DateTime.utc_now(), :second))
+
+    case create_email(attrs) do
       {:ok, email_record} ->
-        # In a real app, you would use Bamboo or Swoosh to send the email
-        # For now, we'll just log it and update the status
         IO.puts("Sending email to #{email} with subject: #{subject}")
         IO.puts("Email body:\n#{body}")
 
         # Update email status to sent
         email_record
-        |> Ecto.Changeset.change(%{status: "sent", sent_at: DateTime.utc_now()})
+        |> Ecto.Changeset.change(%{status: "sent"})
         |> Repo.update()
 
       error ->
