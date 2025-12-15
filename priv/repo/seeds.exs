@@ -16,6 +16,10 @@ case Accounts.register_user(%{
     IO.puts("Admin user already exists")
 end
 
+
+
+
+
 # Create lecturer user
 case Accounts.register_user(%{
   email: "lecturer@gmail.com",
