@@ -1,1 +1,362 @@
- 
+<!-- Main Content -->
+<div class="w-full">
+    <!-- Stats Grid -->
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Stats Cards -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Students</p>
+                        <h3 class="text-2xl font-bold text-blue-800"><%= @total_students %></h3>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-green-500 text-sm font-medium"><i class="fas fa-arrow-up"></i> Active</span>
+                    <span class="text-gray-500 text-sm ml-2">Enrolled</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">My Courses</p>
+                        <h3 class="text-2xl font-bold text-purple-800"><%= length(@courses) %></h3>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-chalkboard-teacher text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-green-500 text-sm font-medium"><i class="fas fa-check-circle"></i> Active</span>
+                    <span class="text-gray-500 text-sm ml-2">This semester</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Attendance</p>
+                        <h3 class="text-2xl font-bold text-green-800"><%= @attendance_summary.total_attendance || 0 %></h3>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-user-check text-green-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-green-500 text-sm font-medium"><i class="fas fa-arrow-up"></i> Tracking</span>
+                    <span class="text-gray-500 text-sm ml-2">All time</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Unique Students</p>
+                        <h3 class="text-2xl font-bold text-orange-800"><%= @attendance_summary.unique_students || 0 %></h3>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-user-graduate text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-green-500 text-sm font-medium"><i class="fas fa-users"></i> Engaged</span>
+                    <span class="text-gray-500 text-sm ml-2">Across courses</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Performance Summary -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">System Performance</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">Uptime</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @uptime_min %> min</h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">Memory</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @memory_mb %> MB</h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">Run Queue</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @run_queue %></h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">IO In</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @io_in_kbs %> KB/s</h3>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-500 text-sm">IO Out</p>
+                    <h3 class="text-xl font-bold text-gray-800"><%= @io_out_kbs %> KB/s</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Course Attendance Chart -->
+            <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">Course Attendance Overview</h2>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-md">Week</button>
+                        <button class="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">Month</button>
+                        <button class="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">Semester</button>
+                    </div>
+                </div>
+                <canvas id="dailySigninsChart" height="250"></canvas>
+            </div>
+
+            <!-- Attendance Methods Distribution -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Attendance Methods</h2>
+                <canvas id="signinDistributionChart" height="250"></canvas>
+            </div>
+        </div>
+
+        <!-- System Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Memory Usage (MB)</h2>
+                <canvas id="systemMemChart" height="220"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Run Queue</h2>
+                <canvas id="systemRunqChart" height="220"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">IO Throughput (KB/s)</h2>
+                <canvas id="systemIOChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Hidden data element for LiveView Hook to read -->
+        <div id="system-metrics-data"
+            phx-hook="SystemCharts"
+            data-labels={Jason.encode!(@labels)}
+            data-mem-series={Jason.encode!(@mem_series)}
+            data-runq-series={Jason.encode!(@runq_series)}
+            data-ioin-series={Jason.encode!(@ioin_series)}
+            data-ioout-series={Jason.encode!(@ioout_series)}
+            class="hidden">
+        </div>
+
+        <!-- Statistical Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Attendance by Course</h2>
+                <canvas id="progBarChart" height="260"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">7-Day Attendance Trend</h2>
+                <canvas id="usersLineChart" height="260"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">OTP Status</h2>
+                <canvas id="otpDonutChart" height="240"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">QR Codes Status</h2>
+                <canvas id="qrDonutChart" height="240"></canvas>
+            </div>
+        </div>
+
+        <!-- Hidden data for statistical charts -->
+        <div id="stats-data"
+             phx-hook="StatsCharts"
+             data-prog-labels={Jason.encode!(@course_labels || [])}
+             data-prog-counts={Jason.encode!(@course_counts || [])}
+             data-users-labels={Jason.encode!(@attendance_labels || [])}
+             data-users-counts={Jason.encode!(@attendance_counts || [])}
+             data-otps-active={@otp_active || 0}
+             data-otps-inactive={@otp_inactive || 0}
+             data-qr-active={@qr_active || 0}
+             data-qr-expired={@qr_inactive || 0}
+             class="hidden">
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- My Courses -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">My Courses</h2>
+                <div class="space-y-4">
+                    <%= for course <- Enum.take(@courses, 4) do %>
+                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div>
+                            <h4 class="font-medium"><%= course.title %></h4>
+                            <p class="text-sm text-gray-500"><%= course.code %> | <%= course.credits %> credits</p>
+                        </div>
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Active</span>
+                    </div>
+                    <% end %>
+                </div>
+            </div>
+
+            <!-- Weekly Attendance Trend -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Weekly Attendance Trend</h2>
+                <canvas id="weeklyTrendChart" height="250"></canvas>
+            </div>
+
+            <!-- Recent Attendance -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Recent Attendance</h2>
+                <div class="space-y-3">
+                    <%= for session <- Enum.take(@attendance_summary.sessions || [], 5) do %>
+                    <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="bg-blue-100 p-2 rounded-full">
+                            <i class="fas fa-user-check text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium"><%= session.student_name %></h4>
+                            <p class="text-sm text-gray-500"><%= session.course.title %> | <%= session.module_code %></p>
+                        </div>
+                        <div class="ml-auto text-right">
+                            <span class="text-xs text-gray-500"><%= Calendar.strftime(session.inserted_at, "%H:%M") %></span>
+                            <div class="text-xs mt-1">
+                                <%= if session.type == "qr" do %>
+                                    <span class="bg-green-100 text-green-800 px-1 rounded">QR</span>
+                                <% else %>
+                                    <span class="bg-blue-100 text-blue-800 px-1 rounded">OTP</span>
+                                <% end %>
+                            </div>
+                        </div>
+                    </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Daily Sign-ins Chart (Course Attendance)
+const dailySigninsCtx = document.getElementById('dailySigninsChart').getContext('2d');
+const dailySigninsChart = new Chart(dailySigninsCtx, {
+    type: 'line',
+    data: {
+        labels: ['6:00 AM', '8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM'],
+        datasets: [
+            {
+                label: 'QR Attendance',
+                data: [45, 52, 38, 65, 48, 25],
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.3,
+                fill: true
+            },
+            {
+                label: 'OTP Attendance',
+                data: [28, 35, 42, 38, 45, 15],
+                borderColor: '#8B5CF6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                tension: 0.3,
+                fill: true
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value + ' students';
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Sign-in Distribution Chart (Attendance Methods)
+const signinDistributionCtx = document.getElementById('signinDistributionChart').getContext('2d');
+const signinDistributionChart = new Chart(signinDistributionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['QR Code', 'OTP'],
+        datasets: [{
+            data: [65, 35],
+            backgroundColor: [
+                '#3B82F6',
+                '#8B5CF6'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = Math.round((value / total) * 100);
+                        return `${label}: ${value}%`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Weekly Trend Chart
+const weeklyTrendCtx = document.getElementById('weeklyTrendChart').getContext('2d');
+const weeklyTrendChart = new Chart(weeklyTrendCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [
+            {
+                label: 'Attendance',
+                data: [35, 42, 38, 45, 50, 15],
+                backgroundColor: '#10B981',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            }
+        },
+        scales: {
+            x: {
+                stacked: false,
+            },
+            y: {
+                stacked: false,
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
