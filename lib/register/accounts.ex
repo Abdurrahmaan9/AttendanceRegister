@@ -101,9 +101,8 @@ def create_user_with_role(%{email: email} = attrs, role) do
       end
 
     # Send welcome email
-    Task.start(fn ->
-      Register.Emails.send_welcome_email(email, name, temp_password)
-    end)
+    Register.Emails.send_welcome_email(email, name, temp_password)
+
 
     {:ok, user}
   else

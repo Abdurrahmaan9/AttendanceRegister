@@ -20,6 +20,13 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
     total_students = Students.count_students()
     total_staff = Accounts.total_users_by_roles(["lecturer", "admin", "staff"])
     total_sessions_for_day = Attendance.total_classes_for_day()
+    total_courses = count_courses()
+    total_programs = count_programs()
+    total_qr_codes = count_qr_codes()
+    total_otps = count_otps()
+    today_attendance = count_today_attendance()
+    students_per_course = get_students_per_course()
+    recent_activities = get_recent_activities()
 
     socket =
       socket
@@ -28,6 +35,13 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
       |> assign(:total_students, total_students)
       |> assign(:total_staff, total_staff)
       |> assign(:total_sessions_for_day, total_sessions_for_day)
+      |> assign(:total_courses, total_courses)
+      |> assign(:total_programs, total_programs)
+      |> assign(:total_qr_codes, total_qr_codes)
+      |> assign(:total_otps, total_otps)
+      |> assign(:today_attendance, today_attendance)
+      |> assign(:students_per_course, students_per_course)
+      |> assign(:recent_activities, recent_activities)
       |> assign_new(:metrics, fn -> initial_metrics() end)
       |> assign_stats()
 
@@ -198,5 +212,100 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
       select: count(field(as(:q), :id)))
 
     {Repo.one(q_active) || 0, Repo.one(q_expired) || 0}
+  end
+
+  defp count_courses do
+    from(c in "courses", where: c.is_active == true, select: count(c.id))
+    |> Repo.one() || 0
+  end
+
+  defp count_programs do
+    from(p in "programs", where: p.is_active == true, select: count(p.id))
+    |> Repo.one() || 0
+  end
+
+  defp count_qr_codes do
+    from(q in "qr_codes", select: count(q.id))
+    |> Repo.one() || 0
+  end
+
+  defp count_otps do
+    from(o in "otp", select: count(o.id))
+    |> Repo.one() || 0
+  end
+
+  defp count_today_attendance do
+    today = Date.utc_today()
+    from(a in "attendance_records", where: a.session_date == ^today, select: count(a.id))
+    |> Repo.one() || 0
+  end
+
+  defp get_students_per_course do
+    from(a in "attendance_records",
+      join: c in "courses", on: a.course_id == c.id,
+      group_by: c.id,
+      select: {c.title, count(a.student_id)})
+    |> Repo.all()
+  end
+
+  defp get_recent_activities do
+    # Get recent attendance records
+    attendance_query = from(a in "attendance_records",
+      join: u in "users", on: a.student_id == u.id,
+      order_by: [desc: a.inserted_at],
+      limit: 5,
+      select: %{
+        type: "attendance",
+        user_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        user_email: u.email,
+        action: "marked attendance",
+        target: a.module_name,
+        timestamp: a.inserted_at,
+        details: a.method
+      })
+
+    # Get recent QR codes created
+    qr_query = from(q in "qr_codes",
+      join: u in "users", on: q.created_by_id == u.id,
+      order_by: [desc: q.inserted_at],
+      limit: 3,
+      select: %{
+        type: "qr_code",
+        user_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        user_email: u.email,
+        action: "created QR code",
+        target: q.name,
+        timestamp: q.inserted_at,
+        details: q.class_name
+      })
+
+    # Get recent OTPs generated
+    otp_query = from(o in "otp",
+      join: u in "users", on: o.created_by_id == u.id,
+      order_by: [desc: o.inserted_at],
+      limit: 3,
+      select: %{
+        type: "otp",
+        user_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        user_email: u.email,
+        action: "generated OTP",
+        target: o.course_name,
+        timestamp: o.inserted_at,
+        details: o.session_date
+      })
+
+    # Combine and sort all activities
+    activities =
+      (Repo.all(attendance_query) ++ Repo.all(qr_query) ++ Repo.all(otp_query))
+      |> Enum.sort_by(fn activity ->
+        case activity.timestamp do
+          %DateTime{} -> activity.timestamp
+          %NaiveDateTime{} -> DateTime.from_naive!(activity.timestamp, "Etc/UTC")
+          _ -> DateTime.utc_now()
+        end
+      end, {:desc, DateTime})
+      |> Enum.take(10)
+
+    activities
   end
 end

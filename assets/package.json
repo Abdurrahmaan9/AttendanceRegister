@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "QR Code Scanner for Register App",
   "scripts": {
-    "deploy": "webpack --mode production",
+    "deploy": "cd .. && mix assets.deploy && rm -f _build/esbuild",
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
