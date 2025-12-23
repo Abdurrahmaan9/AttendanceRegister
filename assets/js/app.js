@@ -6,16 +6,21 @@
 import "phoenix_html"
 
 // Import dependencies
+import Chart from "chart.js/auto"
 import { QRScanner } from "./qr_scanner_bk"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+
+// Make Chart available globally for existing hooks
+window.Chart = Chart
 
 // Import application modules
 import "./sidebar_dropdowns"
 import bgCarousel from "./bg_carousel"
 import "./student_actions"
 import "./modal"
+import StudentCharts from "./hooks/student_charts"
 
 
 // Get CSRF token for secure requests
@@ -39,8 +44,7 @@ let hooks = {
       this.updateFromDataset()
     },
     initCharts() {
-      const Chart = window.Chart
-      if (!Chart) return
+            if (!Chart) return
 
       const memCtx = document.getElementById('systemMemChart')?.getContext('2d')
       const runqCtx = document.getElementById('systemRunqChart')?.getContext('2d')
@@ -112,8 +116,7 @@ let hooks = {
       this.updateFromDataset()
     },
     initCharts() {
-      const Chart = window.Chart
-      if (!Chart) return
+            if (!Chart) return
 
       const progCtx = document.getElementById('progBarChart')?.getContext('2d')
       const usersCtx = document.getElementById('usersLineChart')?.getContext('2d')
@@ -183,7 +186,10 @@ let hooks = {
         console.warn('StatsCharts parse/update error', e)
       }
     }
-  }
+  },
+
+  // Student dashboard charts hook
+  StudentCharts: StudentCharts
 }
 
 // Create and initialize LiveSocket instance with all hooks
