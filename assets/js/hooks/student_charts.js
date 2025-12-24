@@ -4,9 +4,9 @@ export default {
     this.initCharts()
     this.updateFromDataset()
   },
-  updated() {
-    this.updateFromDataset()
-  },
+  // updated() {
+  //   this.updateFromDataset()
+  // },
   initCharts() {
     const Chart = window.Chart
     if (!Chart) return

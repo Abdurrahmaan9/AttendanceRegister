@@ -28,6 +28,9 @@ defmodule Register.Application do
       # Start attendance summary cache refresher (runs every 2 hours)
       Register.Attendance.SummaryCache,
 
+      # Start attendance data updater (runs every 5 minutes)
+      Register.AttendanceUpdater,
+
       # Start the permission initialization worker
       {Task, &initialize_default_permissions/0}
     ]

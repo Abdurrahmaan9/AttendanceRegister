@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaisyUI Test</title>
+    <link href="/priv/static/assets/app.css" rel="stylesheet">
+</head>
+<body class="p-8">
+    <h1 class="text-3xl font-bold mb-6">DaisyUI Components Test</h1>
+    
+    <div class="space-y-6">
+        <!-- Buttons -->
+        <div>
+            <h2 class="text-xl font-semibold mb-3">Buttons</h2>
+            <div class="flex gap-2">
+                <button class="btn btn-primary">Primary</button>
+                <button class="btn btn-secondary">Secondary</button>
+                <button class="btn btn-accent">Accent</button>
+                <button class="btn btn-ghost">Ghost</button>
+                <button class="btn btn-link">Link</button>
+            </div>
+        </div>
+
+        <!-- Card -->
+        <div>
+            <h2 class="text-xl font-semibold mb-3">Card</h2>
+            <div class="card w-96 bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title">Card Title</h2>
+                    <p>If a dog chews shoes whose shoes does he choose?</p>
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-primary">Buy Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert -->
+        <div>
+            <h2 class="text-xl font-semibold mb-3">Alerts</h2>
+            <div class="alert alert-success">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Success! DaisyUI is working!</span>
+            </div>
+            <div class="alert alert-warning mt-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Warning: Test message</span>
+            </div>
+        </div>
+
+        <!-- Badge -->
+        <div>
+            <h2 class="text-xl font-semibold mb-3">Badges</h2>
+            <div class="flex gap-2">
+                <div class="badge badge-primary">Primary</div>
+                <div class="badge badge-secondary">Secondary</div>
+                <div class="badge badge-accent">Accent</div>
+                <div class="badge badge-ghost">Ghost</div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div>
+            <h2 class="text-xl font-semibold mb-3">Progress</h2>
+            <div class="w-full bg-base-200 rounded-full h-4">
+                <div class="bg-primary h-4 rounded-full" style="width: 45%"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
