@@ -448,4 +448,95 @@ defmodule Register.Attendance do
 
     Repo.one(query) || 0
   end
+
+  @doc """
+  Returns paginated recent activities across the system.
+
+  ## Parameters
+
+  - page: Page number (default: 1)
+  - per_page: Items per page (default: 10)
+
+  ## Returns
+
+  {activities, pagination_info}
+  """
+  def list_recent_activities_paginated(page \\ 1, per_page \\ 10) do
+    page = max(page, 1)
+    per_page = max(per_page, 1)
+
+    # Get recent attendance records
+    attendance_query = from(a in "attendance_records",
+      join: u in "users", on: a.student_id == u.id,
+      select: %{
+        type: "attendance",
+        user_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        user_email: u.email,
+        action: "marked attendance",
+        target: a.module_name,
+        timestamp: a.inserted_at,
+        details: a.method
+      })
+
+    # Get recent QR codes created
+    qr_query = from(q in "qr_codes",
+      join: u in "users", on: q.created_by_id == u.id,
+      select: %{
+        type: "qr_code",
+        user_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        user_email: u.email,
+        action: "created QR code",
+        target: q.name,
+        timestamp: q.inserted_at,
+        details: q.class_name
+      })
+
+    # Get recent OTPs generated
+    otp_query = from(o in "otp",
+      join: u in "users", on: o.created_by_id == u.id,
+      select: %{
+        type: "otp",
+        user_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        user_email: u.email,
+        action: "generated OTP",
+        target: o.course_name,
+        timestamp: o.inserted_at,
+        details: o.session_date
+      })
+
+    # Execute queries separately and combine in memory
+    attendance_activities = Repo.all(attendance_query)
+    qr_activities = Repo.all(qr_query)
+    otp_activities = Repo.all(otp_query)
+
+    # Combine and sort all activities
+    all_activities = attendance_activities ++ qr_activities ++ otp_activities
+      |> Enum.sort_by(fn activity ->
+        case activity.timestamp do
+          %DateTime{} -> activity.timestamp
+          %NaiveDateTime{} -> DateTime.from_naive!(activity.timestamp, "Etc/UTC")
+          _ -> DateTime.utc_now()
+        end
+      end, {:desc, DateTime})
+
+    # Get total count
+    total_entries = length(all_activities)
+    total_pages = ceil(total_entries / per_page)
+
+    # Paginate the combined results
+    activities = all_activities
+      |> Enum.drop((page - 1) * per_page)
+      |> Enum.take(per_page)
+
+    pagination_info = %{
+      current_page: page,
+      per_page: per_page,
+      total_pages: total_pages,
+      total_entries: total_entries,
+      has_next_page: page < total_pages,
+      has_prev_page: page > 1
+    }
+
+    {activities, pagination_info}
+  end
 end

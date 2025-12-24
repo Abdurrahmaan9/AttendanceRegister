@@ -16,7 +16,13 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
   @max_points 20
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, session, socket) do
+    current_user = get_session_user(session)
+
+    # Get pagination parameters
+    page = String.to_integer(params["page"] || "1")
+    per_page = String.to_integer(params["per_page"] || "10")
+
     total_students = Students.count_students()
     total_staff = Accounts.total_users_by_roles(["lecturer", "admin", "staff"])
     total_sessions_for_day = Attendance.total_classes_for_day()
@@ -26,12 +32,13 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
     total_otps = count_otps()
     today_attendance = count_today_attendance()
     students_per_course = get_students_per_course()
-    recent_activities = get_recent_activities()
+    {recent_activities, pagination_info} = Attendance.list_recent_activities_paginated(page, per_page)
 
     socket =
       socket
       |> assign(:current_path, @url)
       |> assign(:sidebar_open, false)
+      |> assign(:current_user, current_user)
       |> assign(:total_students, total_students)
       |> assign(:total_staff, total_staff)
       |> assign(:total_sessions_for_day, total_sessions_for_day)
@@ -42,14 +49,41 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
       |> assign(:today_attendance, today_attendance)
       |> assign(:students_per_course, students_per_course)
       |> assign(:recent_activities, recent_activities)
+      |> assign(:pagination_info, pagination_info)
       |> assign_new(:metrics, fn -> initial_metrics() end)
       |> assign_stats()
+      |> assign_initial_system_metrics()
 
-    if connected?(socket) do
-      :timer.send_interval(@sample_interval, :sample_metrics)
+    if connected?(socket) and current_user do
+      # Subscribe to admin dashboard updates
+      if current_user.role == "admin" do
+        RegisterWeb.Endpoint.subscribe("admin_dashboard:#{current_user.id}")
+      end
+
+      # Only update system metrics every 30 seconds
+      :timer.send_interval(60_000, :sample_system_metrics)
+      # Also do an initial sample to populate charts immediately
+      {:ok, sample_and_assign(socket)}
+    else
+      {:ok, socket}
     end
+  end
 
-    {:ok, sample_and_assign(socket)}
+  @impl true
+  def handle_params(params, _url, socket) do
+    # Get pagination parameters from URL
+    page = String.to_integer(params["page"] || "1")
+    per_page = String.to_integer(params["per_page"] || "10")
+
+    # Get paginated recent activities from context
+    {recent_activities, pagination_info} = Attendance.list_recent_activities_paginated(page, per_page)
+
+    socket =
+      socket
+      |> assign(:recent_activities, recent_activities)
+      |> assign(:pagination_info, pagination_info)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -58,8 +92,48 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
   end
 
   @impl true
-  def handle_info(:sample_metrics, socket) do
+  def handle_event("paginate", %{"page" => page, "per-page" => per_page}, socket) do
+    page = String.to_integer(page)
+    per_page = String.to_integer(per_page)
+
+    {recent_activities, pagination_info} = Attendance.list_recent_activities_paginated(page, per_page)
+
+    socket =
+      socket
+      |> assign(:recent_activities, recent_activities)
+      |> assign(:pagination_info, pagination_info)
+      |> push_patch(to: "#{@url}?page=#{page}&per_page=#{per_page}")
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:sample_system_metrics, socket) do
+    # Only update system metrics, not attendance data
     {:noreply, sample_and_assign(socket)}
+  end
+
+  @impl true
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "admin_dashboard:" <> _, event: "attendance_update", payload: attendance_data}, socket) do
+    # Handle attendance updates from background job
+    socket =
+      socket
+      |> assign(:daily_labels, attendance_data.daily_labels)
+      |> assign(:daily_qr_data, attendance_data.daily_qr_data)
+      |> assign(:daily_otp_data, attendance_data.daily_otp_data)
+      |> assign(:weekly_trend_labels, attendance_data.weekly_trend_labels)
+      |> assign(:weekly_trend_data, attendance_data.weekly_trend_data)
+      |> assign(:signin_qr, attendance_data.signin_qr)
+      |> assign(:signin_otp, attendance_data.signin_otp)
+
+    {:noreply, socket}
+  end
+
+  defp get_session_user(session) do
+    case session["user_token"] do
+      nil -> nil
+      token -> Register.Accounts.get_user_by_session_token(token)
+    end
   end
 
   defp sample_and_assign(socket) do
@@ -108,8 +182,8 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
     {{:input, io_in}, {:output, io_out}} = :erlang.statistics(:io)
     delta_in = max(io_in - last_in, 0)
     delta_out = max(io_out - last_out, 0)
-    # bytes over @sample_interval seconds -> KB/s
-    sec = @sample_interval / 1000
+    # bytes over 30_000 milliseconds -> KB/s
+    sec = 60_000 / 1000
     io_in_kbs = Float.round(delta_in / 1024 / sec, 1)
     io_out_kbs = Float.round(delta_out / 1024 / sec, 1)
 
@@ -140,12 +214,44 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
   defp trim_left(list, max) when length(list) <= max, do: list
   defp trim_left(list, max), do: Enum.take(list, -max)
 
+  defp assign_initial_system_metrics(socket) do
+    # Get initial system metrics immediately
+    total_mem_bytes = :erlang.memory(:total)
+    memory_mb = Float.round(total_mem_bytes / 1_048_576, 1)
+    run_queue = :erlang.statistics(:run_queue)
+    {uptime_ms, _} = :erlang.statistics(:wall_clock)
+    uptime_min = Integer.floor_div(uptime_ms, 60_000)
+
+    socket
+    |> assign(:uptime_min, uptime_min)
+    |> assign(:memory_mb, memory_mb)
+    |> assign(:run_queue, run_queue)
+    |> assign(:io_in_kbs, 0)
+    |> assign(:io_out_kbs, 0)
+    |> assign(:labels, [])
+    |> assign(:mem_series, [])
+    |> assign(:runq_series, [])
+    |> assign(:ioin_series, [])
+    |> assign(:ioout_series, [])
+  end
+
   # ===== Statistical aggregates for charts =====
   defp assign_stats(socket) do
     {prog_labels, prog_counts} = students_by_program()
     {users_labels, users_counts} = new_users_last_7_days()
     {otps_active, otps_inactive} = otp_status_counts()
     {qr_active, qr_expired} = qr_status_counts()
+
+    # Add attendance chart data (admin view - all courses)
+    {daily_labels, daily_qr_data, daily_otp_data} = admin_daily_attendance()
+    {weekly_trend_labels, weekly_trend_data} = admin_weekly_trend()
+    {signin_qr, signin_otp} = admin_signin_distribution()
+
+    # Get course attendance stats
+    {course_labels, course_counts} = admin_course_attendance_stats()
+
+    # Get attendance summary
+    attendance_summary = admin_attendance_summary()
 
     socket
     |> assign(:prog_labels, prog_labels)
@@ -156,6 +262,18 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
     |> assign(:otps_inactive, otps_inactive)
     |> assign(:qr_active, qr_active)
     |> assign(:qr_expired, qr_expired)
+    |> assign(:daily_labels, daily_labels)
+    |> assign(:daily_qr_data, daily_qr_data)
+    |> assign(:daily_otp_data, daily_otp_data)
+    |> assign(:weekly_trend_labels, weekly_trend_labels)
+    |> assign(:weekly_trend_data, weekly_trend_data)
+    |> assign(:signin_qr, signin_qr)
+    |> assign(:signin_otp, signin_otp)
+    |> assign(:course_labels, course_labels)
+    |> assign(:course_counts, course_counts)
+    |> assign(:attendance_labels, users_labels)
+    |> assign(:attendance_counts, users_counts)
+    |> assign(:attendance_summary, attendance_summary)
   end
 
   defp students_by_program do
@@ -307,5 +425,152 @@ defmodule RegisterWeb.Admin.Dashboard.Index do
       |> Enum.take(10)
 
     activities
+  end
+
+  # ===== Admin Attendance Chart Functions =====
+
+  defp admin_daily_attendance do
+    # Get attendance by module/session for today (all courses)
+    today = Date.utc_today()
+
+    # Query attendance records for today, grouped by session and method
+    query = from ar in "attendance_records",
+      where: ar.session_date == ^today,
+      group_by: [ar.method, ar.module_code],
+      select: {
+        ar.method,
+        ar.module_code,
+        count(ar.id)
+      },
+      order_by: ar.module_code,
+      limit: 24  # Limit to prevent too much data
+
+    results = Repo.all(query)
+
+    # Get unique module codes for today's sessions
+    module_codes = results
+      |> Enum.map(fn {_, module_code, _} -> module_code end)
+      |> Enum.uniq()
+      |> Enum.take(6) # Limit to 6 sessions for chart readability
+
+    labels = if length(module_codes) > 0 do
+      module_codes
+    else
+      ["No Sessions Today"]
+    end
+
+    # Process results into QR and OTP data by module
+    {qr_data, otp_data} = Enum.reduce(module_codes, {[], []}, fn module_code, {qr_acc, otp_acc} ->
+      qr_count = Enum.find(results, fn {method, mod, _} -> method == "qr" and mod == module_code end)
+      otp_count = Enum.find(results, fn {method, mod, _} -> method == "otp" and mod == module_code end)
+
+      qr_val = if qr_count, do: elem(qr_count, 2), else: 0
+      otp_val = if otp_count, do: elem(otp_count, 2), else: 0
+
+      {[qr_val | qr_acc], [otp_val | otp_acc]}
+    end)
+
+    # Reverse to maintain order
+    qr_data = Enum.reverse(qr_data)
+    otp_data = Enum.reverse(otp_data)
+
+    {labels, qr_data, otp_data}
+  end
+
+  defp admin_weekly_trend do
+    # Get attendance for last 7 days grouped by day
+    start_date = Date.add(Date.utc_today(), -6)
+
+    query = from ar in "attendance_records",
+      where: ar.session_date >= ^start_date,
+      group_by: ar.session_date,
+      select: {ar.session_date, count(ar.id)},
+      order_by: ar.session_date
+
+    results = Repo.all(query)
+    attendance_map = Map.new(results)
+
+    # Generate labels and data for the last 7 days
+    dates = for i <- 0..6, do: Date.add(start_date, i)
+
+    labels = Enum.map(dates, fn date ->
+      case Date.day_of_week(date) do
+        1 -> "Mon"
+        2 -> "Tue"
+        3 -> "Wed"
+        4 -> "Thu"
+        5 -> "Fri"
+        6 -> "Sat"
+        7 -> "Sun"
+      end
+    end)
+
+    data = Enum.map(dates, fn date -> Map.get(attendance_map, date, 0) end)
+
+    {labels, data}
+  end
+
+  defp admin_signin_distribution do
+    # Get total attendance by method for all time
+    qr_query = from ar in "attendance_records",
+      where: ar.method == "qr",
+      select: count(ar.id)
+
+    otp_query = from ar in "attendance_records",
+      where: ar.method == "otp",
+      select: count(ar.id)
+
+    qr_count = Repo.one(qr_query) || 0
+    otp_count = Repo.one(otp_query) || 0
+
+    {qr_count, otp_count}
+  end
+
+  defp admin_course_attendance_stats do
+    # Get attendance counts per course
+    query = from ar in "attendance_records",
+      join: c in "courses", on: ar.course_id == c.id,
+      group_by: c.id,
+      select: {c.title, count(ar.id)},
+      order_by: [desc: count(ar.id)],
+      limit: 10
+
+    results = Repo.all(query)
+
+    labels = Enum.map(results, fn {title, _} -> title end)
+    counts = Enum.map(results, fn {_, count} -> count end)
+
+    {labels, counts}
+  end
+
+  defp admin_attendance_summary do
+    # Get overall attendance summary
+    total_attendance_query = from ar in "attendance_records", select: count(ar.id)
+    total_attendance = Repo.one(total_attendance_query) || 0
+
+    unique_students_query = from ar in "attendance_records", select: count(ar.student_id, :distinct)
+    unique_students = Repo.one(unique_students_query) || 0
+
+    # Get recent sessions
+    recent_sessions_query = from ar in "attendance_records",
+      join: u in "users", on: ar.student_id == u.id,
+      join: c in "courses", on: ar.course_id == c.id,
+      order_by: [desc: ar.inserted_at],
+      limit: 10,
+      select: %{
+        student_name: fragment("? || ' ' || ?", u.first_name, u.last_name),
+        course: %{title: c.title},
+        module_code: ar.module_code,
+        type: ar.method,
+        inserted_at: ar.inserted_at
+      }
+
+    sessions = Repo.all(recent_sessions_query)
+
+    %{
+      total_attendance: total_attendance,
+      unique_students: unique_students,
+      sessions: sessions
+    }
   end
 end

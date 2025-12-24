@@ -31,7 +31,14 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
       |> assign_initial_system_metrics()
 
     if connected?(socket) and current_user do
-      :timer.send_interval(5_000, :sample_metrics)
+      # Subscribe to attendance updates for this lecturer
+      if current_user.role == "lecturer" do
+        RegisterWeb.Endpoint.subscribe("lecturer_dashboard:#{current_user.id}")
+      end
+
+      # Only update system metrics every 30 seconds
+      :timer.send_interval(60_000, :sample_system_metrics)
+      # Also do an initial sample to populate charts immediately
       {:ok, sample_and_assign(socket)}
     else
       {:ok, socket}
@@ -44,8 +51,25 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
   end
 
   @impl true
-  def handle_info(:sample_metrics, socket) do
+  def handle_info(:sample_system_metrics, socket) do
+    # Only update system metrics, not attendance data
     {:noreply, sample_and_assign(socket)}
+  end
+
+  @impl true
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "lecturer_dashboard:" <> _, event: "attendance_update", payload: attendance_data}, socket) do
+    # Handle attendance updates from background job
+    socket =
+      socket
+      |> assign(:daily_labels, attendance_data.daily_labels)
+      |> assign(:daily_qr_data, attendance_data.daily_qr_data)
+      |> assign(:daily_otp_data, attendance_data.daily_otp_data)
+      |> assign(:weekly_trend_labels, attendance_data.weekly_trend_labels)
+      |> assign(:weekly_trend_data, attendance_data.weekly_trend_data)
+      |> assign(:signin_qr, attendance_data.signin_qr)
+      |> assign(:signin_otp, attendance_data.signin_otp)
+
+    {:noreply, socket}
   end
 
   defp get_session_user(session) do
@@ -101,8 +125,8 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
     {{:input, io_in}, {:output, io_out}} = :erlang.statistics(:io)
     delta_in = max(io_in - last_in, 0)
     delta_out = max(io_out - last_out, 0)
-    # bytes over 5_000 milliseconds -> KB/s
-    sec = 5_000 / 1000
+    # bytes over 60_000 milliseconds -> KB/s
+    sec = 60_000 / 1000
     io_in_kbs = Float.round(delta_in / 1024 / sec, 1)
     io_out_kbs = Float.round(delta_out / 1024 / sec, 1)
 
@@ -170,6 +194,11 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
         course_id: nil
       })
 
+      # Get attendance chart data
+      {daily_labels, daily_qr_data, daily_otp_data} = lecturer_daily_attendance(current_user.id)
+      {weekly_trend_labels, weekly_trend_data} = lecturer_weekly_trend(current_user.id)
+      {signin_qr, signin_otp} = lecturer_signin_distribution(current_user.id)
+
       socket
       |> assign(:course_labels, course_labels)
       |> assign(:course_counts, course_counts)
@@ -180,6 +209,13 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
       |> assign(:otp_active, otp_active)
       |> assign(:otp_inactive, otp_inactive)
       |> assign(:attendance_summary, attendance_summary)
+      |> assign(:daily_labels, daily_labels)
+      |> assign(:daily_qr_data, daily_qr_data)
+      |> assign(:daily_otp_data, daily_otp_data)
+      |> assign(:weekly_trend_labels, weekly_trend_labels)
+      |> assign(:weekly_trend_data, weekly_trend_data)
+      |> assign(:signin_qr, signin_qr)
+      |> assign(:signin_otp, signin_otp)
     else
       socket
     end
@@ -266,5 +302,107 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
     inactive = Repo.one(inactive_query) || 0
 
     {active, inactive}
+  end
+
+  # ===== Attendance Chart Data Functions =====
+
+  defp lecturer_daily_attendance(lecturer_id) do
+    # Get attendance by module/session for today
+    today = Date.utc_today()
+
+    # Query attendance records for today, grouped by session and method
+    query = from ar in "attendance_records",
+      join: o in "otp", on: o.course_id == ar.course_id and o.module_code == ar.module_code,
+      where: o.created_by_id == ^lecturer_id and ar.session_date == ^today,
+      group_by: [ar.method, ar.module_code],
+      select: {
+        ar.method,
+        ar.module_code,
+        count(ar.id)
+      },
+      order_by: ar.module_code
+
+    results = Repo.all(query)
+
+    # Get unique module codes for today's sessions
+    module_codes = results
+      |> Enum.map(fn {_, module_code, _} -> module_code end)
+      |> Enum.uniq()
+      |> Enum.take(6) # Limit to 6 sessions for chart readability
+
+    labels = if length(module_codes) > 0 do
+      module_codes
+    else
+      ["No Sessions Today"]
+    end
+
+    # Process results into QR and OTP data by module
+    {qr_data, otp_data} = Enum.reduce(module_codes, {[], []}, fn module_code, {qr_acc, otp_acc} ->
+      qr_count = Enum.find(results, fn {method, mod, _} -> method == "qr" and mod == module_code end)
+      otp_count = Enum.find(results, fn {method, mod, _} -> method == "otp" and mod == module_code end)
+
+      qr_val = if qr_count, do: elem(qr_count, 2), else: 0
+      otp_val = if otp_count, do: elem(otp_count, 2), else: 0
+
+      {[qr_val | qr_acc], [otp_val | otp_acc]}
+    end)
+
+    # Reverse to maintain order
+    qr_data = Enum.reverse(qr_data)
+    otp_data = Enum.reverse(otp_data)
+
+    {labels, qr_data, otp_data}
+  end
+
+  defp lecturer_weekly_trend(lecturer_id) do
+    # Get attendance for last 7 days grouped by day
+    start_date = Date.add(Date.utc_today(), -6)
+
+    query = from ar in "attendance_records",
+      join: o in "otp", on: o.course_id == ar.course_id and o.module_code == ar.module_code,
+      where: o.created_by_id == ^lecturer_id and ar.session_date >= ^start_date,
+      group_by: ar.session_date,
+      select: {ar.session_date, count(ar.id)},
+      order_by: ar.session_date
+
+    results = Repo.all(query)
+    attendance_map = Map.new(results)
+
+    # Generate labels and data for the last 7 days
+    dates = for i <- 0..6, do: Date.add(start_date, i)
+
+    labels = Enum.map(dates, fn date ->
+      case Date.day_of_week(date) do
+        1 -> "Mon"
+        2 -> "Tue"
+        3 -> "Wed"
+        4 -> "Thu"
+        5 -> "Fri"
+        6 -> "Sat"
+        7 -> "Sun"
+      end
+    end)
+
+    data = Enum.map(dates, fn date -> Map.get(attendance_map, date, 0) end)
+
+    {labels, data}
+  end
+
+  defp lecturer_signin_distribution(lecturer_id) do
+    # Get total attendance by method for all time
+    qr_query = from ar in "attendance_records",
+      join: o in "otp", on: o.course_id == ar.course_id and o.module_code == ar.module_code,
+      where: o.created_by_id == ^lecturer_id and ar.method == "qr",
+      select: count(ar.id)
+
+    otp_query = from ar in "attendance_records",
+      join: o in "otp", on: o.course_id == ar.course_id and o.module_code == ar.module_code,
+      where: o.created_by_id == ^lecturer_id and ar.method == "otp",
+      select: count(ar.id)
+
+    qr_count = Repo.one(qr_query) || 0
+    otp_count = Repo.one(otp_query) || 0
+
+    {qr_count, otp_count}
   end
 end

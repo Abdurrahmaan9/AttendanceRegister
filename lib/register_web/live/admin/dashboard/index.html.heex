@@ -306,10 +306,100 @@
             </div>
         </div>
 
-        <!-- Students per Course Overview -->
+        <!-- Charts Section from Lecturer Dashboard -->
         <div class="mt-8">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Course Enrollment Overview</h2>
+                <h2 class="text-xl font-bold text-gray-800">Attendance Analytics</h2>
+                <div class="flex items-center space-x-2">
+                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                        Detailed Insights
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Session Attendance and Attendance Methods -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Today's Session Attendance</h2>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">Week</button>
+                            <button class="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">Month</button>
+                            <button class="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">Semester</button>
+                        </div>
+                    </div>
+                    <canvas id="dailySigninsChart" height="130"></canvas>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Attendance Methods</h2>
+                    <canvas id="signinDistributionChart" height="130"></canvas>
+                </div>
+            </div>
+
+            <div id="attendance-charts-data" phx-hook="AttendanceCharts" 
+                data-daily-labels={Jason.encode!(@daily_labels || [])} 
+                data-daily-qr-data={Jason.encode!(@daily_qr_data || [])}
+                data-daily-otp-data={Jason.encode!(@daily_otp_data || [])}
+                data-weekly-trend-labels={Jason.encode!(@weekly_trend_labels || [])}
+                data-weekly-trend-data={Jason.encode!(@weekly_trend_data || [])}
+                data-signin-labels={Jason.encode!(["QR Code", "OTP"])}
+                data-signin-qr={@signin_qr || 0}
+                data-signin-otp={@signin_otp || 0}
+                class="hidden">
+            </div>
+
+            <!-- System Performance Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Memory Usage (MB)</h2>
+                    <canvas id="systemMemChart" height="220"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Run Queue</h2>
+                    <canvas id="systemRunqChart" height="220"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">IO Throughput (KB/s)</h2>
+                    <canvas id="systemIOChart" height="220"></canvas>
+                </div>
+            </div>
+
+            <div id="system-metrics-data" phx-hook="SystemCharts" data-labels={Jason.encode!(@labels)} data-mem-series={Jason.encode!(@mem_series)} data-runq-series={Jason.encode!(@runq_series)} data-ioin-series={Jason.encode!(@ioin_series)} data-ioout-series={Jason.encode!(@ioout_series)} class="hidden">
+            </div>
+
+            <!-- Attendance by Course and 7-Day Trend -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Attendance by Course</h2>
+                    <canvas id="progBarChart" height="130"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">7-Day Attendance Trend</h2>
+                    <canvas id="usersLineChart" height="260"></canvas>
+                </div>
+            </div>
+
+            <!-- OTP and QR Status Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">OTP Status</h2>
+                    <canvas id="otpDonutChart" height="120"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">QR Codes Status</h2>
+                    <canvas id="qrDonutChart" height="120"></canvas>
+                </div>
+            </div>
+
+            <div id="stats-data" phx-hook="StatsCharts" data-prog-labels={Jason.encode!(@course_labels || [])} data-prog-counts={Jason.encode!(@course_counts || [])} data-users-labels={Jason.encode!(@attendance_labels || [])} data-users-counts={Jason.encode!(@attendance_counts || [])} data-otps-active={@otps_active || 0} data-otps-inactive={@otps_inactive || 0} data-qr-active={@qr_active || 0} data-qr-expired={@qr_expired || 0} class="hidden">
+            </div>
+        </div>
+
+        <!-- Attendance Analytics -->
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Attendance Analytics</h2>
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                         <%= length(@students_per_course) %> courses
@@ -317,7 +407,15 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+
+                <!-- Weekly Attendance Trend -->
+                <div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Weekly Attendance Trend</h2>
+                        <canvas id="weeklyTrendChart" height="250"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Students per Course</h3>
                     <div class="space-y-3">
                         <%= for {course_title, student_count} <- @students_per_course do %>
@@ -464,154 +562,112 @@
                         <% end %>
                     </div>
                 </div>
+                
+                <!-- Pagination Controls -->
+                <%= if @pagination_info.total_pages > 1 do %>
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-700">
+                                Showing 
+                                <span class="font-medium">
+                                    <%= ((@pagination_info.current_page - 1) * @pagination_info.per_page) + 1 %>
+                                </span>
+                                to 
+                                <span class="font-medium">
+                                    <%= min(@pagination_info.current_page * @pagination_info.per_page, @pagination_info.total_entries) %>
+                                </span>
+                                of 
+                                <span class="font-medium"><%= @pagination_info.total_entries %></span>
+                                results
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                <!-- Previous Page -->
+                                <%= if @pagination_info.has_prev_page do %>
+                                    <button 
+                                        phx-click="paginate" 
+                                        phx-value-page={@pagination_info.current_page - 1}
+                                        phx-value-per-page={@pagination_info.per_page}
+                                        class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                        </svg>
+                                        Previous
+                                    </button>
+                                <% else %>
+                                    <button 
+                                        disabled
+                                        class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-md cursor-not-allowed">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                        </svg>
+                                        Previous
+                                    </button>
+                                <% end %>
+                                
+                                <!-- Page Numbers -->
+                                <div class="flex items-center space-x-1">
+                                    <%= for page_num <- 1..@pagination_info.total_pages do %>
+                                        <%= if page_num == @pagination_info.current_page do %>
+                                            <span class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md">
+                                                <%= page_num %>
+                                            </span>
+                                        <% else %>
+                                            <button 
+                                                phx-click="paginate" 
+                                                phx-value-page={page_num}
+                                                phx-value-per-page={@pagination_info.per_page}
+                                                class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                <%= page_num %>
+                                            </button>
+                                        <% end %>
+                                    <% end %>
+                                </div>
+                                
+                                <!-- Next Page -->
+                                <%= if @pagination_info.has_next_page do %>
+                                    <button 
+                                        phx-click="paginate" 
+                                        phx-value-page={@pagination_info.current_page + 1}
+                                        phx-value-per-page={@pagination_info.per_page}
+                                        class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Next
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </button>
+                                <% else %>
+                                    <button 
+                                        disabled
+                                        class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-md cursor-not-allowed">
+                                        Next
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </button>
+                                <% end %>
+                            </div>
+                        </div>
+                        
+                        <!-- Per Page Selector -->
+                        <div class="mt-4 flex items-center justify-center">
+                            <label class="text-sm text-gray-700 mr-2">Show per page:</label>
+                            <select 
+                                phx-change="paginate" 
+                                phx-value-page={@pagination_info.current_page}
+                                class="mt-1 block w-20 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                <option value="5" selected={@pagination_info.per_page == 5}>5</option>
+                                <option value="10" selected={@pagination_info.per_page == 10}>10</option>
+                                <option value="20" selected={@pagination_info.per_page == 20}>20</option>
+                                <option value="50" selected={@pagination_info.per_page == 50}>50</option>
+                            </select>
+                        </div>
+                    </div>
+                <% end %>
             </div>
         </div>
     </div>
-     </div>
+</div>
 
-<script>
-// Set current date
-const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', options);
 
-// Daily Sign-ins Chart
-const dailySigninsCtx = document.getElementById('dailySigninsChart').getContext('2d');
-const dailySigninsChart = new Chart(dailySigninsCtx, {
-    type: 'line',
-    data: {
-        labels: ['6:00 AM', '8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM'],
-        datasets: [
-            {
-                label: 'Students',
-                data: [120, 450, 320, 180, 250, 150],
-                borderColor: '#3B82F6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.3,
-                fill: true
-            },
-            {
-                label: 'Staff',
-                data: [30, 120, 80, 40, 60, 30],
-                borderColor: '#8B5CF6',
-                backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                tension: 0.3,
-                fill: true
-            },
-            {
-                label: 'Lecturers',
-                data: [15, 60, 40, 20, 30, 15],
-                borderColor: '#10B981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                tension: 0.3,
-                fill: true
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return value;
-                    }
-                }
-            }
-        }
-    }
-});
-
-// Sign-in Distribution Chart
-const signinDistributionCtx = document.getElementById('signinDistributionChart').getContext('2d');
-const signinDistributionChart = new Chart(signinDistributionCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Students', 'Staff', 'Lecturers'],
-        datasets: [{
-            data: [780, 150, 102],
-            backgroundColor: [
-                '#3B82F6',
-                '#8B5CF6',
-                '#10B981'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom',
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const label = context.label || '';
-                        const value = context.raw || 0;
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = Math.round((value / total) * 100);
-                        return `${label}: ${value} (${percentage}%)`;
-                    }
-                }
-            }
-        }
-    }
-});
-
-// Weekly Trend Chart
-const weeklyTrendCtx = document.getElementById('weeklyTrendChart').getContext('2d');
-const weeklyTrendChart = new Chart(weeklyTrendCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [
-            {
-                label: 'Students',
-                data: [650, 720, 680, 740, 800, 150],
-                backgroundColor: '#3B82F6',
-            },
-            {
-                label: 'Staff',
-                data: [120, 140, 130, 150, 160, 30],
-                backgroundColor: '#8B5CF6',
-            },
-            {
-                label: 'Lecturers',
-                data: [80, 90, 85, 95, 100, 20],
-                backgroundColor: '#10B981',
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            }
-        },
-        scales: {
-            x: {
-                stacked: false,
-            },
-            y: {
-                stacked: false,
-                beginAtZero: true
-            }
-        }
-    }
-});
-</script>
+<div id="admin-dashboard-charts" phx-hook="AdminDashboardCharts" class="hidden"></div>
