@@ -1,4 +1,4 @@
-defmodule RegisterWeb.Admin.AttendanceLive.Index do
+defmodule RegisterWeb.Admin.AttendanceLive.AttendanceView.Index do
   use RegisterWeb, :live_view
 
   alias Register.Academic
@@ -15,7 +15,7 @@ defmodule RegisterWeb.Admin.AttendanceLive.Index do
       socket
       |> assign(:current_user, current_user)
       |> assign(:sidebar_open, false)
-      |> assign(:page_title, "Attendance View")
+      |> assign(:page_title, "Student Attendance Performance")
       |> assign(:programs, programs)
       |> assign(:courses, courses)
       |> assign(:selected_program_id, nil)
@@ -38,7 +38,7 @@ defmodule RegisterWeb.Admin.AttendanceLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    socket |> assign(:page_title, "Attendance View")
+    socket |> assign(:page_title, "Student Attendance Performance")
   end
 
   @impl true
@@ -84,4 +84,22 @@ defmodule RegisterWeb.Admin.AttendanceLive.Index do
   defp parse_int(nil), do: nil
   defp parse_int(""), do: nil
   defp parse_int(str) when is_binary(str), do: String.to_integer(str)
+
+  defp get_performance_color(rate) do
+    cond do
+      rate >= 95 -> "text-green-600 bg-green-100"
+      rate >= 85 -> "text-blue-600 bg-blue-100"
+      rate >= 75 -> "text-yellow-600 bg-yellow-100"
+      true -> "text-red-600 bg-red-100"
+    end
+  end
+
+  defp get_performance_label(rate) do
+    cond do
+      rate >= 95 -> "Excellent"
+      rate >= 85 -> "Good"
+      rate >= 75 -> "Average"
+      true -> "Needs Improvement"
+    end
+  end
 end

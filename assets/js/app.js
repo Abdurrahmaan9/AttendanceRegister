@@ -24,7 +24,7 @@ import StudentCharts from "./hooks/student_charts"
 import SystemCharts from "./hooks/system_charts"
 import StatsCharts from "./hooks/stats_charts"
 import AttendanceCharts from "./hooks/attendance_charts"
-import { AdminDashboardCharts } from "./hooks/admin_dashboard_charts"
+import { AdminDashboardCharts } from "./hooks/admin_dashboard"
 
 
 // Get CSRF token for secure requests
