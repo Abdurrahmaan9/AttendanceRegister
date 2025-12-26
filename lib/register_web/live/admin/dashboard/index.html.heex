@@ -380,17 +380,17 @@
                 </div>
             </div>
 
-            <!-- OTP and QR Status Charts -->
+            <!-- OTP and QR Status Charts 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">OTP Status</h2>
-                    <canvas id="otpDonutChart" height="120"></canvas>
+                    <canvas id="otpDonutChart" height="60"></canvas>
                 </div>
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">QR Codes Status</h2>
-                    <canvas id="qrDonutChart" height="120"></canvas>
+                    <canvas id="qrDonutChart" height="60"></canvas>
                 </div>
-            </div>
+            </div> -->
 
             <div id="stats-data" phx-hook="StatsCharts" data-prog-labels={Jason.encode!(@course_labels || [])} data-prog-counts={Jason.encode!(@course_counts || [])} data-users-labels={Jason.encode!(@attendance_labels || [])} data-users-counts={Jason.encode!(@attendance_counts || [])} data-otps-active={@otps_active || 0} data-otps-inactive={@otps_inactive || 0} data-qr-active={@qr_active || 0} data-qr-expired={@qr_expired || 0} class="hidden">
             </div>

@@ -82,6 +82,7 @@ defmodule Register.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind register", "esbuild register"],
       "assets.deploy": [
+        "cmd --cd assets npm install",
         "tailwind register --minify",
         "esbuild register --minify",
         "phx.digest"

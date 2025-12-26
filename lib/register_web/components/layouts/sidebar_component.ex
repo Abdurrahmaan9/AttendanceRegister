@@ -33,17 +33,18 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
         <div class="flex flex-col h-full">
           <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
             <div class="flex items-center flex-shrink-0 px-4">
-              <h2 class="text-lg font-semibold text-gray-900">Navigation</h2>
+              <a
+              class="w-full text-lg font-semibold text-gray-900 bg-gradient-to-r from-teal-500 to-teal-600 text-white px-3 py-2 rounded-md transition-colors duration-200 text-center block"
+              href="/Admin/dashboard"
+              >
+              Dashboard
+              </a>
             </div>
             <nav class="mt-5 flex-1 px-2 space-y-1">
               <%= case @user_type do %>
               <% :admin -> %>
               <!-- Admin links -->
               <div class="mb-4">
-                <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center">
-                  <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  Core Features
-                </h3>
                 <div class="mt-2 space-y-1">
                   <div class="space-y-1">
                     <button
@@ -69,16 +70,9 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                       <a href="/Admin/admins-staff" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">Admins & Staff</a>
                     </div>
                   </div>
-                  <.nav_link to="/Admin/attendance/record" icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" active={@current_path == "/attendance/record"}>
-                    Attendance Recording
-                  </.nav_link>
-                  <.nav_link to="/Admin/attendance/view" icon="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" active={@current_path == "/attendance/view"}>
-                    Attendance View
-                  </.nav_link>
                 </div>
               </div>
 
-              <!-- Reports & Analytics -->
               <div class="mb-4">
                 <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center">
                   <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
@@ -91,29 +85,8 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                   <.nav_link to="/Admin/courses" icon="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" active={String.starts_with?(@current_path, "/courses")}>
                     Course Management
                   </.nav_link>
-                </div>
 
-                <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center mt-4">
-                  <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  Reports & Analytics
-                </h3>
-                <div class="mt-2 space-y-1">
-                  <.nav_link to="/Admin/reports" icon="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" active={String.starts_with?(@current_path, "/reports")}>
-                    Reports
-                  </.nav_link>
-                  <.nav_link to="/Admin/analytics" icon="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" active={String.starts_with?(@current_path, "/analytics")}>
-                    Analytics Dashboard
-                  </.nav_link>
-                </div>
-              </div>
-
-              <!-- System -->
-              <div class="mb-4">
-                <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center">
-                  <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                  System
-                </h3>
-                <div class="mt-2 space-y-1">
+                  <div class="mt-2 space-y-1">
                   <%= if @current_user do %>
                     <.nav_link to={"/Admin/students/#{@current_user.id}"} icon="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" active={@current_path == "/Admin/students/#{@current_user.id}"}>
                       My Profile
@@ -139,8 +112,20 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                     <div id="system-mgmt-dropdown" class="dropdown-content hidden ml-8 space-y-1">
                       <a href="/Admin/qr-codes" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">QR Code Management</a>
                       <a href="/Admin/otp-management" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">OTP Management</a>
+                      <a href="/Admin/attendance/record" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">Attendance Records</a>
+                      <a href="/Admin/attendance/view" class="text-gray-700 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">Attendance View</a>
                     </div>
                   </div>
+                </div>
+              </div>
+                <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center mt-4">
+                  <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                  Reports & Analytics
+                </h3>
+                <div class="mt-2 space-y-1">
+                  <.nav_link to="/Admin/reports" icon="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" active={String.starts_with?(@current_path, "/reports")}>
+                    Reports
+                  </.nav_link>
                   <.nav_link to="/Admin/audit-logs" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" active={String.starts_with?(@current_path, "/audit-logs")}>
                     Audit Logs
                   </.nav_link>
@@ -160,8 +145,8 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                 </div>
               </div>
 
-                <% :student -> %>
-                  <!-- Student links -->
+              <% :student -> %>
+                <!-- Student links -->
                   <.nav_link to="/Students/attendance" icon="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" active={@current_path == "/Students/attendance/view"}>
                     Attendance View
                   </.nav_link>
@@ -189,7 +174,7 @@ defmodule RegisterWeb.Layouts.SidebarComponent do
                     Log out
                   </.nav_link>
 
-                <% :lecturer -> %>
+              <% :lecturer -> %>
                   <!-- Lecturer links -->
                   <.nav_link to="/Lecturer/attendance/view" icon="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" active={@current_path == "/Lecturer/attendance/view"}>
                     Attendance View

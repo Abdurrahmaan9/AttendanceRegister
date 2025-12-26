@@ -11,8 +11,8 @@ defmodule Register.Academic.Program do
 
     has_many :program_courses, Register.Academic.ProgramCourse
     has_many :courses, through: [:program_courses, :course]
-    has_many :lecturer_programs, Register.Academic.LecturerProgram
-    has_many :lecturers, through: [:lecturer_programs, :user]
+    # has_many :lecturer_programs, Register.Academic.LecturerProgram
+    # has_many :lecturers, through: [:lecturer_programs, :user]
 
     timestamps()
   end

@@ -114,7 +114,8 @@ defmodule RegisterWeb.Router do
       live "/qr-codes/:id/show", Admin.QrCodeLive.ShowComponent, :show
 
       # ==================== ADMIN ATTENDANCE =========================
-      live "/attendance/view", Admin.AttendanceLive.Index, :index
+      live "/attendance/record", Admin.AttendanceLive.AttendanceRecords.Record, :record
+      live "/attendance/view", Admin.AttendanceLive.AttendanceView.Index, :index
 
       # ==================== PROGRAM MANAGEMENT =========================
       live "/programs", Admin.ProgramLive.Index, :index

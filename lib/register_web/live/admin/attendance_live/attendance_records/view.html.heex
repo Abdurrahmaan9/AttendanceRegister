@@ -1,0 +1,278 @@
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="py-6">
+    <div class="md:flex md:items-center md:justify-between">
+      <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+          View Attendance
+        </h2>
+        <p class="mt-1 text-sm text-gray-500">
+          Monitor attendance percentages and statistics for students
+        </p>
+      </div>
+      <div class="mt-4 flex md:mt-0 md:ml-4">
+        <button 
+          phx-click="refresh_data"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <!-- Selection Form -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Program Selection -->
+          <div>
+            <label for="program-select" class="block text-sm font-medium text-gray-700 mb-2">
+              Select Program
+            </label>
+            <select 
+              id="program-select" 
+              phx-change="select_program" 
+              name="program_id"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Choose a program...</option>
+              <%= for program <- @programs do %>
+                <option value={program.id} selected={@selected_program && @selected_program.id == program.id}>
+                  <%= program.name %>
+                </option>
+              <% end %>
+            </select>
+          </div>
+
+          <!-- Course Selection -->
+          <div>
+            <label for="course-select" class="block text-sm font-medium text-gray-700 mb-2">
+              Select Course
+            </label>
+            <select 
+              id="course-select" 
+              phx-change="select_course" 
+              name="course_id"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Choose a course...</option>
+              <%= for course <- @courses do %>
+                <option value={course.id} selected={@selected_course && @selected_course.id == course.id}>
+                  <%= course.code %> - <%= course.title %>
+                </option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Statistics -->
+      <%= if @overall_stats.total_students > 0 do %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <!-- Total Students -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total Students</dt>
+                    <dd class="text-lg font-medium text-gray-900"><%= @overall_stats.total_students %></dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overall Attendance Rate -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Overall Rate</dt>
+                    <dd class="text-lg font-medium text-gray-900"><%= @overall_stats.overall_rate %>%</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Sessions -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total Sessions</dt>
+                    <dd class="text-lg font-medium text-gray-900"><%= @overall_stats.total_sessions %></dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance Distribution -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Excellent (≥95%)</dt>
+                    <dd class="text-lg font-medium text-gray-900"><%= @overall_stats.distribution.excellent %></dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance Distribution Chart -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Attendance Distribution</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600"><%= @overall_stats.distribution.excellent %></div>
+              <div class="text-sm text-gray-500">Excellent (≥95%)</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600"><%= @overall_stats.distribution.good %></div>
+              <div class="text-sm text-gray-500">Good (85-94%)</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-yellow-600"><%= @overall_stats.distribution.average %></div>
+              <div class="text-sm text-gray-500">Average (75-84%)</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-red-600"><%= @overall_stats.distribution.poor %></div>
+              <div class="text-sm text-gray-500">Poor (&lt;75%)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Individual Student Attendance -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">
+              Individual Student Attendance
+              <%= if @selected_course do %>
+                - <%= @selected_course.code %>
+              <% end %>
+              <%= if @selected_program do %>
+                - <%= @selected_program.name %>
+              <% end %>
+            </h3>
+          </div>
+
+          <div class="px-6 py-4">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Student
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Sessions
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Attended
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Missed
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Attendance Rate
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <%= for student <- @students do %>
+                    <% summary = Map.get(@attendance_summaries, student.id, %{}) %>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= student.first_name %> <%= student.last_name %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">
+                          <%= student.email %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= summary.total_sessions || 0 %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= summary.attended_sessions || 0 %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= summary.missed_sessions || 0 %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= Float.round(summary.attendance_rate || 0, 2) %>%
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full #{get_attendance_color(summary.attendance_rate || 0)}"}>
+                          <%= get_attendance_label(summary.attendance_rate || 0) %>
+                        </span>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="bg-white shadow rounded-lg p-12 text-center">
+          <div class="text-gray-400">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No data available</h3>
+          <p class="mt-1 text-sm text-gray-500">Select a program or course to view attendance statistics.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

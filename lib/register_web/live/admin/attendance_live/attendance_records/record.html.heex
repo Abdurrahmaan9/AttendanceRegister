@@ -1,0 +1,216 @@
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="py-6">
+    <div class="md:flex md:items-center md:justify-between">
+      <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+          Record Attendance
+        </h2>
+        <p class="mt-1 text-sm text-gray-500">
+          Mark attendance for students in selected courses
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <!-- Selection Form -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Program Selection -->
+            <div>
+              <label for="program-select" class="block text-sm font-medium text-gray-700 mb-2">
+                Select Program
+              </label>
+              <select 
+                id="program-select" 
+                phx-change="select_program" 
+                name="program_id"
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="">Choose a program...</option>
+                <%= for program <- @programs do %>
+                  <option value={program.id} selected={@selected_program && @selected_program.id == program.id}>
+                    <%= program.name %>
+                  </option>
+                <% end %>
+              </select>
+            </div>
+
+            <!-- Course Selection -->
+            <div>
+              <label for="course-select" class="block text-sm font-medium text-gray-700 mb-2">
+                Select Course
+              </label>
+              <select 
+                id="course-select" 
+                phx-change="select_course" 
+                name="course_id"
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="">Choose a course...</option>
+                <%= for course <- @courses do %>
+                  <option value={course.id} selected={@selected_course && @selected_course.id == course.id}>
+                    <%= course.code %> - <%= course.title %>
+                  </option>
+                <% end %>
+              </select>
+            </div>
+
+            </div>
+        </div>
+
+      <!-- Attendance Recording -->
+      <%= if @selected_course && length(@students) > 0 do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">
+                  <%= @selected_course.code %> - <%= @selected_course.title %>
+                </h3>
+                <p class="text-sm text-gray-500">
+                  <%= length(@students) %> students • Session: <%= @session_date %>
+                </p>
+              </div>
+              <div class="flex space-x-2">
+                <button 
+                  phx-click="mark_all_present"
+                  class="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  Mark All Present
+                </button>
+                <button 
+                  phx-click="mark_all_absent"
+                  class="px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  Mark All Absent
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4">
+            <!-- Search Bar -->
+            <div class="mb-4">
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="student-search" 
+                  name="query"
+                  value={@search_query}
+                  phx-change="search_students"
+                  placeholder="Search students by name or email..."
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <%= if @search_query != "" do %>
+                <div class="mt-2 text-sm text-gray-600">
+                  Found <%= length(@filtered_students) %> students matching "<%= @search_query %>"
+                </div>
+              <% end %>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Student
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <%= for student <- @filtered_students do %>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= student.first_name %> <%= student.last_name %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">
+                          <%= student.email %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <%= case Map.get(@attendance_data, student.id, %{present: false, marked: false}) do %>
+                          <% %{present: true, marked: true} -> %>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              Present
+                            </span>
+                          <% %{present: false, marked: true} -> %>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                              Absent
+                            </span>
+                          <% _ -> %>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                              Not Marked
+                            </span>
+                        <% end %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <button 
+                          phx-click="toggle_attendance"
+                          phx-value-student_id={student.id}
+                          class="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          Toggle
+                        </button>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 border-t border-gray-200">
+            <div class="flex justify-end">
+              <button 
+                phx-click="save_attendance"
+                phx-value-module_name={@module_name || "Session"}
+                class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                disabled={@loading}
+              >
+                <%= if @loading do %>
+                  <span class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  </span>
+                <% else %>
+                  Save Attendance
+                <% end %>
+              </button>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="bg-white shadow rounded-lg p-12 text-center">
+          <div class="text-gray-400">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No course selected</h3>
+          <p class="mt-1 text-sm text-gray-500">Select a program and course to start recording attendance.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
