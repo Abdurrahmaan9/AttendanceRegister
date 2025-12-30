@@ -865,7 +865,7 @@ defmodule RegisterWeb.CoreComponents do
         width: 20px;
         margin-right: 10px;
         border-radius: 10px;
-        background-color: #b3d4fc;
+        background: linear-gradient(to right, #14b8a6, #0d9488);
         animation: pulse 1.5s infinite ease-in-out;
       }
 
@@ -896,20 +896,20 @@ defmodule RegisterWeb.CoreComponents do
       @keyframes pulse {
         0% {
           transform: scale(0.8);
-          background-color: #b3d4fc;
-          box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+          background: linear-gradient(to right, #14b8a6, #0d9488);
+          box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7);
         }
 
         50% {
           transform: scale(1.2);
-          background-color: #6793fb;
-          box-shadow: 0 0 0 10px rgba(178, 212, 252, 0);
+          background: linear-gradient(to right, #0d9488, #0f766e);
+          box-shadow: 0 0 0 10px rgba(20, 184, 166, 0);
         }
 
         100% {
           transform: scale(0.8);
-          background-color: #b3d4fc;
-          box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+          background: linear-gradient(to right, #14b8a6, #0d9488);
+          box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7);
         }
       }
     </style>
