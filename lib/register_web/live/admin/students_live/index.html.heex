@@ -1,90 +1,99 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-2xl font-semibold text-gray-900">Students</h1>
-            <p class="mt-2 text-sm text-gray-700">
-                A list of all the students in your account including their name, email and student ID.
-            </p>
-        </div>
-        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <.button
-                phx-click="new_student"
-                variant={:primary}
-                class="sm:w-auto"
-            >
-                Add student
-            </.button>
-        </div>
-    </div>
-
-    <div class="mt-8 flex flex-col">
-        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Program</th>
-                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                    <span class="sr-only">Actions</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <%= for student <- @students do %>
-                                <tr>
-                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                        <%= student.first_name %> <%= student.last_name %>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        <%= student.email %>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        <%= student.program %>
-                                    </td>
-                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                        <.link
-                                            navigate={"/Admin/students/#{student.id}"}
-                                            class="btn btn-secondary"
-                                        >
-                                            View
-                                        </.link>
-                                        <.button
-                                            phx-click="edit_student"
-                                            phx-value-id={student.id}
-                                            variant={:secondary}
-                                            class="mr-4"
-                                        >
-                                            Edit
-                                        </.button>
-                                        <.button
-                                            phx-click="delete_student"
-                                            phx-value-id={student.id}
-                                            data-confirm="Are you sure you want to delete this student?"
-                                            variant={:danger}
-                                        >
-                                            Delete
-                                        </.button>
-                                    </td>
-                                </tr>
-                            <% end %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Header -->
+<div class="flex justify-between items-center mb-8">
+<div>
+    <h1 class="text-2xl font-semibold text-gray-900">Students</h1>
+    <p class="mt-1 text-sm text-gray-500">
+    A list of all the students in your account including their name, email, and program.
+    </p>
 </div>
 
-<%= if @editing_id || @show_form do %>
-  <.live_component
+<.button
+    phx-click={JS.push("new_student") |> show_modal("student-modal")}
+    variant={:primary}
+    class="btn-spacing"
+>
+    Add student
+</.button>
+</div>
+
+<!-- Table -->
+<div class="bg-white shadow rounded-lg">
+
+<div :if={@loading}>
+  <.data_loader />
+</div>
+
+<.table
+    id="students-table"
+    rows={@students}
+>
+    <:col :let={student} label="Name">
+    <span class="font-medium text-gray-900">
+        <%= student.first_name %> <%= student.last_name %>
+    </span>
+    </:col>
+
+    <:col :let={student} label="Email">
+    <span class="text-gray-500"><%= student.email %></span>
+    </:col>
+
+    <:col :let={student} label="Program">
+    <span class="text-gray-500"><%= student.program %></span>
+    </:col>
+
+    <:action :let={student}>
+    <div class="flex justify-end">
+        <.flowbite_dropdown button_text="Options" row_index={student.id}>
+        <:trigger>
+            <.button variant={:ghost} class="btn-spacing">
+            Actions
+            </.button>
+        </:trigger>
+
+        <:item>
+        <.link
+            navigate={~p"/Admin/students/#{student.id}"}
+            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+            View
+        </.link>
+        </:item>
+
+        <:item>
+        <button
+            type="button"
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            phx-click={JS.push("edit_student", value: %{id: student.id}) |> show_modal("student-modal")}
+        >
+            Edit
+        </button>
+        </:item>
+
+        <:item>
+        <button
+            type="button"
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            phx-click="delete_student"
+            phx-value-id={student.id}
+            data-confirm="Are you sure you want to delete this student?"
+        >
+            Delete
+        </button>
+        </:item>
+        </.flowbite_dropdown>
+    </div>
+    </:action>
+</.table>
+</div>
+
+<!-- Modal -->
+<.modal id="student-modal">
+<.live_component
     module={RegisterWeb.Admin.StudentsLive.FormComponent}
-    id={"student-#{@editing_id}" || "new-student"}
+    id={"student-#{@editing_id || "new"}"}
     action={if @editing_id, do: :edit, else: :new}
     student={@editing_student || %Student{}}
     return_to={~p"/Admin/students"}
     current_user={@current_user}
-  />
-<% end %>
+/>
+</.modal>

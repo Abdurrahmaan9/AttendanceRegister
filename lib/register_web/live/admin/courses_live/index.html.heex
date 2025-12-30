@@ -1,97 +1,84 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-2xl font-bold text-gray-900">Courses</h1>
-    <.link
-      patch={~p"/Admin/courses/new"}
-      class="btn btn-primary"
-    >
-      Add Course
-    </.link>
-  </div>
-
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Course Name
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Code
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Credits
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th scope="col" class="relative px-6 py-3">
-              <span class="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <%= for course <- @courses do %>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
-                  <%= course.title %>
-                </div>
-                <div class="text-sm text-gray-500">
-                  <%= course.description || "No description" %>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= course.code %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                  <%= course.credits %>
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <%= if course.is_active do %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Active
-                  </span>
-                <% else %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                    Inactive
-                  </span>
-                <% end %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex justify-end space-x-4">
-                  <.link
-                    patch={~p"/Admin/courses/#{course}/edit"}
-                    class="btn btn-secondary"
-                  >
-                    Edit
-                  </.link>
-                  <.button
-                    variant={:danger}
-                    phx-click={JS.push("delete", value: %{id: course.id})}
-                    data-confirm="Are you sure?"
-                  >
-                    Delete
-                  </.button>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  </div>
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Courses</h1>
+  <.link
+    patch={~p"/Admin/courses/new"}
+    class="btn bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"
+  >
+    New Course
+  </.link>
 </div>
 
-<.modal
-  :if={@live_action in [:new, :edit]}
-  id="course-modal"
-  show
-  on_cancel={JS.patch(~p"/Admin/courses")}
->
+
+<div class="bg-white shadow rounded-lg">
+
+  <div :if={@loading}>
+    <.data_loader />
+  </div>
+
+  <.table :if={!@loading} id="tbl_courses" rows={@courses}>
+    <:col :let={course} label="Course Name" filter_item="title">
+      <div class="text-sm font-medium text-gray-900">
+        <%= course.title %>
+      </div>
+      <div class="text-sm text-gray-500">
+        <%= course.description || "No description" %>
+      </div>
+    </:col>
+
+    <:col :let={course} label="Code" filter_item="code">
+      <%= course.code %>
+    </:col>
+
+    <:col :let={course} label="Credits" filter_item="credits">
+      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+        <%= course.credits %>
+      </span>
+    </:col>
+
+    <:col :let={course} label="Status" filter_item="is_active">
+      <span class={"inline-flex px-2 py-1 text-xs font-semibold rounded-full #{status_color_class(course.is_active)}"}>
+        <%= if course.is_active, do: "Active", else: "Inactive" %>
+      </span>
+    </:col>
+
+    <:action :let={course}>
+      <.flowbite_dropdown button_text="Options" row_index={course.id}>
+        <:item>
+          <.link
+            patch={~p"/Admin/courses/#{course}/edit"}
+            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <i class="fas fa-edit mr-2"></i> Edit
+          </.link>
+        </:item>
+
+        <:item>
+          <button
+            phx-click={show_modal("delete-course-#{course.id}")}
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <i class="fas fa-trash mr-2"></i> Delete
+          </button>
+        </:item>
+      </.flowbite_dropdown>
+
+      <!-- Delete Confirmation Modal -->
+      <.modal id={"delete-course-#{course.id}"}>
+        <:title>Confirm Deletion</:title>
+        <:content>
+          <p class="text-gray-600 mb-4">
+            Are you sure you want to delete course "<%= course.title %>"?
+          </p>
+        </:content>
+        <:confirm phx-click="delete" phx-value-id={course.id}>
+          Delete
+        </:confirm>
+      </.modal>
+    </:action>
+  </.table>
+</div>
+
+<.modal :if={@live_action in [:new, :edit]} id="course-modal" show>
   <.live_component
     module={RegisterWeb.Admin.CoursesLive.FormComponent}
     id={@course.id || :new}

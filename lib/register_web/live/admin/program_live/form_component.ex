@@ -24,6 +24,14 @@ defmodule RegisterWeb.Admin.ProgramLive.FormComponent do
       <div class="sm:flex sm:items-start">
         <div class="w-full">
           <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <.link
+              href={~p"/Admin/programs"}
+              class="flex items-center justify-end text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </.link>
             <%= @title %>
           </h3>
           <.form

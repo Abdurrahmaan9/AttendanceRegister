@@ -1,5 +1,6 @@
 defmodule RegisterWeb.Admin.OTPManagementLive.Index do
   use RegisterWeb, :live_view
+  import RegisterWeb.Utils
   alias Register.Otps
   alias Register.Courses
   alias RegisterWeb.Plugs.MfaAuth
@@ -18,14 +19,18 @@ defmodule RegisterWeb.Admin.OTPManagementLive.Index do
         "expires_in" => "5"
       })
 
-    {:ok,
-     socket
-     |> assign(:courses, courses)
-     |> assign(:otp, nil)
-     |> assign(:selected_otp, nil)
-     |> assign(:otps, otps)
-     |> assign(:sidebar_open, false)
-     |> assign(:form, form)}
+    socket =
+      socket
+      |> assign(:courses, courses)
+      |> assign(:otp, nil)
+      |> assign(:selected_otp, nil)
+      |> assign(:otps, otps)
+      |> assign(:sidebar_open, false)
+      |> assign(:form, form)
+      |> assign(:loading, !connected?(socket))
+
+    if connected?(socket), do: send(self(), :load)
+    {:ok, socket}
   end
 
   @impl true

@@ -1,7 +1,9 @@
 defmodule RegisterWeb.Admin.LecturersLive.Index do
   use RegisterWeb, :live_view
+  import RegisterWeb.Utils
+
   alias Register.Accounts
-  alias RegisterWeb.Helpers.RoleHelper
+  # alias RegisterWeb.Helpers.RoleHelper
 
   @impl true
   def mount(_params, _session, socket) do
@@ -9,6 +11,7 @@ defmodule RegisterWeb.Admin.LecturersLive.Index do
       socket
       |> assign(:sidebar_open, false)
       |> assign(:lecturers, [])
+      |> assign(:loading, !connected?(socket))
 
     if connected?(socket), do: send(self(), :load)
     {:ok, socket}
@@ -17,7 +20,7 @@ defmodule RegisterWeb.Admin.LecturersLive.Index do
   @impl true
   def handle_info(:load, socket) do
     lecturers = Accounts.list_users_by_role("lecturer")
-    {:noreply, assign(socket, :lecturers, lecturers)}
+    {:noreply, assign(socket, :lecturers, lecturers) |> assign(:loading, false)}
   end
 
   @impl true

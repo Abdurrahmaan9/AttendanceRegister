@@ -1,5 +1,6 @@
 defmodule RegisterWeb.Admin.QrCodeLive.Index do
   use RegisterWeb, :live_view
+  import RegisterWeb.Utils
 
   alias Register.QrCodes, as: QR
   alias Register.QrCodes.QrCode
@@ -18,6 +19,7 @@ defmodule RegisterWeb.Admin.QrCodeLive.Index do
       |> assign(:qr_svg, nil)
       |> assign(:created_qr, nil)
       |> assign(:editing_qr, nil)
+      |> assign(:loading, !connected?(socket))
 
     if connected?(socket) and current_user do
       {:ok, load_qr_codes(socket)}

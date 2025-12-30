@@ -1,5 +1,6 @@
 defmodule RegisterWeb.Admin.CoursesLive.Index do
   use RegisterWeb, :live_view
+  import RegisterWeb.Utils
   alias Register.Courses
   alias Register.Courses.Course
 
@@ -9,6 +10,7 @@ defmodule RegisterWeb.Admin.CoursesLive.Index do
       socket
       |> assign(:courses, list_courses())
       |> assign(:sidebar_open, false)
+      |> assign(:loading, !connected?(socket))
 
     if connected?(socket), do: send(self(), {:courses, list_courses()})
 
@@ -51,6 +53,11 @@ defmodule RegisterWeb.Admin.CoursesLive.Index do
 
   defp list_courses do
     Courses.list_courses()
+  end
+
+  @impl true
+  def handle_info({:courses, courses}, socket) do
+    {:noreply, socket |> assign(:courses, courses) |> assign(:loading, false)}
   end
 
   @impl true

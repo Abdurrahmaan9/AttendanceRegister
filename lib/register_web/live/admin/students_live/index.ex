@@ -1,5 +1,7 @@
 defmodule RegisterWeb.Admin.StudentsLive.Index do
   use RegisterWeb, :live_view
+  import RegisterWeb.Utils
+
   alias Register.Students
   alias Register.Students.Student
 
@@ -19,6 +21,7 @@ defmodule RegisterWeb.Admin.StudentsLive.Index do
       |> assign(:show_form, false)
       |> assign(:sidebar_open, false)
       |> assign(:students, [])
+      |> assign(:loading, !connected?(socket))
       |> assign(:changeset, Students.change_student(%Student{}))
 
     if connected?(socket) do

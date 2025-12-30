@@ -1,146 +1,179 @@
-<div class="p-6">
-  <h1 class="text-2xl font-semibold mb-4">Generate OTP for Class Attendance</h1>
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">
+    Generate OTP for Class Attendance
+  </h1>
+</div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <div class="bg-white border rounded p-4">
-      <h2 class="text-lg font-semibold mb-4">Create OTP</h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+  <!-- Create OTP -->
+  <div class="bg-white shadow rounded-lg p-4">
+    <h2 class="text-sm font-medium text-gray-700 mb-4">Create OTP</h2>
 
-      <form phx-submit="generate" class="space-y-5">
-        <div>
-          <label for="course_id" class="block text-sm font-medium text-gray-700">Select Course</label>
-          <div class="mt-1">
-            <select
-              id="course_id"
-              name="form[course_id]"
-              required
-              class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-            >
-              <option value="">-- Select a course --</option>
-              <%= for course <- @courses do %>
-                <option value={course.id}><%= course.title %> (<%= course.code %>)</option>
-              <% end %>
-            </select>
-          </div>
-        </div>
+    <form phx-submit="generate" class="space-y-5">
+      <div>
+        <label for="course_id" class="block text-sm font-medium text-gray-700">
+          Select Course
+        </label>
+        <select
+          id="course_id"
+          name="form[course_id]"
+          required
+          class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-teal-500 focus:ring-teal-500"
+        >
+          <option value="">-- Select a course --</option>
+          <%= for course <- @courses do %>
+            <option value={course.id}>
+              <%= course.title %> (<%= course.code %>)
+            </option>
+          <% end %>
+        </select>
+      </div>
 
-        <div>
-          <label for="location" class="block text-sm font-medium text-gray-700">Location (optional)</label>
-          <input
-            type="text"
-            name="form[location]"
-            id="location"
-            class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="e.g., Room 101"
-          />
-        </div>
+      <div>
+        <label for="location" class="block text-sm font-medium text-gray-700">
+          Location (optional)
+        </label>
+        <input
+          type="text"
+          name="form[location]"
+          id="location"
+          class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
+          placeholder="e.g., Room 101"
+        />
+      </div>
 
-        <div>
-          <label for="expires_in" class="block text-sm font-medium text-gray-700">Expires after (minutes)</label>
-          <input
-            type="number"
-            name="form[expires_in]"
-            id="expires_in"
-            value="30"
-            min="5"
-            max="1440"
-            class="mt-1 block w-28 rounded-md border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
+      <div>
+        <label for="expires_in" class="block text-sm font-medium text-gray-700">
+          Expires after (minutes)
+        </label>
+        <input
+          type="number"
+          name="form[expires_in]"
+          id="expires_in"
+          value="30"
+          min="5"
+          max="1440"
+          class="mt-1 block w-28 rounded-md border-gray-300 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
+        />
+      </div>
 
-        <div class="flex justify-end">
-          <.button type="submit" class="btn-spacing" variant={:primary}>
-            Generate OTP
-          </.button>
-        </div>
-      </form>
-    </div>
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="btn bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"
+        >
+          Generate OTP
+        </button>
+      </div>
+    </form>
+  </div>
 
-    <div class="bg-white border rounded p-4">
-      <h2 class="text-lg font-semibold mb-4">Current OTP</h2>
+  <!-- Current OTP -->
+  <div class="bg-white shadow rounded-lg p-4">
+    <h2 class="text-sm font-medium text-gray-700 mb-4">Current OTP</h2>
 
-      <%= if current_otp = @selected_otp || @otp do %>
-        <div class="space-y-4">
-          <div class="rounded border border-blue-100 bg-blue-50 p-4">
-            <p class="text-sm font-medium text-blue-600">Verification Code</p>
-            <p class="mt-2 text-center font-mono text-3xl font-bold text-blue-800">
-              <%= current_otp.code %>
-            </p>
-          </div>
-
-          <div class="rounded border border-gray-200 bg-gray-50 p-4">
-            <p class="text-sm font-medium text-gray-600">For Module</p>
-            <p class="mt-2 text-center text-xl font-medium">
-              <%= current_otp.module_code %>
-            </p>
-          </div>
-
-          <p class="text-center text-sm text-gray-500">
-            Expires at: <%= Timex.format!(current_otp.expires_at, "{h12}:{m} {AM}") %>
+    <%= if current_otp = @selected_otp || @otp do %>
+      <div class="space-y-4">
+        <div class="rounded border border-teal-100 bg-teal-50 p-4">
+          <p class="text-sm font-medium text-teal-600">Verification Code</p>
+          <p class="mt-2 text-center font-mono text-3xl font-bold text-teal-800">
+            <%= current_otp.code %>
           </p>
         </div>
-      <% else %>
-        <div class="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
-          Generate an OTP to preview it here.
-        </div>
-      <% end %>
-    </div>
-  </div>
 
-  <div class="mt-8">
-    <h2 class="text-lg font-semibold mb-4">Recent OTPs</h2>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-left text-sm">
-        <thead class="border-b font-medium">
-          <tr>
-            <th class="px-3 py-2">Code</th>
-            <th class="px-3 py-2">Module</th>
-            <th class="px-3 py-2">Location</th>
-            <th class="px-3 py-2">Expires</th>
-            <th class="px-3 py-2">Active</th>
-            <th class="px-3 py-2 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y">
-          <%= if Enum.empty?(@otps) do %>
-            <tr>
-              <td colspan="6" class="px-3 py-4 text-center text-sm text-gray-500">
-                Generate an OTP to see it listed here.
-              </td>
-            </tr>
-          <% else %>
-            <%= for otp <- @otps do %>
-              <tr class={if @selected_otp && @selected_otp.id == otp.id, do: "bg-blue-50"}>
-                <td class="px-3 py-2 font-mono"><%= otp.code %></td>
-                <td class="px-3 py-2"><%= otp.module_code %></td>
-                <td class="px-3 py-2"><%= otp.location %></td>
-                <td class="px-3 py-2"><%= Timex.format!(otp.expires_at, "{YYYY}-{0M}-{0D} {h12}:{m} {AM}") %></td>
-                <td class="px-3 py-2"><%= if otp.is_active, do: "Yes", else: "No" %></td>
-                <td class="px-3 py-2">
-                  <div class="flex justify-end gap-2">
-                    <.button
-                      class="btn-spacing"
-                      variant={:primary}
-                      phx-click="view_otp"
-                      phx-value-id={otp.id}
-                    >
-                      View
-                    </.button>
-                    <.button
-                      class="btn-spacing"
-                      variant={:danger}
-                      phx-click="delete_otp"
-                      phx-value-id={otp.id}
-                      data-confirm="Are you sure you want to delete this OTP?"
-                    >
-                      Delete
-                    </.button>
-                  </div>
-                </td>
-              </tr>
-            <% end %>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+        <div class="rounded border border-gray-200 bg-gray-50 p-4">
+          <p class="text-sm font-medium text-gray-600">For Module</p>
+          <p class="mt-2 text-center text-xl font-medium">
+            <%= current_otp.module_code %>
+          </p>
+        </div>
+
+        <p class="text-center text-sm text-gray-500">
+          Expires at:
+          <%= Timex.format!(current_otp.expires_at, "{h12}:{m} {AM}") %>
+        </p>
+      </div>
+    <% else %>
+      <div class="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
+        Generate an OTP to preview it here.
+      </div>
+    <% end %>
   </div>
+</div>
+
+<!-- Recent OTPs -->
+<div class="mb-6">
+  <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent OTPs</h2>
+    <div class="bg-white shadow rounded-lg">
+
+      <div :if={@loading}>
+        <.data_loader />
+      </div>
+
+      <.table :if={!@loading} id="tbl_otps" rows={@otps}>
+      <:col :let={otp} label="Code">
+        <span class="font-mono"><%= otp.code %></span>
+      </:col>
+
+      <:col :let={otp} label="Module">
+        <%= otp.module_code %>
+      </:col>
+
+      <:col :let={otp} label="Location">
+        <%= otp.location || "-" %>
+      </:col>
+
+      <:col :let={otp} label="Expires">
+        <%= Timex.format!(otp.expires_at, "{YYYY}-{0M}-{0D} {h12}:{m} {AM}") %>
+      </:col>
+
+      <:col :let={otp} label="Active">
+        <span class={"inline-flex px-2 py-1 text-xs font-semibold rounded-full #{status_color_class(otp.is_active)}"}>
+          <%= if otp.is_active, do: "Yes", else: "No" %>
+        </span>
+      </:col>
+
+      <:action :let={otp}>
+        <.flowbite_dropdown button_text="Options" row_index={otp.id}>
+          <:item>
+            <button
+              phx-click="view_otp"
+              phx-value-id={otp.id}
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <i class="fas fa-eye mr-2"></i> View
+            </button>
+          </:item>
+
+          <:item>
+            <button
+              phx-click={show_modal("delete-otp-#{otp.id}")}
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <i class="fas fa-trash mr-2"></i> Delete
+            </button>
+          </:item>
+        </.flowbite_dropdown>
+
+        <!-- Delete Confirmation Modal -->
+        <.modal id={"delete-otp-#{otp.id}"}>
+          <:title>Confirm Deletion</:title>
+          <:content>
+            <p class="text-gray-600 mb-4">
+              Are you sure you want to delete OTP
+              "<span class="font-mono"><%= otp.code %></span>"?
+            </p>
+          </:content>
+          <:confirm phx-click="delete_otp" phx-value-id={otp.id}>
+            Delete
+          </:confirm>
+        </.modal>
+      </:action>
+    </.table>
+  </div>
+  <%= if Enum.empty?(@otps) and not @loading do %>
+    <p class="text-center text-sm text-gray-500 mt-6">
+      Generate an OTP to see it listed here.
+    </p>
+  <% end %>
 </div>

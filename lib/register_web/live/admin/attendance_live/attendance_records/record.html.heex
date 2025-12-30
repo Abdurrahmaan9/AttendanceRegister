@@ -24,7 +24,7 @@
                 id="program-select" 
                 phx-change="select_program" 
                 name="program_id"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-teal-500"
               >
                 <option value="">Choose a program...</option>
                 <%= for program <- @programs do %>
@@ -44,7 +44,7 @@
                 id="course-select" 
                 phx-change="select_course" 
                 name="course_id"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-teal-500"
               >
                 <option value="">Choose a course...</option>
                 <%= for course <- @courses do %>
@@ -74,7 +74,7 @@
               <div class="flex space-x-2">
                 <button 
                   phx-click="mark_all_present"
-                  class="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="px-3 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   Mark All Present
                 </button>
@@ -104,7 +104,7 @@
                   value={@search_query}
                   phx-change="search_students"
                   placeholder="Search students by name or email..."
-                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-teal-500 focus:border-blue-500"
                 />
               </div>
               <%= if @search_query != "" do %>
@@ -165,7 +165,7 @@
                         <button 
                           phx-click="toggle_attendance"
                           phx-value-student_id={student.id}
-                          class="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="px-3 py-1 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-xs font-medium rounded hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                         >
                           Toggle
                         </button>
@@ -182,7 +182,7 @@
               <button 
                 phx-click="save_attendance"
                 phx-value-module_name={@module_name || "Session"}
-                class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                class="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50"
                 disabled={@loading}
               >
                 <%= if @loading do %>

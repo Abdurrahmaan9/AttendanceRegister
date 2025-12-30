@@ -5,6 +5,7 @@ defmodule RegisterWeb.Admin.ProgramLive.Index do
 
   alias Register.Academic
   alias Register.Academic.Program
+  alias RegisterWeb.Utils
 
 @impl true
 def mount(_params, _session, socket) do
@@ -12,6 +13,7 @@ def mount(_params, _session, socket) do
     socket
     |> assign(:programs, list_programs())
     |> assign(:sidebar_open, false)
+    |> assign(:loading, !connected?(socket))
 
   if connected?(socket), do: send(self(), {:programs, list_programs()})
 
@@ -120,7 +122,15 @@ end
   end
 
   @impl true
+  def handle_info({:programs, programs}, socket) do
+    {:noreply, socket |> assign(:programs, programs) |> assign(:loading, false)}
+  end
+
   def handle_event("toggle_sidebar", _, socket) do
     {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
   end
+
+  # Make Utils functions available in template
+  def status_color_class(status), do: RegisterWeb.Utils.status_color_class(status)
+  def format_status(status), do: RegisterWeb.Utils.format_status(status)
 end

@@ -1,5 +1,7 @@
 defmodule RegisterWeb.Admin.AdminsStaffLive.Index do
   use RegisterWeb, :live_view
+  import RegisterWeb.Utils
+
   alias Register.Accounts
   alias RegisterWeb.Helpers.RoleHelper
 
@@ -10,6 +12,7 @@ defmodule RegisterWeb.Admin.AdminsStaffLive.Index do
       |> assign(:sidebar_open, false)
       |> assign(:active_tab, "admin")
       |> assign(:users, [])
+      |> assign(:loading, true)
 
     if connected?(socket), do: send(self(), {:load_users, "admin"})
     {:ok, socket}
@@ -18,14 +21,14 @@ defmodule RegisterWeb.Admin.AdminsStaffLive.Index do
   @impl true
   def handle_params(params, _url, socket) do
     tab = params["tab"] || "admin"
-    if connected?(socket), do: send(self(), {:load_users, tab})
-    {:noreply, assign(socket, :active_tab, tab)}
+    send(self(), {:load_users, tab})
+    {:noreply, socket |> assign(:active_tab, tab) |> assign(:loading, true)}
   end
 
   @impl true
   def handle_info({:load_users, tab}, socket) do
     users = Accounts.list_users_by_role(tab)
-    {:noreply, assign(socket, :users, users)}
+    {:noreply, socket |> assign(:users, users) |> assign(:loading, false)}
   end
 
   @impl true

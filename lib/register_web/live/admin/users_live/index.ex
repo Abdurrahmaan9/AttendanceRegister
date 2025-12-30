@@ -1,4 +1,6 @@
 defmodule RegisterWeb.Admin.UserMgtLive.Index do
+  import RegisterWeb.Utils
+
   use RegisterWeb, :live_view
   alias Register.Accounts
   alias RegisterWeb.Helpers.RoleHelper
@@ -9,6 +11,7 @@ defmodule RegisterWeb.Admin.UserMgtLive.Index do
       socket
     |> assign(users: [])
     |> assign(:sidebar_open, false)
+    |> assign(:loading, !connected?(socket))
 
     if connected?(socket), do: send(self(), {:load_users, "all"})
     {:ok, assign(socket, active_tab: "all")}

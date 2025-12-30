@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold text-gray-800">QR Code Scanner</h1>
     <button
       phx-click={@camera_active && "stop_scan" || "start_scan"}
-      class="btn btn-primary"    
+      class="btn bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"    
       >
       <%= if @camera_active, do: "Stop Scanning", else: "Start Scanning" %>
     </button>

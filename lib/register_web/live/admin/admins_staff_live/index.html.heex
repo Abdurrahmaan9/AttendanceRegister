@@ -1,83 +1,127 @@
-<div class="px-4 sm:px-6 lg:px-8">
-  <div class="sm:flex sm:items-center">
-    <div class="sm:flex-auto">
-      <h1 class="text-xl font-semibold text-gray-900">Admins & Staff Management</h1>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="border-b border-gray-200 mt-4">
-    <nav class="-mb-px flex space-x-8">
-      <.link 
-        patch={~p"/Admin/admins-staff?tab=admin"}
-        class={[
-          "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
-          @active_tab == "admin" && "border-blue-500 text-blue-600" || "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        ]}
-      >
-        Admins
-      </.link>
-      <.link 
-        patch={~p"/Admin/admins-staff?tab=staff"}
-        class={[
-          "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
-          @active_tab == "staff" && "border-blue-500 text-blue-600" || "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        ]}
-      >
-        Staff
-      </.link>
-    </nav>
-  </div>
-
-  <div class="mt-8 flex flex-col">
-    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-      <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <div class="bg-white p-4">
-            <h2 class="text-sm font-medium text-gray-700 mb-3">Add <%= String.capitalize(@active_tab) %></h2>
-            <form phx-submit="create_member" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-              <input name="first_name" type="text" placeholder="First name" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-              <input name="last_name" type="text" placeholder="Last name" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-              <input name="email" type="email" placeholder="Email" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-              <input name="phone" type="tel" placeholder="Phone (optional)" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-              <button type="submit" class="btn btn-primary">Add <%= String.capitalize(@active_tab) %></button>
-            </form>
-          </div>
-
-          <table class="min-w-full divide-y divide-gray-400">
-            <thead class="bg-gray-50">
-              <tr>
-                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Email</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Role</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-              <%= if Enum.empty?(@users) do %>
-                <tr>
-                  <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No users found</td>
-                </tr>
-              <% else %>
-                <%= for user <- @users do %>
-                  <tr>
-                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                      <%= user.email %>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                        <%= String.capitalize(user.role) %>
-                      </span>
-                    </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <button phx-click="remove_user" phx-value-id={user.id} class="btn btn-error">Remove</button>
-                    </td>
-                  </tr>
-                <% end %>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Admins & Staff Management</h1>
 </div>
+
+<!-- Tabs -->
+<div class="border-b border-gray-200 mb-6">
+  <nav class="-mb-px flex space-x-8">
+    <.link
+      patch={~p"/Admin/admins-staff?tab=admin"}
+      class={[
+        "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
+        @active_tab == "admin" &&
+          "border-teal-500 text-teal-600" ||
+          "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+      ]}
+    >
+      Admins
+    </.link>
+
+    <.link
+      patch={~p"/Admin/admins-staff?tab=staff"}
+      class={[
+        "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
+        @active_tab == "staff" &&
+          "border-teal-500 text-teal-600" ||
+          "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+      ]}
+    >
+      Staff
+    </.link>
+  </nav>
+</div>
+
+<!-- Add Member -->
+<div class="bg-white shadow rounded-lg p-4 mb-6">
+  <h2 class="text-sm font-medium text-gray-700 mb-3">
+    Add <%= String.capitalize(@active_tab) %>
+  </h2>
+
+  <form phx-submit="create_member" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+    <input
+      name="first_name"
+      type="text"
+      placeholder="First name"
+      required
+      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+    />
+    <input
+      name="last_name"
+      type="text"
+      placeholder="Last name"
+      required
+      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+    />
+    <input
+      name="email"
+      type="email"
+      placeholder="Email"
+      required
+      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+    />
+    <input
+      name="phone"
+      type="tel"
+      placeholder="Phone (optional)"
+      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+    />
+    <button
+      type="submit"
+      class="btn bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"
+    >
+      Add <%= String.capitalize(@active_tab) %>
+    </button>
+  </form>
+</div>
+
+<div class="bg-white shadow rounded-lg">
+
+  <div :if={@loading}>
+    <.data_loader />
+  </div>
+
+  <.table :if={!@loading} id="tbl_admins_staff" rows={@users}>
+    <:col :let={user} label="Email" filter_item="email">
+      <%= user.email %>
+    </:col>
+
+    <:col :let={user} label="Role" filter_item="role">
+      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+        <%= String.capitalize(user.role) %>
+      </span>
+    </:col>
+
+    <:action :let={user}>
+      <.flowbite_dropdown button_text="Options" row_index={user.id}>
+        <:item>
+          <button
+            phx-click={show_modal("remove-user-#{user.id}")}
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <i class="fas fa-user-times mr-2"></i> Remove
+          </button>
+        </:item>
+      </.flowbite_dropdown>
+
+      <!-- Remove Confirmation Modal -->
+      <.modal id={"remove-user-#{user.id}"}>
+        <:title>Confirm Removal</:title>
+        <:content>
+          <p class="text-gray-600 mb-4">
+            Are you sure you want to remove
+            "<%= user.email %>" from <%= String.capitalize(@active_tab) %>?
+          </p>
+        </:content>
+        <:confirm phx-click="remove_user" phx-value-id={user.id}>
+          Remove
+        </:confirm>
+      </.modal>
+    </:action>
+  </.table>
+</div>
+
+<%= if Enum.empty?(@users) and not @loading do %>
+  <p class="text-center text-sm text-gray-500 mt-6">
+    No <%= @active_tab %> users found.
+  </p>
+<% end %>
