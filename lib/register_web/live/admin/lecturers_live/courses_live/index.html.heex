@@ -43,7 +43,7 @@
                            phx-click="set_primary" 
                            phx-value-user_id={@lecturer.id}
                            phx-value-course_id={lc.course_id}
-                           class="text-indigo-600 hover:text-indigo-900"
+                           class="text-blue-600 hover:text-blue-900"
                            >
                            Set as primary
                            </button>
@@ -77,7 +77,7 @@
                   <div class="flex-1">
                      <select 
                         name="course_id" 
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md"
                         required
                      >
                         <option value="">Select a course</option>
@@ -89,7 +89,7 @@
                   <div class="ml-3">
                      <button 
                         type="submit" 
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
                      >
                         Add Course
                      </button>
@@ -105,7 +105,7 @@
     <div class="flex justify-end">
       <.link 
         patch={~p"/Admin/lecturers"}
-        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
       >
         Back to List
       </.link>
@@ -152,7 +152,7 @@
                       <div class="flex flex-wrap gap-2">
                         <%= for lc <- lecturer.lecturer_courses do %>
                           <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                            #{if lc.is_primary, do: "bg-indigo-100 text-indigo-800", else: "bg-gray-100 text-gray-800"}"}>
+                            #{if lc.is_primary, do: "bg-teal-100 text-teal-800", else: "bg-gray-100 text-gray-800"}"}>
                             <%= lc.course.name %>
                             <%= if lc.is_primary do %>
                               <span class="ml-1">★</span>
@@ -168,7 +168,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <.link 
                     patch={Routes.admin_lecturer_courses_path(@socket, :edit, lecturer.id)}
-                    class="text-indigo-600 hover:text-indigo-900"
+                    class="text-teal-600 hover:text-teal-900"
                   >
                     Manage
                   </.link>

@@ -18,6 +18,7 @@ defmodule RegisterWeb.CoreComponents do
   use Gettext, backend: RegisterWeb.Gettext
 
   alias Phoenix.LiveView.JS
+  alias RegisterWeb.Utils
 
   @doc """
   Renders a modal.
@@ -75,7 +76,7 @@ defmodule RegisterWeb.CoreComponents do
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
-                  <.icon name="hero-x-mark-solid" class="h-5 w-5" />
+                  <%!-- <.icon name="hero-x-mark-solid" class="h-5 w-5" /> --%>
                 </button>
               </div>
               <div id={"#{@id}-content"}>
@@ -256,10 +257,11 @@ defmodule RegisterWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 btn",
+        "phx-submit-loading:opacity-75 btn whitespace-nowrap",
         @variant_class,
         @size_class,
-        @class
+        @class,
+        default_button_classes()
       ]}
       {@rest}
     >
@@ -268,15 +270,19 @@ defmodule RegisterWeb.CoreComponents do
     """
   end
 
-  defp button_variant_class(:primary), do: "btn-primary"
-  defp button_variant_class(:secondary), do: "btn-secondary"
-  defp button_variant_class(:danger), do: "btn-error"
+  defp default_button_classes do
+    "px-4 py-2 text-sm sm:text-base"
+  end
+
+  defp button_variant_class(:primary), do: "bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"
+  defp button_variant_class(:secondary), do: "bg-gradient-to-r from-red-500 to-red-600 text-white hover:bg-red-700 border-0"
+  defp button_variant_class(:grey), do: "bg-gradient-to-r from-grey-500 to-grey-600 text-black hover:from-grey-600 hover:to-grey-700"
   defp button_variant_class(:ghost), do: "btn-ghost"
-  defp button_variant_class(_), do: "btn-primary"
+  defp button_variant_class(_), do: "bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"
 
   defp button_size_class(:md), do: nil
-  defp button_size_class(:sm), do: "btn-sm"
-  defp button_size_class(:icon), do: "btn-icon"
+  defp button_size_class(:sm), do: "px-3 py-1.5 text-xs sm:text-sm"
+  defp button_size_class(:icon), do: "p-2"
   defp button_size_class(_), do: nil
 
   @doc """
@@ -478,84 +484,6 @@ defmodule RegisterWeb.CoreComponents do
     """
   end
 
-  @doc ~S"""
-  Renders a table with generic styling.
-
-  ## Examples
-
-      <.table id="users" rows={@users}>
-        <:col :let={user} label="id">{user.id}</:col>
-        <:col :let={user} label="username">{user.username}</:col>
-      </.table>
-  """
-  attr :id, :string, required: true
-  attr :rows, :list, required: true
-  attr :row_id, :any, default: nil, doc: "the function for generating the row id"
-  attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
-
-  attr :row_item, :any,
-    default: &Function.identity/1,
-    doc: "the function for mapping each row before calling the :col and :action slots"
-
-  slot :col, required: true do
-    attr :label, :string
-  end
-
-  slot :action, doc: "the slot for showing user actions in the last table column"
-
-  def table(assigns) do
-    assigns =
-      with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
-        assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
-      end
-
-    ~H"""
-    <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="w-[40rem] mt-11 sm:w-full">
-        <thead class="text-sm text-left leading-6 text-zinc-500">
-          <tr>
-            <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal">{col[:label]}</th>
-            <th :if={@action != []} class="relative p-0 pb-4">
-              <span class="sr-only">{gettext("Actions")}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          id={@id}
-          phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700"
-        >
-          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-zinc-50">
-            <td
-              :for={{col, i} <- Enum.with_index(@col)}
-              phx-click={@row_click && @row_click.(row)}
-              class={["relative p-0", @row_click && "hover:cursor-pointer"]}
-            >
-              <div class="block py-4 pr-6">
-                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
-                <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
-                  {render_slot(col, @row_item.(row))}
-                </span>
-              </div>
-            </td>
-            <td :if={@action != []} class="relative w-14 p-0">
-              <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
-                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
-                <span
-                  :for={action <- @action}
-                  class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
-                >
-                  {render_slot(action, @row_item.(row))}
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    """
-  end
-
   @doc """
   Renders a data list.
 
@@ -709,5 +637,282 @@ defmodule RegisterWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  @doc ~S"""
+  Renders a table with generic styling and sorting functionality.
+
+  ## Examples
+
+      <.table id="users" rows={@users}>
+        <:col :let={user} label="id" filter_item="id"><%= user.id %></:col>
+        <:col :let={user} label="username" filter_item="username"><%= user.username %></:col>
+      </.table>
+  """
+  attr :id, :string, required: true
+  attr :filter_params, :map, default: %{}
+  attr :pagination, :map
+  attr :selected_column, :string, default: "inserted_at"
+  attr :list_of_operators, :list, default: []
+  attr :operator, :string, default: ""
+  attr :query_fields_list, :list, default: []
+  attr :rows, :list, required: true
+  attr :row_id, :any, default: nil, doc: "the function for generating the row id"
+  attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :filter_url, :string, default: "#"
+  attr :export_url, :string, default: "#"
+  attr :show_filter, :boolean, default: false
+  attr :show_export, :boolean, default: false
+
+  attr :row_item, :any,
+    default: &Function.identity/1,
+    doc: "the function for mapping each row before calling the :col and :action slots"
+
+  slot :col, required: true do
+    attr :label, :string
+    attr :filter_item, :string
+  end
+
+  slot :action, doc: "the slot for showing user actions in the last table column"
+
+  def table(assigns) do
+    assigns =
+      with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
+        assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
+      end
+
+    ~H"""
+    <div class="px-2 sm:px-0">
+      <div class="p-2">
+      <div class="overflow-x-auto overflow-y-hidden sm:rounded-lg">
+         <table class="min-w-full divide-y divide-gray-200">
+            <thead class="text-[12px] text-left leading-4 text-white">
+              <tr class="bg-gradient-to-r from-teal-500 to-teal-600 text-left font-medium text-white uppercase tracking-wider sticky top-0">
+                <th :for={col <- @col} class="p-2 pb-2 pr-3 font-normal whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="sm:mr-auto xl:flex text-[11px]"><%= col[:label] %></span>
+                    <a
+                      :if={col[:filter_item]}
+                      href={"?#{encode_sort_params(@filter_params, col[:filter_item])}"}
+                      data-phx-link="redirect"
+                      data-phx-link-state="push"
+                      class="inline-flex items-center hover:text-gray-700 transition-colors duration-200"
+                    >
+                      <%= Phoenix.HTML.raw(icon_def(@filter_params, col[:filter_item], @selected_column)) %>
+                    </a>
+                  </div>
+                </th>
+                <th :if={@action != []} class="relative p-0 pb-2">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id={@id}
+              phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
+              class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-[12px] leading-4 text-zinc-700 bg-white"
+            >
+              <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-gray-50 transition duration-150">
+                <td
+                  :for={{col, i} <- Enum.with_index(@col)}
+                  phx-click={@row_click && @row_click.(row)}
+                  class={["relative px-1 py-1 text-[12px] text-gray-900 whitespace-nowrap", @row_click && "hover:cursor-pointer"]}
+                >
+                  <div class="block py-1 pr-2">
+                    <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-gray-50 sm:rounded-l-xl" />
+                    <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
+                      <%= render_slot(col, @row_item.(row)) %>
+                    </span>
+                  </div>
+                </td>
+               <%!-- <td :if={@action != []} class="relative w-12 p-0">
+                  <.dropdown row_index={@row_id} button_text="Options">
+                    <div class="relative whitespace-nowrap text-left text-[12px] font-medium">
+                      <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-gray-50 sm:rounded-r-xl" />
+                      <span
+                        :for={action <- @action}
+                        class="relative ml-3 font-semibold leading-4 text-zinc-900 hover:text-zinc-700"
+                      >
+                        <%= render_slot(action, @row_item.(row)) %>
+                      </span>
+                    </div>
+                  </.dropdown>
+                </td> --%>
+                <td :if={@action != []} class="relative w-12 p-0">
+                  <div class="relative whitespace-nowrap text-left text-[12px] font-medium">
+                    <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-gray-50 sm:rounded-r-xl" />
+                    <span
+                      :for={action <- @action}
+                      class="relative ml-3 font-semibold leading-4 text-zinc-900 hover:text-zinc-700"
+                    >
+                      <%= render_slot(action, @row_item.(row)) %>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+
+
+
+  slot :item, required: true, doc: "Dropdown menu items"
+  attr :button_text, :string, required: true, doc: "The text displayed on the button"
+
+  def flowbite_dropdown(assigns) do
+    ~H"""
+    <div id={"dropdown-container-#{assigns.row_index}"} phx-hook="DropdownPortal">
+     <div class="relative inline-block">
+       <button
+        id={"dropdownRadioBgHoverButton-#{assigns.row_index}"}
+        data-dropdown-toggle={"dropdownRadioBgHover-#{assigns.row_index}"}
+        class="text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center"
+        type="button"
+       >
+        <%= @button_text %>
+       </button>
+
+       <div
+        id={"dropdownRadioBgHover-#{assigns.row_index}"}
+        class="hidden portal-dropdown w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-lg"
+        style="position: fixed; z-index: 9999;"
+       >
+        <ul class="p-2 space-y-1 text-sm text-black" aria-labelledby={"dropdownRadioBgHoverButton-#{assigns.row_index}"}>
+         <%= for item <- @item do %>
+           <%= render_slot(item) %>
+         <% end %>
+        </ul>
+       </div>
+     </div>
+    </div>
+    """
+   end
+
+  defp icon_def(filter_params, filter_item, selected_column) do
+    if filter_item == selected_column do
+      if filter_params["sort_order"] == "asc" do
+        ~s(
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-4 p-1 text-black">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                </svg>
+                )
+      else
+        ~s(<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-4 p-1 text-black">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+              )
+      end
+    else
+      ~s(
+          <div class="text-zinc-200">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+            </svg>
+          </div>)
+    end
+  end
+
+  defp encode_sort_params(params, field) do
+    current_order = params["sort_order"] || "desc"
+    current_field = params["sort_field"] || "inserted_at"
+
+    new_order = if field == current_field, do: toggle_order(current_order), else: "desc"
+
+    params
+    |> Map.put("sort_field", field)
+    |> Map.put("sort_order", new_order)
+    |> URI.encode_query()
+  end
+
+  defp toggle_order("desc"), do: "asc"
+  defp toggle_order("asc"), do: "desc"
+  defp toggle_order(_), do: "desc"
+
+  @doc """
+  Renders a data loader / skeleton screen.
+
+  ## Examples
+
+      <.data_loader />
+
+  """
+  def data_loader(assigns) do
+    ~H"""
+    <section class="dots-container">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </section>
+    <style>
+      .dots-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        padding: 2rem;
+      }
+
+      .dot {
+        height: 20px;
+        width: 20px;
+        margin-right: 10px;
+        border-radius: 10px;
+        background-color: #b3d4fc;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .dot:last-child {
+        margin-right: 0;
+      }
+
+      .dot:nth-child(1) {
+        animation-delay: -0.3s;
+      }
+
+      .dot:nth-child(2) {
+        animation-delay: -0.1s;
+      }
+
+      .dot:nth-child(3) {
+        animation-delay: 0.1s;
+      }
+
+      .dot:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+
+      .dot:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.8);
+          background-color: #b3d4fc;
+          box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+        }
+
+        50% {
+          transform: scale(1.2);
+          background-color: #6793fb;
+          box-shadow: 0 0 0 10px rgba(178, 212, 252, 0);
+        }
+
+        100% {
+          transform: scale(0.8);
+          background-color: #b3d4fc;
+          box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+        }
+      }
+    </style>
+    """
   end
 end

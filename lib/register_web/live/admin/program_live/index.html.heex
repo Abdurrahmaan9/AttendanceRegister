@@ -2,73 +2,66 @@
   <h1 class="text-2xl font-bold text-gray-900">Programs</h1>
   <.link
     patch={~p"/Admin/programs/new"}
-    class="btn btn-primary"
+    class="btn bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 border-0"
   >
     New Program
   </.link>
 </div>
 
-<div class="overflow-x-auto">
-  <table class="min-w-full divide-y divide-gray-200">
-    <thead class="bg-gray-50">
-      <tr>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-        <th scope="col" class="relative px-6 py-3">
-          <span class="sr-only">Actions</span>
-        </th>
-      </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      <%= for program <- @programs do %>
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-            <%= program.code %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <%= program.name %>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <%= program.duration_years %> years
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <.status_pill active={program.is_active} />
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <div class="flex space-x-2 justify-end">
-              <.link
-                patch={~p"/Admin/programs/#{program.id}/manage_courses"}
-                class="btn btn-secondary"
-              >
-                Manage Courses
-              </.link>
-              <.link
-                patch={~p"/Admin/programs/#{program}/edit"}
-                class="btn btn-secondary"
-              >
-                Edit
-              </.link>
-              <.button
-                variant={:danger}
-                phx-click={show_modal("delete-program-#{program.id}")}
-              >
-                Delete
-              </.button>
-            </div>
+<div class="bg-white shadow rounded-lg">
 
-            <!-- Delete Confirmation Modal -->
-            <.modal id={"delete-program-#{program.id}"}>
-              <:title>Confirm Deletion</:title>
-              <p class="text-gray-600 mb-4">Are you sure you want to delete the program "<%= program.name %>"?</p>
-              <:confirm phx-click="delete" phx-value-id={program.id}>Delete</:confirm>
-            </.modal>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <div :if={@loading}>
+    <.data_loader />
+  </div>
+
+  <.table :if={!@loading} id="tbl_programs" rows={@programs}>
+    <:col :let={program} label="Code" filter_item="code">
+      <%= program.code %>
+    </:col>
+    <:col :let={program} label="Name" filter_item="name">
+      <%= program.name %>
+    </:col>
+    <:col :let={program} label="Duration" filter_item="duration_years">
+      <%= program.duration_years %> years
+    </:col>
+    <:col :let={program} label="Status" filter_item="is_active">
+      <span class={"inline-flex px-2 py-1 text-xs font-semibold rounded-full #{status_color_class(program.is_active)}"}>
+        <%= if program.is_active, do: "Active", else: "Inactive" %>
+      </span>
+    </:col>
+    <:action :let={program}>
+      <.flowbite_dropdown button_text="Options" row_index={program.id}>
+        <:item>
+          <.link patch={~p"/Admin/programs/#{program.id}/manage_courses"} class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-book mr-2"></i> Manage Courses
+          </.link>
+        </:item>
+        <:item>
+          <.link patch={~p"/Admin/programs/#{program}/edit"} class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-edit mr-2"></i> Edit
+          </.link>
+        </:item>
+        <:item>
+          <button
+            phx-click={show_modal("delete-program-#{program.id}")}
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <i class="fas fa-trash mr-2"></i> Delete
+          </button>
+        </:item>
+    
+      </.flowbite_dropdown>
+      
+      <!-- Delete Confirmation Modal -->
+      <.modal id={"delete-program-#{program.id}"}>
+        <:title>Confirm Deletion</:title>
+        <:content>
+          <p class="text-gray-600 mb-4">Are you sure you want to delete program "<%= program.name %>"?</p>
+        </:content>
+        <:confirm phx-click="delete" phx-value-id={program.id}>Delete</:confirm>
+      </.modal>
+    </:action>
+  </.table>
 </div>
 
 <.modal :if={@live_action in [:new, :edit]} id="program-modal" show>
@@ -83,129 +76,10 @@
 </.modal>
 
 <.modal :if={@live_action == :manage_courses} id="manage-courses-modal" show>
-  <div class="space-y-6">
-    <div>
-      <h3 class="text-lg leading-6 font-medium text-gray-900">
-        Manage Courses - <%= @program.name %>
-      </h3>
-      <p class="mt-1 text-sm text-gray-500">
-        Add or remove courses from this program.
-      </p>
-    </div>
-
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div class="px-4 py-5 sm:p-6">
-        <h4 class="text-md font-medium text-gray-900 mb-4">Add Course</h4>
-        
-        <.form :let={f} for={%{}} as={:course} phx-submit="add_course" class="space-y-4">
-          <input type="hidden" name="program_id" value={@program.id} />
-          
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="col-span-2">
-              <label for="course_id" class="block text-sm font-medium text-gray-700">Course</label>
-              <select
-                id="course_id"
-                name="course_id"
-                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                required
-              >
-                <option value="">Select a course</option>
-                <%= for course <- @available_courses do %>
-                  <option value={course.id}><%= course.code %> - <%= course.title %></option>
-                <% end %>
-              </select>
-            </div>
-            
-            <div>
-              <label for="year" class="block text-sm font-medium text-gray-700">Year</label>
-              <select
-                id="year"
-                name="year"
-                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                required
-              >
-                <%= for year <- @years do %>
-                  <option value={year}><%= year %></option>
-                <% end %>
-              </select>
-            </div>
-            
-            <div>
-              <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
-              <select
-                id="semester"
-                name="semester"
-                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                required
-              >
-                <%= for semester <- @semesters do %>
-                  <option value={semester}><%= semester %></option>
-                <% end %>
-              </select>
-            </div>
-          </div>
-          
-          <div class="flex justify-end">
-            <.button type="submit" variant={:primary}>
-              Add Course
-            </.button>
-          </div>
-        </.form>
-      </div>
-      
-      <div class="border-t border-gray-200">
-        <div class="px-4 py-5 sm:p-6">
-          <h4 class="text-md font-medium text-gray-900 mb-4">Program Courses</h4>
-          
-          <div class="space-y-4">
-            <%= for year <- @years do %>
-              <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Year <%= year %></h5>
-                <%= for semester <- @semesters do %>
-                  <div class="mb-4">
-                    <h6 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Semester <%= semester %></h6>
-                    <ul class="space-y-2">
-                      <%= for pc <- get_courses_by_year_and_semester(@program.id, year, semester) do %>
-                        <li class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded-md">
-                          <div>
-                            <span class="font-medium"><%= pc.course.code %></span>
-                            <span class="text-gray-500 ml-2"><%= pc.course.title %></span>
-                            <%= if pc.is_core do %>
-                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
-                                Core
-                              </span>
-                            <% end %>
-                          </div>
-                          <.button
-                            phx-click="remove_course"
-                            phx-value-id={pc.id}
-                            variant={:danger}
-                            size={:sm}
-                          >
-                            Remove
-                          </.button>
-                        </li>
-                      <% end %>
-                      <%= if Enum.empty?(get_courses_by_year_and_semester(@program.id, year, semester)) do %>
-                        <li class="text-sm text-gray-500 italic">No courses added yet</li>
-                      <% end %>
-                    </ul>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="mt-5 sm:mt-6">
-      <.link
-        patch={~p"/Admin/programs"}
-        class="btn btn-primary w-full"
-      >
-        Done
-      </.link>
-    </div>
-  </div>
+  <.live_component
+    module={RegisterWeb.Admin.ProgramLive.ProgramCoursesComponent}
+    id={@program.id}
+    program={@program}
+    on_cancel={~p"/Admin/programs"}
+  />
 </.modal>

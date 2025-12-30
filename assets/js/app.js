@@ -20,6 +20,7 @@ import "./sidebar_dropdowns"
 import bgCarousel from "./bg_carousel"
 import "./student_actions"
 import "./modal"
+import DropdownPortal from "./hooks/dropdown_portal"
 import StudentCharts from "./hooks/student_charts"
 import SystemCharts from "./hooks/system_charts"
 import StatsCharts from "./hooks/stats_charts"
@@ -32,6 +33,9 @@ let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute(
 
 // Initialize all hooks in one place
 let hooks = {
+  // Register DropdownPortal hook
+  DropdownPortal: DropdownPortal,
+  
   // Register QRScanner hook
   QRScanner: QRScanner,
   

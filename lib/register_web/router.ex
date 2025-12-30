@@ -100,7 +100,6 @@ defmodule RegisterWeb.Router do
       # ==================== PROGRAM MANAGEMENT =========================
       live "/programs", Admin.ProgramLive.Index, :index
       live "/programs/new", Admin.ProgramLive.Index, :new
-      live "/programs/:id", Admin.ProgramLive.Index, :show
       live "/programs/:id/edit", Admin.ProgramLive.Index, :edit
       live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
 
@@ -116,12 +115,6 @@ defmodule RegisterWeb.Router do
       # ==================== ADMIN ATTENDANCE =========================
       live "/attendance/record", Admin.AttendanceLive.AttendanceRecords.Record, :record
       live "/attendance/view", Admin.AttendanceLive.AttendanceView.Index, :index
-
-      # ==================== PROGRAM MANAGEMENT =========================
-      live "/programs", Admin.ProgramLive.Index, :index
-      live "/programs/new", Admin.ProgramLive.Index, :new
-      live "/programs/:id/edit", Admin.ProgramLive.Index, :edit
-      live "/programs/:id/manage_courses", Admin.ProgramLive.Index, :manage_courses
 
       # ==================== OTP MANAGEMENT =========================
       live "/otp-management", Admin.OTPManagementLive.Index, :index

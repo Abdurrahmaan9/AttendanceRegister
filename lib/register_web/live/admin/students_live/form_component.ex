@@ -78,7 +78,7 @@ defmodule RegisterWeb.Admin.StudentsLive.FormComponent do
                 <.button
                   phx-click={JS.navigate(@return_to)}
                   type="button"
-                  class="bg-white text-gray-700 hover:bg-gray-50"
+                  variant={:grey}
                 >
                   Cancel
                 </.button>
