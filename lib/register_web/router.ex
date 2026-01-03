@@ -120,6 +120,14 @@ defmodule RegisterWeb.Router do
       live "/otp-management", Admin.OTPManagementLive.Index, :index
       live "/otp-management/new", Admin.OTPManagementLive.Index, :new
       live "/otp-management/:id/edit", Admin.OTPManagementLive.Index, :edit
+
+      # ==================== ONLINE LIBRARY =========================
+      live "/library", LibraryLive.Index, :index
+      live "/library/new", LibraryLive.Index, :new
+      live "/library/new_board", LibraryLive.Index, :new_board
+      live "/library/:id/edit", LibraryLive.Index, :edit
+      live "/library/boards/:id", LibraryLive.ShowComponent, :show
+      live "/library/boards/:id/new_resource", LibraryLive.ShowComponent, :new_resource
     end
   end
 
@@ -141,6 +149,13 @@ defmodule RegisterWeb.Router do
       live "/otp-management", Lecturer.OTPLive.Index, :index
       live "/otp-management/new", Lecturer.OTPLive.Index, :new
       live "/otp-management/:id", Lecturer.OTPLive.Index, :show
+
+      # ===================== ONLINE LIBRARY =========================
+      live "/library", LibraryLive.Index, :index
+      live "/library/new", LibraryLive.Index, :new
+      live "/library/:id/edit", LibraryLive.Index, :edit
+      live "/library/boards/:id", LibraryLive.ShowComponent, :show
+      live "/library/boards/:id/new_resource", LibraryLive.ShowComponent, :new_resource
 
     end
   end
@@ -164,6 +179,10 @@ defmodule RegisterWeb.Router do
       live "/qr-codes", Students.QrCodesLive.Index, :index
       live "/qr-codes/:id", Students.QrCodesLive.Index, :show
       live "/qr-codes/:id/verify", Students.QrCodesLive.Index, :verify
+
+      # ===================== ONLINE LIBRARY =========================
+      live "/library", LibraryLive.Index, :index
+      live "/library/boards/:id", LibraryLive.ShowComponent, :show
 
       # ===================== STUDENT COURSES =========================
       live "/courses", Students.CoursesLive.Index, :index

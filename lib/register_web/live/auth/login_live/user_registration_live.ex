@@ -17,12 +17,12 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
               alt="SyncIn logo"
               class="h-6 w-auto"
             />
-            <!--<span class="text-2xl font-bold text-blue-600 whitespace-nowrap">SyncIn</span>-->
+            <!--<span class="text-2xl font-bold text-teal-600 whitespace-nowrap">SyncIn</span>-->
           </a>
           </div>
           <div class="flex items-center space-x-8">
-            <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</a>
-            <a href="/about" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">About</a>
+            <a href="/" class="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">Home</a>
+            <a href="/about" class="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">About</a>
           </div>
         </div>
       </div>
@@ -31,7 +31,7 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
     <div class="pt-24;">
       <div class="max-w-md w-full space-y-8">
         <div class="text-center">
-          <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
+          <div class="mx-auto h-16 w-16 bg-teal-600 rounded-full flex items-center justify-center mb-4">
             <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 0112 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
@@ -78,7 +78,7 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
                   type="email"
                   label="Email address"
                   required
-                  class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all duration-200"
+                  class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                   placeholder="Enter your email"
                 />
               </div>
@@ -89,7 +89,7 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
                   type={if @show_password, do: "text", else: "password"}
                   label="Password"
                   required
-                  class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all duration-200"
+                  class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                   placeholder="Create a password"
                 />
                 <button
@@ -113,10 +113,10 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
             <:actions>
               <.button
                 phx-disable-with="Creating account..."
-                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <svg class="h-5 w-5 text-blue-500 group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-5 w-5 text-teal-500 group-hover:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </span>
@@ -128,7 +128,7 @@ defmodule RegisterWeb.Auth.LoginLive.UserRegistrationLive do
           <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
               Already have an account?
-              <a href="/users/login" class="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+              <a href="/users/login" class="font-medium text-teal-600 hover:text-teal-500 transition-colors duration-200">
                 Sign in here
               </a>
             </p>
