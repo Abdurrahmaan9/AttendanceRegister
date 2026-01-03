@@ -24,7 +24,6 @@ defmodule Register.Permissions do
     Enum.group_by(permissions, fn permission -> permission.category end)
   end
 
-  
   def has_permission?(role, permission_name) when is_binary(role) and is_binary(permission_name) do
     query =
       from p in Permission,
@@ -136,7 +135,8 @@ defmodule Register.Permissions do
           %{
             role: role,
             permission_id: id,
-            inserted_at: timestamp
+            inserted_at: timestamp,
+            updated_at: timestamp
           }
         end)
 

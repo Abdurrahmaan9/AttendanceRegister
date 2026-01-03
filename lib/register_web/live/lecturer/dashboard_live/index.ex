@@ -24,6 +24,7 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
       |> assign(:current_path, @url)
       |> assign(:sidebar_open, false)
       |> assign(:current_user, current_user)
+      |> assign(:loading, true)
       |> assign(:total_students, total_students)
       |> assign(:courses, courses)
       |> assign_new(:metrics, fn -> initial_metrics() end)
@@ -38,6 +39,7 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
 
       # Only update system metrics every 30 seconds
       :timer.send_interval(60_000, :sample_system_metrics)
+      Process.send_after(self(), :load_lecturer_data, 100)
       # Also do an initial sample to populate charts immediately
       {:ok, sample_and_assign(socket)}
     else
@@ -54,6 +56,16 @@ defmodule RegisterWeb.Lecturer.Dashboard.Index do
   def handle_info(:sample_system_metrics, socket) do
     # Only update system metrics, not attendance data
     {:noreply, sample_and_assign(socket)}
+  end
+
+  @impl true
+  def handle_info(:load_lecturer_data, socket) do
+    # Load lecturer data asynchronously
+    socket = socket
+      |> assign_lecturer_stats()
+      |> assign(:loading, false)
+
+    {:noreply, socket}
   end
 
   @impl true

@@ -174,6 +174,10 @@ defmodule RegisterWeb.Router do
       # ===================== STUDENT QR SCANNER =======================
       live "/scan", Students.ScanLive.Index, :index
 
+      # ===================== STUDENT DOCKETS =======================
+      live "/dockets", Students.DocketsLive.Index, :index
+      live "/dockets/:type", Students.DocketsLive.Show, :show
+
     end
   end
 

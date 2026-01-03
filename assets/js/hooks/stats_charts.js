@@ -3,11 +3,28 @@ export default {
   mounted() {
     console.log('StatsCharts mounted - initializing charts')
     this.lastDataHash = null
+    this.wasLoading = true
     this.initCharts()
     this.updateFromDataset()
   },
   updated() {
     console.log('StatsCharts updated - checking if data changed')
+    const el = this.el
+    const isLoading = el.dataset.loading === 'true'
+    
+    console.log('StatsCharts loading state:', { isLoading, wasLoading: this.wasLoading })
+    
+    // If loading just completed, reinitialize charts with a delay to ensure DOM is ready
+    if (!isLoading && this.wasLoading) {
+      console.log('StatsCharts loading completed, reinitializing charts')
+      // Add a small delay to ensure the canvas elements are rendered
+      setTimeout(() => {
+        this.initCharts()
+        this.updateFromDataset()
+      }, 100)
+    }
+    
+    this.wasLoading = isLoading
     this.updateFromDataset()
   },
   destroyed() {

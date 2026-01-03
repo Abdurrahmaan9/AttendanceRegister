@@ -3,11 +3,31 @@ export default {
   mounted() {
     console.log('AttendanceCharts mounted - initializing attendance charts')
     this.lastDataHash = null
+    this.wasLoading = true
     this.initCharts()
     this.updateFromDataset()
   },
   updated() {
     console.log('AttendanceCharts updated - checking if data changed')
+    const el = this.el
+    const isLoading = el.dataset.loading === 'true'
+    
+    console.log('AttendanceCharts loading state:', { isLoading, wasLoading: this.wasLoading })
+    
+    // If loading just completed, reinitialize charts with a delay to ensure DOM is ready
+    if (!isLoading && this.wasLoading) {
+      console.log('AttendanceCharts loading completed, reinitializing charts')
+      // Add a small delay to ensure the canvas elements are rendered
+      setTimeout(() => {
+        this.initCharts()
+        this.updateFromDataset()
+      }, 100)
+    } else {
+      // Also try to initialize charts on every update as a fallback
+      this.initCharts()
+    }
+    
+    this.wasLoading = isLoading
     this.updateFromDataset()
   },
   destroyed() {
@@ -35,9 +55,20 @@ export default {
 
     console.log('Initializing AttendanceCharts...')
     
-    const dailyCtx = document.getElementById('dailySigninsChart')?.getContext('2d')
-    const signinDistCtx = document.getElementById('signinDistributionChart')?.getContext('2d')
-    const weeklyTrendCtx = document.getElementById('weeklyTrendChart')?.getContext('2d')
+    // Check if canvas elements exist in the DOM
+    const dailyCanvas = document.getElementById('dailySigninsChart')
+    const signinDistCanvas = document.getElementById('signinDistributionChart')
+    const weeklyTrendCanvas = document.getElementById('weeklyTrendChart')
+    
+    console.log('Canvas elements found:', {
+      dailyCanvas: !!dailyCanvas,
+      signinDistCanvas: !!signinDistCanvas,
+      weeklyTrendCanvas: !!weeklyTrendCanvas
+    })
+    
+    const dailyCtx = dailyCanvas?.getContext('2d')
+    const signinDistCtx = signinDistCanvas?.getContext('2d')
+    const weeklyTrendCtx = weeklyTrendCanvas?.getContext('2d')
 
     console.log('Attendance chart contexts found:', {
       dailyCtx: !!dailyCtx,
@@ -45,11 +76,12 @@ export default {
       weeklyTrendCtx: !!weeklyTrendCtx
     })
 
-    if (dailyCtx && !this.dailyChart) {
-      const existingChart = Chart.getChart(dailyCtx.canvas)
-      if (existingChart) {
+    if (dailyCtx) {
+      // Always destroy existing chart before creating a new one
+      const existingDailyChart = Chart.getChart(dailyCtx.canvas)
+      if (existingDailyChart) {
         console.log('Destroying existing dailyChart instance')
-        existingChart.destroy()
+        existingDailyChart.destroy()
       }
       
       this.dailyChart = new Chart(dailyCtx, {
@@ -103,11 +135,12 @@ export default {
         }
       })
     }
-    if (signinDistCtx && !this.signinDistChart) {
-      const existingChart = Chart.getChart(signinDistCtx.canvas)
-      if (existingChart) {
+    if (signinDistCtx) {
+      // Always destroy existing chart before creating a new one
+      const existingSigninChart = Chart.getChart(signinDistCtx.canvas)
+      if (existingSigninChart) {
         console.log('Destroying existing signinDistChart instance')
-        existingChart.destroy()
+        existingSigninChart.destroy()
       }
       
       this.signinDistChart = new Chart(signinDistCtx, {
@@ -147,11 +180,12 @@ export default {
         }
       })
     }
-    if (weeklyTrendCtx && !this.weeklyTrendChart) {
-      const existingChart = Chart.getChart(weeklyTrendCtx.canvas)
-      if (existingChart) {
+    if (weeklyTrendCtx) {
+      // Always destroy existing chart before creating a new one
+      const existingWeeklyChart = Chart.getChart(weeklyTrendCtx.canvas)
+      if (existingWeeklyChart) {
         console.log('Destroying existing weeklyTrendChart instance')
-        existingChart.destroy()
+        existingWeeklyChart.destroy()
       }
       
       this.weeklyTrendChart = new Chart(weeklyTrendCtx, {

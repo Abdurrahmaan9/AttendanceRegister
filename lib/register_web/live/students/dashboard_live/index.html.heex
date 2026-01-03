@@ -10,7 +10,7 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-          <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
+          <div class="bg-gradient-to-r from-teal-500 to-blue-500 p-4">
             <div class="flex items-center justify-between">
               <div class="bg-white/20 p-3 rounded-lg backdrop-blur">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +37,7 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-          <div class="bg-gradient-to-r from-green-500 to-green-600 p-4">
+          <div class="bg-gradient-to-r from-teal-500 to-blue-500 p-4">
             <div class="flex items-center justify-between">
               <div class="bg-white/20 p-3 rounded-lg backdrop-blur">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-          <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4">
+          <div class="bg-gradient-to-r from-teal-500 to-blue-500 p-4">
             <div class="flex items-center justify-between">
               <div class="bg-white/20 p-3 rounded-lg backdrop-blur">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,9 +77,9 @@
               </div>
             </div>
           </div>
-          <div class="p-4 bg-purple-50">
+          <div class="p-4 bg-blue-50">
             <div class="flex items-center justify-between">
-              <span class="text-purple-600 text-sm font-medium flex items-center">
+              <span class="text-blue-600 text-sm font-medium flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
@@ -91,7 +91,7 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-          <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+          <div class="bg-gradient-to-r from-teal-500 to-blue-500 p-4">
             <div class="flex items-center justify-between">
               <div class="bg-white/20 p-3 rounded-lg backdrop-blur">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,9 +104,9 @@
               </div>
             </div>
           </div>
-          <div class="p-4 bg-orange-50">
+          <div class="p-4 bg-green-50">
             <div class="flex items-center justify-between">
-              <span class="text-orange-600 text-sm font-medium flex items-center">
+              <span class="text-green-600 text-sm font-medium flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
@@ -121,63 +121,6 @@
 
     <div class="mb-8">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-gray-800">System Performance</h2>
-        <div class="flex items-center space-x-2">
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span class="text-sm text-gray-600">Live monitoring</span>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-600 text-sm font-medium">Uptime</p>
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800"><%= @uptime_min %> min</h3>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-600 text-sm font-medium">Memory</p>
-            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800"><%= @memory_mb %> MB</h3>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-600 text-sm font-medium">Run Queue</p>
-            <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800"><%= @run_queue %></h3>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-600 text-sm font-medium">IO In</p>
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800"><%= @io_in_kbs %> KB/s</h3>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-600 text-sm font-medium">IO Out</p>
-            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8V4m0 0l-4 4m4-4l4 4M7 20v-4m0 0l-4 4m4-4l4 4"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800"><%= @io_out_kbs %> KB/s</h3>
-        </div>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-800">My Attendance Analytics</h2>
         <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
           Personal Insights
@@ -186,11 +129,29 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4">Attendance Trend</h3>
-          <canvas id="attendanceTrendChart" height="130"></canvas>
+          <%= if @loading do %>
+            <div class="flex items-center justify-center py-8">
+              <div class="text-center">
+                <.data_loader />
+                <p class="mt-2 text-sm text-gray-600">Loading attendance trend...</p>
+              </div>
+            </div>
+          <% else %>
+            <canvas id="attendanceTrendChart" height="130"></canvas>
+          <% end %>
         </div>
         <div class="bg-white rounded-xl shadow-lg p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4">Course Distribution</h3>
-          <canvas id="courseDistChart" height="300"></canvas>
+          <%= if @loading do %>
+            <div class="flex items-center justify-center py-8">
+              <div class="text-center">
+                <.data_loader />
+                <p class="mt-2 text-sm text-gray-600">Loading course data...</p>
+              </div>
+            </div>
+          <% else %>
+            <canvas id="courseDistChart" height="300"></canvas>
+          <% end %>
         </div>
       </div>
     </div>
@@ -205,8 +166,16 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden">
           <div class="p-6">
-            <div class="space-y-4">
-              <%= for course <- Enum.take(@courses, 6) do %>
+            <%= if @loading do %>
+              <div class="flex items-center justify-center py-8">
+                <div class="text-center">
+                  <.data_loader />
+                  <p class="mt-2 text-sm text-gray-600">Loading courses...</p>
+                </div>
+              </div>
+            <% else %>
+              <div class="space-y-4">
+                <%= for course <- Enum.take(@courses, 6) do %>
               <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-800"><%= course.title %></h4>
@@ -231,8 +200,9 @@
                 </div>
               </div>
               <% end %>
+            </div>
 
-              <%= if length(@courses) == 0 do %>
+            <%= if length(@courses) == 0 do %>
               <div class="text-center py-8">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
@@ -241,6 +211,7 @@
                 <p class="mt-1 text-sm text-gray-500">You haven't enrolled in any courses yet.</p>
               </div>
               <% end %>
+            <% end %>
             </div>
           </div>
         </div>
@@ -281,7 +252,15 @@
       </div>
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-6">
-          <div class="space-y-4">
+          <%= if @loading do %>
+            <div class="flex items-center justify-center py-8">
+              <div class="text-center">
+                <.data_loader />
+                <p class="mt-2 text-sm text-gray-600">Loading recent activities...</p>
+              </div>
+            </div>
+          <% else %>
+            <div class="space-y-4">
             <%= for activity <- Enum.take(@recent_activities, 8) do %>
             <div class="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
               <div class="flex-shrink-0">
@@ -330,8 +309,8 @@
               </div>
             </div>
             <% end %>
-
-            <%= if length(@recent_activities) == 0 do %>
+          </div>
+          <%= if length(@recent_activities) == 0 do %>
             <div class="text-center py-8">
               <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -339,13 +318,12 @@
               <h3 class="mt-2 text-sm font-medium text-gray-900">No recent activities</h3>
               <p class="mt-1 text-sm text-gray-500">Your attendance activities will appear here.</p>
             </div>
-            <% end %>
+          <% end %>
+          <% end %>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
 <div id="student-metrics-data" phx-hook="StudentCharts" data-attendance-labels={Jason.encode!(@attendance_labels || [])} data-attendance-counts={Jason.encode!(@attendance_counts || [])} data-course-labels={Jason.encode!(@course_labels || [])} data-course-counts={Jason.encode!(@course_counts || [])} class="hidden">
 </div>

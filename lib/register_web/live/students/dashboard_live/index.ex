@@ -27,6 +27,7 @@ defmodule RegisterWeb.Students.Dashboard.Index do
       |> assign(:current_path, @url)
       |> assign(:sidebar_open, false)
       |> assign(:current_user, current_user)
+      |> assign(:loading, true)
       |> assign(:courses, courses)
       |> assign(:total_courses, total_courses)
       |> assign(:total_attendance, total_attendance)
@@ -34,10 +35,10 @@ defmodule RegisterWeb.Students.Dashboard.Index do
       |> assign(:upcoming_sessions, upcoming_sessions)
       |> assign_new(:metrics, fn -> initial_metrics() end)
       |> assign_student_stats()
-      |> assign_initial_system_metrics()
 
     if connected?(socket) and current_user do
       :timer.send_interval(@sample_interval, :sample_metrics)
+      Process.send_after(self(), :load_student_data, 100)
       {:ok, sample_and_assign(socket)}
     else
       {:ok, socket}
@@ -52,6 +53,16 @@ defmodule RegisterWeb.Students.Dashboard.Index do
   @impl true
   def handle_info(:sample_metrics, socket) do
     {:noreply, sample_and_assign(socket)}
+  end
+
+  @impl true
+  def handle_info(:load_student_data, socket) do
+    # Load student data asynchronously
+    socket = socket
+      |> assign_student_stats()
+      |> assign(:loading, false)
+
+    {:noreply, socket}
   end
 
   defp get_session_user(session) do
@@ -137,26 +148,6 @@ defmodule RegisterWeb.Students.Dashboard.Index do
 
   defp trim_left(list, max) when length(list) <= max, do: list
   defp trim_left(list, max), do: Enum.take(list, -max)
-
-  defp assign_initial_system_metrics(socket) do
-    total_mem_bytes = :erlang.memory(:total)
-    memory_mb = Float.round(total_mem_bytes / 1_048_576, 1)
-    run_queue = :erlang.statistics(:run_queue)
-    {uptime_ms, _} = :erlang.statistics(:wall_clock)
-    uptime_min = Integer.floor_div(uptime_ms, 60_000)
-
-    socket
-    |> assign(:uptime_min, uptime_min)
-    |> assign(:memory_mb, memory_mb)
-    |> assign(:run_queue, run_queue)
-    |> assign(:io_in_kbs, 0)
-    |> assign(:io_out_kbs, 0)
-    |> assign(:labels, [])
-    |> assign(:mem_series, [])
-    |> assign(:runq_series, [])
-    |> assign(:ioin_series, [])
-    |> assign(:ioout_series, [])
-  end
 
   defp assign_student_stats(socket) do
     current_user = socket.assigns.current_user

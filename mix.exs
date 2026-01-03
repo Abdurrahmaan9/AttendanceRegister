@@ -63,7 +63,8 @@ defmodule Register.MixProject do
       {:qr_code, "~> 3.0"},
       {:eqrcode, "~> 0.1.10"},
       {:nimble_totp, "~> 1.0"},
-      {:timex, "~> 3.7"}
+      {:timex, "~> 3.7"},
+      {:pdf_generator, "~> 0.6.2", runtime: false}
     ]
   end
 
